@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Daniel Streams</string>
+    <string name="tab_pt">🇵🇹 Portugal</string>
+    <string name="tab_favorites">⭐ Favoritos</string>
+    <string name="tab_all">🌐 Todos os Canais</string>
+    <string name="search_hint">Pesquisar canal ou desporto...</string>
+    <string name="no_favorites_title">Nenhum canal favorito</string>
+    <string name="no_favorites_desc">Toque na estrela de qualquer canal em Portugal ou em Todos os Canais para adicioná-lo aqui.</string>
+    <string name="server_stream">Servidor 1 (Stream)</string>
+    <string name="server_cast">Servidor 2 (Cast)</string>
+    <string name="server_watch">Servidor 3 (Watch)</string>
+    <string name="server_player">Servidor 4 (Player)</string>
+</resources>

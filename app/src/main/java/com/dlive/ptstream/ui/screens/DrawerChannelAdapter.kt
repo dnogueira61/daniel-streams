@@ -1,0 +1,121 @@
+package com.dlive.ptstream.ui.screens
+
+import android.graphics.Color
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import com.dlive.ptstream.R
+import com.dlive.ptstream.data.Channel
+import com.dlive.ptstream.data.ChannelLogoHelper
+
+class DrawerChannelAdapter(
+    private var channels: List<Channel>,
+    private var activeChannelId: String,
+    private val onChannelSelected: (Channel) -> Unit,
+    private val onFavoriteToggled: (Channel) -> Unit,
+    private val onHideChannel: ((Channel) -> Unit)? = null
+) : RecyclerView.Adapter<DrawerChannelAdapter.ViewHolder>() {
+
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val root: View = view.findViewById(R.id.channelRowRoot)
+        val viewPlayingDot: View = view.findViewById(R.id.viewPlayingDot)
+        val ivLogo: ImageView = view.findViewById(R.id.ivDrawerChannelLogo)
+        val tvId: TextView = view.findViewById(R.id.tvDrawerChannelId)
+        val tvName: TextView = view.findViewById(R.id.tvDrawerChannelName)
+        val tvCategory: TextView = view.findViewById(R.id.tvDrawerChannelCategory)
+        val btnFavorite: ImageButton = view.findViewById(R.id.btnDrawerFavorite)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_channel_drawer, parent, false)
+        return ViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val channel = channels[position]
+        val isCurrent = channel.id == activeChannelId
+
+        holder.tvId.text = channel.id
+        holder.tvName.text = channel.name
+
+        // Logo binding
+        val localLogo = ChannelLogoHelper.getLocalLogoRes(channel.name)
+        val onlineLogo = channel.logoUrl
+
+        if (onlineLogo != null) {
+            holder.ivLogo.visibility = View.VISIBLE
+            holder.tvId.visibility = View.GONE
+            holder.ivLogo.load(onlineLogo) {
+                crossfade(true)
+                if (localLogo != null) error(localLogo)
+            }
+        } else if (localLogo != null) {
+            holder.ivLogo.visibility = View.VISIBLE
+            holder.tvId.visibility = View.GONE
+            holder.ivLogo.setImageResource(localLogo)
+        } else {
+            holder.ivLogo.visibility = View.GONE
+            holder.tvId.visibility = View.VISIBLE
+        }
+
+        val tagText = if (channel.isPortuguese) "PT 🇵🇹 • ${channel.category}" else "${channel.country} • ${channel.category}"
+        holder.tvCategory.text = tagText
+
+        // Active playing indicator
+        if (isCurrent) {
+            holder.viewPlayingDot.visibility = View.VISIBLE
+            holder.tvName.setTextColor(Color.parseColor("#E50914"))
+        } else {
+            holder.viewPlayingDot.visibility = View.GONE
+            holder.tvName.setTextColor(Color.WHITE)
+        }
+        holder.root.setBackgroundResource(R.drawable.selector_channel_row)
+
+        // TV Remote D-Pad Focus scaling
+        holder.root.setOnFocusChangeListener { view, hasFocus ->
+            if (hasFocus) {
+                view.animate().scaleX(1.02f).scaleY(1.02f).setDuration(120).start()
+                holder.tvName.setTextColor(Color.parseColor("#FFFFFF"))
+            } else {
+                view.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start()
+                if (isCurrent) {
+                    holder.tvName.setTextColor(Color.parseColor("#E50914"))
+                }
+            }
+        }
+
+        // Star favorite
+        if (channel.isFavorite) {
+            holder.btnFavorite.setImageResource(android.R.drawable.star_on)
+        } else {
+            holder.btnFavorite.setImageResource(android.R.drawable.star_off)
+        }
+
+        holder.root.setOnClickListener {
+            onChannelSelected(channel)
+        }
+
+        holder.root.setOnLongClickListener {
+            onHideChannel?.invoke(channel)
+            true
+        }
+
+        holder.btnFavorite.setOnClickListener {
+            onFavoriteToggled(channel)
+        }
+    }
+
+    override fun getItemCount(): Int = channels.size
+
+    fun updateChannels(newChannels: List<Channel>, newActiveId: String) {
+        this.channels = newChannels
+        this.activeChannelId = newActiveId
+        notifyDataSetChanged()
+    }
+}

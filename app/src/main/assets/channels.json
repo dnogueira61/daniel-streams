@@ -1,0 +1,6302 @@
+[
+  {
+    "id": "717",
+    "name": "AXN Movies Portugal",
+    "country": "PT",
+    "category": "Filmes",
+    "isPt": true
+  },
+  {
+    "id": "380",
+    "name": "Benfica TV PT",
+    "country": "PT",
+    "category": "Geral",
+    "isPt": true
+  },
+  {
+    "id": "790",
+    "name": "CMTV Portugal",
+    "country": "PT",
+    "category": "Notícias",
+    "isPt": true
+  },
+  {
+    "id": "540",
+    "name": "Canal 11 Portugal",
+    "country": "PT",
+    "category": "Geral",
+    "isPt": true
+  },
+  {
+    "id": "918",
+    "name": "DAZN Portugal Fifa Mundial De Clubes",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true
+  },
+  {
+    "id": "455",
+    "name": "Eleven Sports 1 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true
+  },
+  {
+    "id": "456",
+    "name": "Eleven Sports 2 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true
+  },
+  {
+    "id": "457",
+    "name": "Eleven Sports 3 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true
+  },
+  {
+    "id": "458",
+    "name": "Eleven Sports 4 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true
+  },
+  {
+    "id": "459",
+    "name": "Eleven Sports 5 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true
+  },
+  {
+    "id": "718",
+    "name": "Porto Canal Portugal",
+    "country": "PT",
+    "category": "Geral",
+    "isPt": true
+  },
+  {
+    "id": "719",
+    "name": "RTP 1 Portugal",
+    "country": "PT",
+    "category": "Geral",
+    "isPt": true
+  },
+  {
+    "id": "720",
+    "name": "RTP 2 Portugal",
+    "country": "PT",
+    "category": "Geral",
+    "isPt": true
+  },
+  {
+    "id": "721",
+    "name": "RTP 3 Portugal",
+    "country": "PT",
+    "category": "Notícias",
+    "isPt": true
+  },
+  {
+    "id": "722",
+    "name": "SIC Portugal",
+    "country": "PT",
+    "category": "Geral",
+    "isPt": true
+  },
+  {
+    "id": "49",
+    "name": "Sport TV1 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true
+  },
+  {
+    "id": "74",
+    "name": "Sport TV2 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true
+  },
+  {
+    "id": "454",
+    "name": "Sport TV3 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true
+  },
+  {
+    "id": "289",
+    "name": "Sport TV4 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true
+  },
+  {
+    "id": "290",
+    "name": "Sport TV5 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true
+  },
+  {
+    "id": "291",
+    "name": "Sport TV6 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true
+  },
+  {
+    "id": "716",
+    "name": "Sporting TV Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true
+  },
+  {
+    "id": "723",
+    "name": "TVi Portugal",
+    "country": "PT",
+    "category": "Geral",
+    "isPt": true
+  },
+  {
+    "id": "724",
+    "name": "TVi Reality Portugal",
+    "country": "PT",
+    "category": "Geral",
+    "isPt": true
+  },
+  {
+    "id": "521",
+    "name": "#Vamos Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "501",
+    "name": "18+ (Player-01)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "502",
+    "name": "18+ (Player-02)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "503",
+    "name": "18+ (Player-03)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "504",
+    "name": "18+ (Player-04)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "505",
+    "name": "18+ (Player-05)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "506",
+    "name": "18+ (Player-06)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "507",
+    "name": "18+ (Player-07)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "508",
+    "name": "18+ (Player-08)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "509",
+    "name": "18+ (Player-09)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "510",
+    "name": "18+ (Player-10)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "511",
+    "name": "18+ (Player-11)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "512",
+    "name": "18+ (Player-12)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "513",
+    "name": "18+ (Player-13)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "514",
+    "name": "18+ (Player-14)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "515",
+    "name": "18+ (Player-15)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "516",
+    "name": "18+ (Player-16)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "517",
+    "name": "18+ (Player-17)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "518",
+    "name": "18+ (Player-18)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "519",
+    "name": "18+ (Player-19)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "520",
+    "name": "18+ (Player-20)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "857",
+    "name": "20 Mediaset Italy",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "726",
+    "name": "3Sat De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "360",
+    "name": "5 USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "800",
+    "name": "6'Eren Denmark",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "963",
+    "name": "6Ter France",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "868",
+    "name": "8Sky Cinema Suspense Italy",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "1011",
+    "name": "A Spor Turkey",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "269",
+    "name": "A Sport Pk",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "302",
+    "name": "A&E USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "766",
+    "name": "Abc Ny USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "51",
+    "name": "Abc USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "609",
+    "name": "Abu Dhabi Sports 1 Premium",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "600",
+    "name": "Abu Dhabi Sports 1 Uae",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "610",
+    "name": "Abu Dhabi Sports 2 Premium",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "601",
+    "name": "Abu Dhabi Sports 2 Uae",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "664",
+    "name": "Acc Network USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "295",
+    "name": "Adult Swim",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "206",
+    "name": "Ahc (American Heroes Channel)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "784",
+    "name": "Alkass Four",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "781",
+    "name": "Alkass One",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "783",
+    "name": "Alkass Three",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "782",
+    "name": "Alkass Two",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "923",
+    "name": "Altitude Sports",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "303",
+    "name": "Amc USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "304",
+    "name": "Animal Planet",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "531",
+    "name": "Antena 3 Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "283",
+    "name": "Antenna TV USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "579",
+    "name": "Arena Sport 1 Bih",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "432",
+    "name": "Arena Sport 1 Croatia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "134",
+    "name": "Arena Sport 1 Premium",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "429",
+    "name": "Arena Sport 1 Serbia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "945",
+    "name": "Arena Sport 10 Serbia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "433",
+    "name": "Arena Sport 2 Croatia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "135",
+    "name": "Arena Sport 2 Premium",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "430",
+    "name": "Arena Sport 2 Serbia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "434",
+    "name": "Arena Sport 3 Croatia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "139",
+    "name": "Arena Sport 3 Premium",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "431",
+    "name": "Arena Sport 3 Serbia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "580",
+    "name": "Arena Sport 4 Croatia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "581",
+    "name": "Arena Sport 4 Serbia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "940",
+    "name": "Arena Sport 5 Serbia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "941",
+    "name": "Arena Sport 6 Serbia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "942",
+    "name": "Arena Sport 7 Serbia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "943",
+    "name": "Arena Sport 8 Serbia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "944",
+    "name": "Arena Sport 9 Serbia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "612",
+    "name": "Arena Sports Tenis Serbia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "725",
+    "name": "Arte De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "958",
+    "name": "Arte France",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "370",
+    "name": "Astro Cricket",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "123",
+    "name": "Astro Supersport 1",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "124",
+    "name": "Astro Supersport 2",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "125",
+    "name": "Astro Supersport 3",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "126",
+    "name": "Astro Supersport 4",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1000",
+    "name": "Atv Turkey",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "961",
+    "name": "Automoto La Chaîne",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "742",
+    "name": "Axs TV USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "844",
+    "name": "Azteca 7 Mx",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "934",
+    "name": "Azteca Uno Mx",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "275",
+    "name": "Bandsports Brasil",
+    "country": "BR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "522",
+    "name": "Barca TV Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "305",
+    "name": "Bbc America (Bbca)",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "359",
+    "name": "Bbc Four UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "349",
+    "name": "Bbc News Channel Hd",
+    "country": "UK",
+    "category": "Notícias",
+    "isPt": false
+  },
+  {
+    "id": "356",
+    "name": "Bbc One UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "358",
+    "name": "Bbc Three UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "357",
+    "name": "Bbc Two UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "91",
+    "name": "Bein Sports 1 Arabic",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "116",
+    "name": "Bein Sports 1 France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "712",
+    "name": "Bein Sports 1 Malaysia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "62",
+    "name": "Bein Sports 1 Turkey",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "92",
+    "name": "Bein Sports 2 Arabic",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "117",
+    "name": "Bein Sports 2 France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "713",
+    "name": "Bein Sports 2 Malaysia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "63",
+    "name": "Bein Sports 2 Turkey",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "93",
+    "name": "Bein Sports 3 Arabic",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "118",
+    "name": "Bein Sports 3 France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "714",
+    "name": "Bein Sports 3 Malaysia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "64",
+    "name": "Bein Sports 3 Turkey",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "94",
+    "name": "Bein Sports 4 Arabic",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "67",
+    "name": "Bein Sports 4 Turkey",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "95",
+    "name": "Bein Sports 5 Arabic",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1010",
+    "name": "Bein Sports 5 Turkey",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "96",
+    "name": "Bein Sports 6 Arabic",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "97",
+    "name": "Bein Sports 7 Arabic",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "98",
+    "name": "Bein Sports 8 Arabic",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "99",
+    "name": "Bein Sports 9 Arabic",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "491",
+    "name": "Bein Sports Australia 1",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "492",
+    "name": "Bein Sports Australia 2",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "493",
+    "name": "Bein Sports Australia 3",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "372",
+    "name": "Bein Sports En Espa単Ol",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "578",
+    "name": "Bein Sports Hd Qatar",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "500",
+    "name": "Bein Sports Max 10 France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "494",
+    "name": "Bein Sports Max 4 France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "495",
+    "name": "Bein Sports Max 5 France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "496",
+    "name": "Bein Sports Max 6 France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "497",
+    "name": "Bein Sports Max 7 France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "498",
+    "name": "Bein Sports Max 8 France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "499",
+    "name": "Bein Sports Max 9 France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "597",
+    "name": "Bein Sports Max Ar",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "61",
+    "name": "Bein Sports Mena English 1",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "90",
+    "name": "Bein Sports Mena English 2",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "425",
+    "name": "Bein Sports USA",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "100",
+    "name": "Bein Sports Xtra 1",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "306",
+    "name": "Bet USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "957",
+    "name": "Bfm TV France",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "891",
+    "name": "Big Brother S28 Cam 1",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "892",
+    "name": "Big Brother S28 Cam 2",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "893",
+    "name": "Big Brother S28 Cam 3",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "894",
+    "name": "Big Brother S28 Cam 4",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "895",
+    "name": "Big Brother S28 Quadview",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "397",
+    "name": "Big Ten Network (Btn USA)",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "476",
+    "name": "Bnt 1 Bulgaria",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "477",
+    "name": "Bnt 2 Bulgaria",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "478",
+    "name": "Bnt 3 Bulgaria",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "648",
+    "name": "Boomerang",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "737",
+    "name": "Br Fernsehen De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "307",
+    "name": "Bravo USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "481",
+    "name": "Btv Action Bulgaria",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "479",
+    "name": "Btv Bulgaria",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "484",
+    "name": "Btv Lady Bulgaria",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "813",
+    "name": "C More Hits Sweden",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "750",
+    "name": "C Span 1",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "956",
+    "name": "C8 France",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "805",
+    "name": "Canal 9 Denmark",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "983",
+    "name": "Canal+ Extra 1 Poland",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "984",
+    "name": "Canal+ Extra 2 Poland",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "985",
+    "name": "Canal+ Extra 3 Poland",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "986",
+    "name": "Canal+ Extra 4 Poland",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "987",
+    "name": "Canal+ Extra 5 Poland",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "988",
+    "name": "Canal+ Extra 6 Poland",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "989",
+    "name": "Canal+ Extra 7 Poland",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "567",
+    "name": "Canal+ Family Poland",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "463",
+    "name": "Canal+ Foot France",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "273",
+    "name": "Canal+ Formula 1",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "121",
+    "name": "Canal+ France",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "271",
+    "name": "Canal+ Motogp France",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "566",
+    "name": "Canal+ Premium Poland",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "570",
+    "name": "Canal+ Seriale Poland",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "486",
+    "name": "Canal+ Sport 1 Afrique",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "487",
+    "name": "Canal+ Sport 2 Afrique",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1043",
+    "name": "Canal+ Sport 2 Cz",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "73",
+    "name": "Canal+ Sport 2 Poland",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1064",
+    "name": "Canal+ Sport 2 Sk",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "488",
+    "name": "Canal+ Sport 3 Afrique",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1044",
+    "name": "Canal+ Sport 3 Cz",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "259",
+    "name": "Canal+ Sport 3 Poland",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1065",
+    "name": "Canal+ Sport 3 Sk",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "489",
+    "name": "Canal+ Sport 4 Afrique",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1045",
+    "name": "Canal+ Sport 4 Cz",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1066",
+    "name": "Canal+ Sport 4 Sk",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "490",
+    "name": "Canal+ Sport 5 Afrique",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1046",
+    "name": "Canal+ Sport 5 Cz",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "75",
+    "name": "Canal+ Sport 5 Poland",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1047",
+    "name": "Canal+ Sport 6 Cz",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1048",
+    "name": "Canal+ Sport 7 Cz",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1049",
+    "name": "Canal+ Sport 8 Cz",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1020",
+    "name": "Canal+ Sport Cz",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "122",
+    "name": "Canal+ Sport France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "48",
+    "name": "Canal+ Sport Poland",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1063",
+    "name": "Canal+ Sport Sk",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "464",
+    "name": "Canal+ Sport360",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "936",
+    "name": "Canal5 Mx",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "339",
+    "name": "Cartoon Network",
+    "country": "Outro",
+    "category": "Infantil",
+    "isPt": false
+  },
+  {
+    "id": "832",
+    "name": "Cbc Ca",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "910",
+    "name": "Cbs Sports Golazo",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "308",
+    "name": "Cbs Sports Network (Cbssn)",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "52",
+    "name": "Cbs USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "767",
+    "name": "Cbsny USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "547",
+    "name": "Channel 10 Israe",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "548",
+    "name": "Channel 11 Israel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "549",
+    "name": "Channel 12 Israel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "551",
+    "name": "Channel 13 Israel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "552",
+    "name": "Channel 14 Israel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "354",
+    "name": "Channel 4 UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "355",
+    "name": "Channel 5 UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "546",
+    "name": "Channel 9 Israel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "776",
+    "name": "Chicago Sports Network",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "374",
+    "name": "Cinemax USA",
+    "country": "US",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "831",
+    "name": "Citytv",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "933",
+    "name": "Claro Sports Mx",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "715",
+    "name": "Cleo TV",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "647",
+    "name": "Cmt USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "309",
+    "name": "Cnbc USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "964",
+    "name": "Cnews France",
+    "country": "FR",
+    "category": "Notícias",
+    "isPt": false
+  },
+  {
+    "id": "345",
+    "name": "Cnn USA",
+    "country": "US",
+    "category": "Notícias",
+    "isPt": false
+  },
+  {
+    "id": "89",
+    "name": "Combate Brasil",
+    "country": "BR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "310",
+    "name": "Comedy Central",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "696",
+    "name": "Comet USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "697",
+    "name": "Cooking Channel USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "281",
+    "name": "Court TV USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "748",
+    "name": "Cozi TV USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "669",
+    "name": "Crime+ Investigation USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1033",
+    "name": "Ct Sport Cz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1035",
+    "name": "Ct1 Hd Cz",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1036",
+    "name": "Ct2 Hd Cz",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "838",
+    "name": "Ctv 2 Canada",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "602",
+    "name": "Ctv Canada",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "535",
+    "name": "Cuatro Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "866",
+    "name": "Cw Philly",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "280",
+    "name": "Cw Pix 11 USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "300",
+    "name": "Cw USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "911",
+    "name": "Cytavision Sports 1 Cyprus",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "912",
+    "name": "Cytavision Sports 2 Cyprus",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "913",
+    "name": "Cytavision Sports 3 Cyprus",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "914",
+    "name": "Cytavision Sports 4 Cyprus",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "915",
+    "name": "Cytavision Sports 5 Cyprus",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "916",
+    "name": "Cytavision Sports 6 Cyprus",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "917",
+    "name": "Cytavision Sports 7 Cyprus",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "426",
+    "name": "DAZN 1 Bar De",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "445",
+    "name": "DAZN 1 Spain",
+    "country": "ES",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "230",
+    "name": "DAZN 1 UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "427",
+    "name": "DAZN 2 Bar De",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "446",
+    "name": "DAZN 2 Spain",
+    "country": "ES",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "447",
+    "name": "DAZN 3 Spain",
+    "country": "ES",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "448",
+    "name": "DAZN 4 Spain",
+    "country": "ES",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "537",
+    "name": "DAZN F1 Es",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "538",
+    "name": "DAZN Laliga",
+    "country": "ES",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "960",
+    "name": "DAZN Ligue 1 France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "877",
+    "name": "DAZN Zona Italy",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1051",
+    "name": "Dajto Sk",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "348",
+    "name": "Dave",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "651",
+    "name": "Destination America",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "482",
+    "name": "Diema Bulgaria",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "485",
+    "name": "Diema Family Bulgaria",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "466",
+    "name": "Diema Sport 2 Bulgaria",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "467",
+    "name": "Diema Sport 3 Bulgaria",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "465",
+    "name": "Diema Sport Bulgaria",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "400",
+    "name": "Digi Sport 1 Romania",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "401",
+    "name": "Digi Sport 2 Romania",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "402",
+    "name": "Digi Sport 3 Romania",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "403",
+    "name": "Digi Sport 4 Romania",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "313",
+    "name": "Discovery Channel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "657",
+    "name": "Discovery Family",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "311",
+    "name": "Discovery Life Channel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "661",
+    "name": "Discovery Turbo",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "285",
+    "name": "Discovery Velocity Ca",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "312",
+    "name": "Disney Channel",
+    "country": "Outro",
+    "category": "Infantil",
+    "isPt": false
+  },
+  {
+    "id": "652",
+    "name": "Disney Jr",
+    "country": "Outro",
+    "category": "Infantil",
+    "isPt": false
+  },
+  {
+    "id": "314",
+    "name": "Disney Xd",
+    "country": "Outro",
+    "category": "Infantil",
+    "isPt": false
+  },
+  {
+    "id": "801",
+    "name": "Dr1 Denmark",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "802",
+    "name": "Dr2 Denmark",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "828",
+    "name": "Dstv Kyknet & Kie",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "827",
+    "name": "Dstv M-Net",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "786",
+    "name": "Dstv Mzansi Magic",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "608",
+    "name": "Dubai Racing 2 Uae",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "604",
+    "name": "Dubai Sports 1 Uae",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "605",
+    "name": "Dubai Sports 2 Uae",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "606",
+    "name": "Dubai Sports 3 Uae",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "315",
+    "name": "E! Entertainment Television",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "363",
+    "name": "E4 Channel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "71",
+    "name": "Eleven Sports 1 Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "72",
+    "name": "Eleven Sports 2 Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "428",
+    "name": "Eleven Sports 3 Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "999",
+    "name": "Eleven Sports 4 Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "774",
+    "name": "Ert 1 Greece",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "925",
+    "name": "Espn 1 Mx",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "379",
+    "name": "Espn 1 Nl",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "926",
+    "name": "Espn 2 Mx",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "386",
+    "name": "Espn 2 Nl",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "927",
+    "name": "Espn 3 Mx",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "888",
+    "name": "Espn 3 Nl",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "928",
+    "name": "Espn 4 Mx",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "149",
+    "name": "Espn Argentina",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "81",
+    "name": "Espn Brasil",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "375",
+    "name": "Espn Deportes",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "387",
+    "name": "Espn Premium Argentina",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "44",
+    "name": "Espn USA",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "150",
+    "name": "Espn2 Argentina",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "82",
+    "name": "Espn2 Brasil",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "45",
+    "name": "Espn2 USA",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "798",
+    "name": "Espn3 Argentina",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "83",
+    "name": "Espn3 Brasil",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "85",
+    "name": "Espn4 Brasil",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "288",
+    "name": "Espnews",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "316",
+    "name": "Espnu USA",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "772",
+    "name": "Eurosport 1 France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "41",
+    "name": "Eurosport 1 Greece",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "878",
+    "name": "Eurosport 1 Italy",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "233",
+    "name": "Eurosport 1 Nl",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "57",
+    "name": "Eurosport 1 Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "524",
+    "name": "Eurosport 1 Spain",
+    "country": "ES",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "231",
+    "name": "Eurosport 1 Sw",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "773",
+    "name": "Eurosport 2 France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "42",
+    "name": "Eurosport 2 Greece",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "879",
+    "name": "Eurosport 2 Italy",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "234",
+    "name": "Eurosport 2 Nl",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "58",
+    "name": "Eurosport 2 Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "525",
+    "name": "Eurosport 2 Spain",
+    "country": "ES",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "232",
+    "name": "Eurosport 2 Sw",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "890",
+    "name": "Fanduel Sports Network Arizona",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "896",
+    "name": "Fanduel Sports Network Midwest",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "897",
+    "name": "Fanduel Sports Network New Orleans",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "898",
+    "name": "Fanduel Sports Network North",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "899",
+    "name": "Fanduel Sports Network Ohio",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "900",
+    "name": "Fanduel Sports Network Oklahoma",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "902",
+    "name": "Fanduel Sports Network Socal",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "903",
+    "name": "Fanduel Sports Network South",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "904",
+    "name": "Fanduel Sports Network Southeast",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "905",
+    "name": "Fanduel Sports Network Sun",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "906",
+    "name": "Fanduel Sports Network West",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "907",
+    "name": "Fanduel Sports Network Wisconsin",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "744",
+    "name": "Fashion TV",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "751",
+    "name": "Fetv - Family Entertainment Television",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "757",
+    "name": "Fight Network",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "688",
+    "name": "Film4 UK",
+    "country": "UK",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "568",
+    "name": "Filmbox Premium Poland",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "297",
+    "name": "Fox Business",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "369",
+    "name": "Fox Cricket",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "643",
+    "name": "Fox Deportes USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "483",
+    "name": "Fox Hd Bulgaria",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "347",
+    "name": "Fox News",
+    "country": "US",
+    "category": "Notícias",
+    "isPt": false
+  },
+  {
+    "id": "756",
+    "name": "Fox Soccer Plus",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "929",
+    "name": "Fox Sports 1 Mx",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "39",
+    "name": "Fox Sports 1 USA",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "788",
+    "name": "Fox Sports 2 Argentina",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "930",
+    "name": "Fox Sports 2 Mx",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "758",
+    "name": "Fox Sports 2 USA",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "789",
+    "name": "Fox Sports 3 Argentina",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "931",
+    "name": "Fox Sports 3 Mx",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "820",
+    "name": "Fox Sports 502 Au",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "821",
+    "name": "Fox Sports 503 Au",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "822",
+    "name": "Fox Sports 504 Au",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "823",
+    "name": "Fox Sports 505 Au",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "824",
+    "name": "Fox Sports 506 Au",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "825",
+    "name": "Fox Sports 507 Au",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "787",
+    "name": "Fox Sports Argentina",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "830",
+    "name": "Fox Sports Premium Mx",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "54",
+    "name": "Fox USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "775",
+    "name": "Fox Weather Channel",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "768",
+    "name": "Foxny USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "950",
+    "name": "France 2",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "951",
+    "name": "France 3",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "952",
+    "name": "France 4",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "953",
+    "name": "France 5",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "301",
+    "name": "Freeform",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "279",
+    "name": "Fuse TV USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "381",
+    "name": "Fx Movie Channel",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "317",
+    "name": "Fx USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "298",
+    "name": "Fxx USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "665",
+    "name": "Fyi",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "743",
+    "name": "Galavisi贸N USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "319",
+    "name": "Game Show Network",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "836",
+    "name": "Global Ca",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "761",
+    "name": "Globo Rio",
+    "country": "BR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "760",
+    "name": "Globo Sp",
+    "country": "BR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "530",
+    "name": "Gol Play Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "687",
+    "name": "Gold UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "318",
+    "name": "Golf Channel USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "699",
+    "name": "Great American Family Channel (Gac)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "752",
+    "name": "Grit Channel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "296",
+    "name": "Hallmark Movies & Mysterie",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "846",
+    "name": "Happy TV Serbia",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "690",
+    "name": "Hbo Comedy USA",
+    "country": "US",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "691",
+    "name": "Hbo Family USA",
+    "country": "US",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "692",
+    "name": "Hbo Latino USA",
+    "country": "US",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "569",
+    "name": "Hbo Poland",
+    "country": "US",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "693",
+    "name": "Hbo Signature USA",
+    "country": "US",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "321",
+    "name": "Hbo USA",
+    "country": "US",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "694",
+    "name": "Hbo Zone USA",
+    "country": "US",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "689",
+    "name": "Hbo2 USA",
+    "country": "US",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "323",
+    "name": "Headline News",
+    "country": "Outro",
+    "category": "Notícias",
+    "isPt": false
+  },
+  {
+    "id": "282",
+    "name": "Heroes & Icons (H&I) USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "382",
+    "name": "Hgtv",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "322",
+    "name": "History USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "553",
+    "name": "Hot3 Israel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "656",
+    "name": "Ifc TV USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "324",
+    "name": "Investigation Discovery (Id USA)",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "325",
+    "name": "Ion USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "854",
+    "name": "Italia 1 Italy",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "350",
+    "name": "Itv 1 UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "351",
+    "name": "Itv 2 UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "352",
+    "name": "Itv 3 UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "353",
+    "name": "Itv 4 UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "876",
+    "name": "Itv Quiz",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1050",
+    "name": "Joj Sk",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1052",
+    "name": "Joj Šport Sk",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "731",
+    "name": "Kabel Eins (Kabel 1) De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "803",
+    "name": "Kanal 4 Denmark",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "804",
+    "name": "Kanal 5 Denmark",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1001",
+    "name": "Kanal D Turkey",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "645",
+    "name": "L'Equipe France",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "534",
+    "name": "La Sexta Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "855",
+    "name": "La7 Italy",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "856",
+    "name": "La7D Hd+ Italy",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "539",
+    "name": "Laliga Smartbank TV",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "276",
+    "name": "Laligatv UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "924",
+    "name": "Las Estrellas",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "278",
+    "name": "Law & Crime Network",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "962",
+    "name": "Lci France",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "389",
+    "name": "Lifetime Movies Network",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "326",
+    "name": "Lifetime Network",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "826",
+    "name": "Liverpool TV (Lfc TV)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "849",
+    "name": "Logo TV USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "265",
+    "name": "M4 Sports Hungary",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "470",
+    "name": "M6 France",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "622",
+    "name": "Magenta Sport 1 Hd",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "623",
+    "name": "Magenta Sport 2 Hd",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "624",
+    "name": "Magenta Sport 3 Hd",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "625",
+    "name": "Magenta Sport 4 Hd",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "626",
+    "name": "Magenta Sport 5 Hd",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "627",
+    "name": "Magenta Sport 6 Hd",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "628",
+    "name": "Magenta Sport 7 Hd",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "629",
+    "name": "Magenta Sport 8 Hd",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "630",
+    "name": "Magenta Sport 9 Hd",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "299",
+    "name": "Magnolia Network",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "770",
+    "name": "Marquee Sports Network",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "829",
+    "name": "Masn USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "136",
+    "name": "Match Football 1 Russia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "137",
+    "name": "Match Football 2 Russia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "138",
+    "name": "Match Football 3 Russia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "573",
+    "name": "Match Premier Russia",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "127",
+    "name": "Match TV Russia",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "472",
+    "name": "Max Sport 1 Bulgaria",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "779",
+    "name": "Max Sport 1 Croatia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "473",
+    "name": "Max Sport 2 Bulgaria",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "780",
+    "name": "Max Sport 2 Croatia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "474",
+    "name": "Max Sport 3 Bulgaria",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "475",
+    "name": "Max Sport 4 Bulgaria",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "733",
+    "name": "Mdr De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "662",
+    "name": "Metv USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "791",
+    "name": "Mgm+ USA / Epix",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "399",
+    "name": "Mlb Network USA",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "778",
+    "name": "Monumental Sports Network",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "563",
+    "name": "Motowizja Poland",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "438",
+    "name": "Movistar Deportes 2 Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "526",
+    "name": "Movistar Deportes 3 Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "527",
+    "name": "Movistar Deportes 4 Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "436",
+    "name": "Movistar Deportes Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "528",
+    "name": "Movistar Golf Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "84",
+    "name": "Movistar Laliga",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "435",
+    "name": "Movistar Liga De Campeones",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "437",
+    "name": "Movistar Supercopa De España",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "765",
+    "name": "Msg USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "327",
+    "name": "Msnbc",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "806",
+    "name": "Mtv Denmark",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "990",
+    "name": "Mtv Poland",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "367",
+    "name": "Mtv UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "371",
+    "name": "Mtv USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "749",
+    "name": "Mundotoro TV Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "377",
+    "name": "Mutv UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "654",
+    "name": "My9TV USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "745",
+    "name": "Nat Geo Wild USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "328",
+    "name": "National Geographic (Ngc)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "404",
+    "name": "Nba TV USA",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "753",
+    "name": "Nbc Sports Bay Area",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "754",
+    "name": "Nbc Sports Boston",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "755",
+    "name": "Nbc Sports California",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "777",
+    "name": "Nbc Sports Philadelphia",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "53",
+    "name": "Nbc USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "845",
+    "name": "Nbc Universo",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "277",
+    "name": "Nbc10 Philadelphia",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "769",
+    "name": "Nbcny USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "736",
+    "name": "Ndr De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "762",
+    "name": "Nesn USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "613",
+    "name": "Newsmax USA",
+    "country": "US",
+    "category": "Notícias",
+    "isPt": false
+  },
+  {
+    "id": "292",
+    "name": "Newsnation USA",
+    "country": "US",
+    "category": "Notícias",
+    "isPt": false
+  },
+  {
+    "id": "405",
+    "name": "Nfl Network",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "667",
+    "name": "Nfl Redzone",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "663",
+    "name": "Nhl Network USA",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "330",
+    "name": "Nick",
+    "country": "Outro",
+    "category": "Infantil",
+    "isPt": false
+  },
+  {
+    "id": "329",
+    "name": "Nick Jr",
+    "country": "Outro",
+    "category": "Infantil",
+    "isPt": false
+  },
+  {
+    "id": "666",
+    "name": "Nick Music",
+    "country": "Outro",
+    "category": "Infantil",
+    "isPt": false
+  },
+  {
+    "id": "649",
+    "name": "Nicktoons",
+    "country": "Outro",
+    "category": "Infantil",
+    "isPt": false
+  },
+  {
+    "id": "835",
+    "name": "Noovo Ca",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1034",
+    "name": "Nova Hd Cz",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "847",
+    "name": "Nova S Serbia",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1021",
+    "name": "Nova Sport 1 Cz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1022",
+    "name": "Nova Sport 2 Cz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1023",
+    "name": "Nova Sport 3 Cz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1060",
+    "name": "Nova Sport 3 Sk",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1024",
+    "name": "Nova Sport 4 Cz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1061",
+    "name": "Nova Sport 4 Sk",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1025",
+    "name": "Nova Sport 5 Cz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1062",
+    "name": "Nova Sport 5 Sk",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1026",
+    "name": "Nova Sport 6 Cz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "468",
+    "name": "Nova Sport Bulgaria",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "582",
+    "name": "Nova Sport Serbia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "631",
+    "name": "Nova Sports 1 Greece",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "632",
+    "name": "Nova Sports 2 Greece",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "633",
+    "name": "Nova Sports 3 Greece",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "634",
+    "name": "Nova Sports 4 Greece",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "635",
+    "name": "Nova Sports 5 Greece",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "636",
+    "name": "Nova Sports 6 Greece",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "639",
+    "name": "Nova Sports News Greece",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "599",
+    "name": "Nova Sports Premier League Greece",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "638",
+    "name": "Nova Sports Prime Greece",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "637",
+    "name": "Nova Sports Start Greece",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "480",
+    "name": "Nova TV Bulgaria",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1003",
+    "name": "Now TV Turkey",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "541",
+    "name": "One 1 Hd Israel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "542",
+    "name": "One 2 Hd Israel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1039",
+    "name": "Oneplay Md2 Cz",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1040",
+    "name": "Oneplay Md3 Cz",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1041",
+    "name": "Oneplay Md4 Cz",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1027",
+    "name": "Oneplay Sport 1 Cz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1028",
+    "name": "Oneplay Sport 2 Cz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1029",
+    "name": "Oneplay Sport 3 Cz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1038",
+    "name": "Oneplay Sport 4 Cz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "611",
+    "name": "Ontime Sports",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "331",
+    "name": "Oprah Winfrey Network (Own)",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "439",
+    "name": "Orange Sport 1 Romania",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "440",
+    "name": "Orange Sport 2 Romania",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "441",
+    "name": "Orange Sport 3 Romania",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "442",
+    "name": "Orange Sport 4 Romania",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "848",
+    "name": "Outdoor Channel USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "332",
+    "name": "Oxygen True Crime",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "450",
+    "name": "PTV Sports",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "287",
+    "name": "Pac-12 Network USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "334",
+    "name": "Paramount Network",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "210",
+    "name": "Pbs USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "43",
+    "name": "Pdc TV",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "564",
+    "name": "Polsat Film Poland",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "443",
+    "name": "Polsat News Poland",
+    "country": "Outro",
+    "category": "Notícias",
+    "isPt": false
+  },
+  {
+    "id": "562",
+    "name": "Polsat Poland",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "50",
+    "name": "Polsat Sport 2 Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "129",
+    "name": "Polsat Sport 3 Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "993",
+    "name": "Polsat Sport Extra 1 Hd Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "994",
+    "name": "Polsat Sport Extra 2 Hd Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "995",
+    "name": "Polsat Sport Extra 3 Hd Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "996",
+    "name": "Polsat Sport Extra 4 Hd Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "997",
+    "name": "Polsat Sport Fight Hd Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "998",
+    "name": "Polsat Sport News Hd Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "47",
+    "name": "Polsat Sport Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "991",
+    "name": "Polsat Sport Premium 1 Super Hd Pl",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "992",
+    "name": "Polsat Sport Premium 2 Super Hd Pl",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "653",
+    "name": "Pop TV USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "88",
+    "name": "Premier Brasil",
+    "country": "BR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1030",
+    "name": "Premier Sport 1 Cz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1031",
+    "name": "Premier Sport 2 Cz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1032",
+    "name": "Premier Sport 3 Cz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "771",
+    "name": "Premier Sports Ireland 1",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "799",
+    "name": "Premier Sports Ireland 2",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "583",
+    "name": "Prima Sport 1",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "584",
+    "name": "Prima Sport 2",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "585",
+    "name": "Prima Sport 3",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "586",
+    "name": "Prima Sport 4",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "843",
+    "name": "Prima TV Ro",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "730",
+    "name": "Prosieben (Pro7) De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "646",
+    "name": "Racer TV USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "555",
+    "name": "Racing TV UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "850",
+    "name": "Rai 1 Italy",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "851",
+    "name": "Rai 2 Italy",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "852",
+    "name": "Rai 3 Italy",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "853",
+    "name": "Rai 4 Italy",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "858",
+    "name": "Rai Premium Italy",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "882",
+    "name": "Rai Sport Italy",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "607",
+    "name": "Rally TV",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "840",
+    "name": "Rds 2 Ca",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "839",
+    "name": "Rds Ca",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "841",
+    "name": "Rds Info Ca",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "523",
+    "name": "Real Madrid TV Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "293",
+    "name": "Reelz Channel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "471",
+    "name": "Ring Bulgaria",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "119",
+    "name": "Rmc Sport 1 France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "120",
+    "name": "Rmc Sport 2 France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "954",
+    "name": "Rmc Story France",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "920",
+    "name": "Root Sports Northwest",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "364",
+    "name": "Rte 1",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "365",
+    "name": "Rte 2",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "740",
+    "name": "Rtl De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "390",
+    "name": "Rtl7 Netherland",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "670",
+    "name": "S4C UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "729",
+    "name": "Sat.1 De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "883",
+    "name": "Sbs6 Nl",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "294",
+    "name": "Science Channel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "385",
+    "name": "Sec Network USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "811",
+    "name": "See Denmark",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "811",
+    "name": "See Denmark",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1002",
+    "name": "Show TV Turkey",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "792",
+    "name": "Showtime 2 USA (Sho2) USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "794",
+    "name": "Showtime Extreme USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "795",
+    "name": "Showtime Family Zone (Sho Family Zone) USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "796",
+    "name": "Showtime Next (Sho Next) USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "793",
+    "name": "Showtime Showcase USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "333",
+    "name": "Showtime USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "797",
+    "name": "Showtime Women USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "732",
+    "name": "Sixx De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "683",
+    "name": "Sky Arts UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "362",
+    "name": "Sky Atlantic",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "871",
+    "name": "Sky Calcio 1 (251) Italy",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "872",
+    "name": "Sky Calcio 2 (252) Italy",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "873",
+    "name": "Sky Calcio 3 (253) Italy",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "874",
+    "name": "Sky Calcio 4 (254) Italy",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "861",
+    "name": "Sky Cinema Action Italy",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "677",
+    "name": "Sky Cinema Action UK",
+    "country": "UK",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "675",
+    "name": "Sky Cinema Animation UK",
+    "country": "UK",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "859",
+    "name": "Sky Cinema Collection Italy",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "862",
+    "name": "Sky Cinema Comedy Italy",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "678",
+    "name": "Sky Cinema Comedy UK",
+    "country": "UK",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "867",
+    "name": "Sky Cinema Drama Italy",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "680",
+    "name": "Sky Cinema Drama UK",
+    "country": "UK",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "865",
+    "name": "Sky Cinema Family Italy",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "676",
+    "name": "Sky Cinema Family UK",
+    "country": "UK",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "674",
+    "name": "Sky Cinema Greats UK",
+    "country": "UK",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "673",
+    "name": "Sky Cinema Hits UK",
+    "country": "UK",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "671",
+    "name": "Sky Cinema Premiere UK",
+    "country": "UK",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "864",
+    "name": "Sky Cinema Romance Italy",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "681",
+    "name": "Sky Cinema Sci-Fi Horror UK",
+    "country": "UK",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "672",
+    "name": "Sky Cinema Select UK",
+    "country": "UK",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "679",
+    "name": "Sky Cinema Thriller UK",
+    "country": "UK",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "863",
+    "name": "Sky Cinema Uno +24 Italy",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "860",
+    "name": "Sky Cinema Uno Italy",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "684",
+    "name": "Sky Comedy UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "685",
+    "name": "Sky Crime",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "686",
+    "name": "Sky History",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "708",
+    "name": "Sky Max UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "695",
+    "name": "Sky News UK",
+    "country": "UK",
+    "category": "Notícias",
+    "isPt": false
+  },
+  {
+    "id": "880",
+    "name": "Sky Serie Italy",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "682",
+    "name": "Sky Showcase UK",
+    "country": "UK",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "588",
+    "name": "Sky Sport 1 Nz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "589",
+    "name": "Sky Sport 2 Nz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "869",
+    "name": "Sky Sport 24 Italy",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "590",
+    "name": "Sky Sport 3 Nz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "591",
+    "name": "Sky Sport 4 Nz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "592",
+    "name": "Sky Sport 5 Nz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "593",
+    "name": "Sky Sport 6 Nz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "594",
+    "name": "Sky Sport 7 Nz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "595",
+    "name": "Sky Sport 8 Nz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "596",
+    "name": "Sky Sport 9 Nz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "462",
+    "name": "Sky Sport Arena Italy",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "559",
+    "name": "Sky Sport Austria 1 Hd",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "875",
+    "name": "Sky Sport Basket Italy",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "558",
+    "name": "Sky Sport Bundesliga 1 Hd",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "946",
+    "name": "Sky Sport Bundesliga 2",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "947",
+    "name": "Sky Sport Bundesliga 3",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "948",
+    "name": "Sky Sport Bundesliga 4",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "949",
+    "name": "Sky Sport Bundesliga 5",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "870",
+    "name": "Sky Sport Calcio Italy",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "577",
+    "name": "Sky Sport F1 Italy",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "460",
+    "name": "Sky Sport Max Italy",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "557",
+    "name": "Sky Sport Mix De",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "575",
+    "name": "Sky Sport Motogp Italy",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "587",
+    "name": "Sky Sport Select Nz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "576",
+    "name": "Sky Sport Tennis Italy",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "556",
+    "name": "Sky Sport Top Event De",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "461",
+    "name": "Sky Sport Uno Italy",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "240",
+    "name": "Sky Sports 1 De",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "241",
+    "name": "Sky Sports 2 De",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "37",
+    "name": "Sky Sports Action UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "65",
+    "name": "Sky Sports Cricket",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "274",
+    "name": "Sky Sports F1 De",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "60",
+    "name": "Sky Sports F1 UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "35",
+    "name": "Sky Sports Football UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "785",
+    "name": "Sky Sports Golf De",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "574",
+    "name": "Sky Sports Golf Italy",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "70",
+    "name": "Sky Sports Golf UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "38",
+    "name": "Sky Sports Main Event",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "449",
+    "name": "Sky Sports Mix UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "366",
+    "name": "Sky Sports News UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "130",
+    "name": "Sky Sports Premier League",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "554",
+    "name": "Sky Sports Racing UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "884",
+    "name": "Sky Sports Tennis De",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "46",
+    "name": "Sky Sports Tennis UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "36",
+    "name": "Sky Sports+ Plus",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "881",
+    "name": "Sky Uno Italy",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "361",
+    "name": "Sky Witness Hd",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "603",
+    "name": "Smithsonian Channel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "885",
+    "name": "Sony Ten 1",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "886",
+    "name": "Sony Ten 2",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "887",
+    "name": "Sony Ten 3",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "921",
+    "name": "Space City Home Network",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "764",
+    "name": "Spectrum Sportsnet La",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "982",
+    "name": "Spectrum Sportsnet USA",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1042",
+    "name": "Sport 1 Cz",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "140",
+    "name": "Sport 1 Israel",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "141",
+    "name": "Sport 2 Israel",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "142",
+    "name": "Sport 3 Israel",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "143",
+    "name": "Sport 4 Israel",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "148",
+    "name": "Sport 5 Gold Israel",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "144",
+    "name": "Sport 5 Israel",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "146",
+    "name": "Sport 5 Live Israel",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "145",
+    "name": "Sport 5 Plus Israel",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "147",
+    "name": "Sport 5 Star Israel",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "965",
+    "name": "Sport En France",
+    "country": "FR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "101",
+    "name": "Sport Klub 1 Croatia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "102",
+    "name": "Sport Klub 2 Croatia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "103",
+    "name": "Sport Klub 3 Croatia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "104",
+    "name": "Sport Klub 4 Croatia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "710",
+    "name": "Sport Klub Golf Croatia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "453",
+    "name": "Sport Klub Hd Croatia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "641",
+    "name": "Sport1 Germany",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "571",
+    "name": "Sportdigital Fussball",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "640",
+    "name": "Sportdigital1+ Germany",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "409",
+    "name": "Sportsnet 360",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "408",
+    "name": "Sportsnet East",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "759",
+    "name": "Sportsnet New York (Sny)",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "411",
+    "name": "Sportsnet One",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "406",
+    "name": "Sportsnet Ontario",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "922",
+    "name": "Sportsnet Pittsburgh",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "407",
+    "name": "Sportsnet West",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "410",
+    "name": "Sportsnet World",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "78",
+    "name": "Sportv Brasil",
+    "country": "BR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "79",
+    "name": "Sportv2 Brasil",
+    "country": "BR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "80",
+    "name": "Sportv3 Brasil",
+    "country": "BR",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "739",
+    "name": "Sr Fernsehen De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "614",
+    "name": "Ssc Sport 1",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "615",
+    "name": "Ssc Sport 2",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "616",
+    "name": "Ssc Sport 3",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "617",
+    "name": "Ssc Sport 4",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "618",
+    "name": "Ssc Sport 5",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "619",
+    "name": "Ssc Sport Extra 1",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "620",
+    "name": "Ssc Sport Extra 2",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "621",
+    "name": "Ssc Sport Extra 3",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "267",
+    "name": "Star Sports 1 In",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "268",
+    "name": "Star Sports Hindi In",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1004",
+    "name": "Star TV Turkey",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "335",
+    "name": "Starz",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "970",
+    "name": "Starz Cinema",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "971",
+    "name": "Starz Comedy",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "972",
+    "name": "Starz Edge",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "975",
+    "name": "Starz Encore",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "976",
+    "name": "Starz Encore Action",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "977",
+    "name": "Starz Encore Black",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "978",
+    "name": "Starz Encore Classic",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "979",
+    "name": "Starz Encore Family",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "980",
+    "name": "Starz Encore Suspense",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "981",
+    "name": "Starz Encore Westerns",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "973",
+    "name": "Starz In Black",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "974",
+    "name": "Starz Kids & Family",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "284",
+    "name": "Starzplay Criclife 1 Hd",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "658",
+    "name": "Sundance TV",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "738",
+    "name": "Super Rtl De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "420",
+    "name": "Supersport Action",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "368",
+    "name": "Supersport Cricket",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "56",
+    "name": "Supersport Football",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "422",
+    "name": "Supersport Golf",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "412",
+    "name": "Supersport Grandstand",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "415",
+    "name": "Supersport Laliga",
+    "country": "ES",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "572",
+    "name": "Supersport Maximo 1",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "424",
+    "name": "Supersport Motorsport",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "414",
+    "name": "Supersport Premier League",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "413",
+    "name": "Supersport Psl",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "421",
+    "name": "Supersport Rugby",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "423",
+    "name": "Supersport Tennis",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "416",
+    "name": "Supersport Variety 1",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "417",
+    "name": "Supersport Variety 2",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "418",
+    "name": "Supersport Variety 3",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "419",
+    "name": "Supersport Variety 4",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "735",
+    "name": "Swr De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "373",
+    "name": "Syfy USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "270",
+    "name": "T Sports Bd",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "814",
+    "name": "TV 2 Sport 2 Norway",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "812",
+    "name": "TV 2 Sport Norway",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "660",
+    "name": "TV One USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "807",
+    "name": "TV2 Bornholm Denmark",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "817",
+    "name": "TV2 Denmark",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "810",
+    "name": "TV2 Sport Denmark",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "808",
+    "name": "TV2 Sport X Denmark",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "818",
+    "name": "TV2 Zulu",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "223",
+    "name": "TV3 Max Denmark",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "809",
+    "name": "TV3 Sport Denmark",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "819",
+    "name": "TV3+ Denmark",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "747",
+    "name": "TV4 Football Sweden",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "700",
+    "name": "TV4 Hockey",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "702",
+    "name": "TV4 Motor",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "703",
+    "name": "TV4 Sport Live 1",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "704",
+    "name": "TV4 Sport Live 2",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "705",
+    "name": "TV4 Sport Live 3",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "706",
+    "name": "TV4 Sport Live 4",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "707",
+    "name": "TV4 Sportkanalen",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "701",
+    "name": "TV4 Tennis",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1005",
+    "name": "TV8 Turkey",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "833",
+    "name": "TVa Sports",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "834",
+    "name": "TVa Sports 2",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "932",
+    "name": "TVc Deportes Mx",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "533",
+    "name": "TVe La 1 Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "536",
+    "name": "TVe La 2 Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "342",
+    "name": "TVland",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "565",
+    "name": "TVn Hd Poland",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "444",
+    "name": "TVn24 Poland",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "842",
+    "name": "TVo Ca",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "452",
+    "name": "TVp Info",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "128",
+    "name": "TVp Sport Poland",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "560",
+    "name": "TVp1 Poland",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "561",
+    "name": "TVp2 Poland",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "336",
+    "name": "Tbs USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "644",
+    "name": "Tcm USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "650",
+    "name": "Teennick",
+    "country": "Outro",
+    "category": "Infantil",
+    "isPt": false
+  },
+  {
+    "id": "532",
+    "name": "Telecinco Spain",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "529",
+    "name": "Teledeporte Spain (Tdp)",
+    "country": "ES",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "131",
+    "name": "Telemundo",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "741",
+    "name": "Ten Sports Pk",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "40",
+    "name": "Tennis Channel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "709",
+    "name": "Tennis+ 10",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "711",
+    "name": "Tennis+ 12",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "469",
+    "name": "Tf1 France",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "384",
+    "name": "The Food Network",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "320",
+    "name": "The Hallmark Channel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "394",
+    "name": "The Weather Channel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "337",
+    "name": "Tlc",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "698",
+    "name": "Tmc Channel USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "955",
+    "name": "Tmc France",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1037",
+    "name": "Tn Live Cz",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "87",
+    "name": "Tnt Brasil",
+    "country": "BR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "31",
+    "name": "Tnt Sports 1 UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "32",
+    "name": "Tnt Sports 2 UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "33",
+    "name": "Tnt Sports 3 UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "34",
+    "name": "Tnt Sports 4 UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "388",
+    "name": "Tnt Sports Argentina",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "642",
+    "name": "Tnt Sports Hd Chile",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "338",
+    "name": "Tnt USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "340",
+    "name": "Travel Channel",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "889",
+    "name": "Trt Spor Tr",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "341",
+    "name": "Trutv USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "111",
+    "name": "Tsn1",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "112",
+    "name": "Tsn2",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "113",
+    "name": "Tsn3",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "114",
+    "name": "Tsn4",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "115",
+    "name": "Tsn5",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "935",
+    "name": "Tudn Mx",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "66",
+    "name": "Tudn USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "746",
+    "name": "Tyc Sports Argentina",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "343",
+    "name": "USA Network",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "133",
+    "name": "Unimas",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "668",
+    "name": "Universal Kids USA",
+    "country": "US",
+    "category": "Infantil",
+    "isPt": false
+  },
+  {
+    "id": "132",
+    "name": "Univision",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "816",
+    "name": "V Film Family",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "815",
+    "name": "V Film Premiere",
+    "country": "BR",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "272",
+    "name": "V Sport Motor Sweden",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "378",
+    "name": "Veronica Nl Netherland",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "344",
+    "name": "Vh1 USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "451",
+    "name": "Viaplay Sports 1 UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "550",
+    "name": "Viaplay Sports 2 UK",
+    "country": "UK",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "659",
+    "name": "Vice TV",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "260",
+    "name": "Vodafone Sport",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "1053",
+    "name": "Voyo Special 1 Sk",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1054",
+    "name": "Voyo Special 2 Sk",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1055",
+    "name": "Voyo Special 3 Sk",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1056",
+    "name": "Voyo Special 4 Sk",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1057",
+    "name": "Voyo Special 7 Sk",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1058",
+    "name": "Voyo Special 8 Sk",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "1059",
+    "name": "Voyo Special 9 Sk",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "391",
+    "name": "Vtv+ Uruguay",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "959",
+    "name": "W9 France",
+    "country": "FR",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "734",
+    "name": "Wdr De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "655",
+    "name": "Wetv USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "598",
+    "name": "Willow 2 Cricket",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "346",
+    "name": "Willow Cricket",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "392",
+    "name": "Win Sports+ Columbia",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "376",
+    "name": "Wwe Network",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "543",
+    "name": "Yes Movies Action Israel",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "545",
+    "name": "Yes Movies Comedy Israel",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "544",
+    "name": "Yes Movies Kids Israel",
+    "country": "Outro",
+    "category": "Filmes",
+    "isPt": false
+  },
+  {
+    "id": "763",
+    "name": "Yes Network USA",
+    "country": "US",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "837",
+    "name": "Yes TV Ca",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "286",
+    "name": "Ytv Ca",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "727",
+    "name": "Zdf De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "728",
+    "name": "Zdf Info De",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  },
+  {
+    "id": "398",
+    "name": "Ziggo Sport 2 Nl",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "919",
+    "name": "Ziggo Sport 3 Nl",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "396",
+    "name": "Ziggo Sport 4 Nl",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "383",
+    "name": "Ziggo Sport 5 Nl",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "901",
+    "name": "Ziggo Sport 6 Nl",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "393",
+    "name": "Ziggo Sport Nl",
+    "country": "Outro",
+    "category": "Desporto",
+    "isPt": false
+  },
+  {
+    "id": "395",
+    "name": "Матч! Боец Russia",
+    "country": "Outro",
+    "category": "Geral",
+    "isPt": false
+  }
+]

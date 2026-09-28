@@ -1,0 +1,26 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+    <!-- Background -->
+    <path
+        android:fillColor="#12141C"
+        android:pathData="M0,0h320v180h-320z"/>
+    <!-- Red Accent Top Bar -->
+    <path
+        android:fillColor="#E50914"
+        android:pathData="M0,0h320v6h-320z"/>
+    <!-- TV Icon Box -->
+    <path
+        android:fillColor="#E50914"
+        android:pathData="M136,54h48c4.4,0 8,3.6 8,8v34c0,4.4 -3.6,8 -8,8h-48c-4.4,0 -8,-3.6 -8,-8V62c0,-4.4 3.6,-8 8,-8z"/>
+    <!-- Play Triangle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M154,67l18,12l-18,12z"/>
+    <!-- Antenna lines -->
+    <path
+        android:fillColor="#E50914"
+        android:pathData="M152,44l8,10l8,-10l4,3l-9,11l-3,-1l-9,-11z"/>
+</vector>

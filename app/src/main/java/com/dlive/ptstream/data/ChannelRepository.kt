@@ -1,0 +1,579 @@
+package com.dlive.ptstream.data
+
+import android.content.Context
+import android.content.SharedPreferences
+import com.google.gson.Gson
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.regex.Pattern
+
+enum class TabFilter {
+    PORTUGAL,
+    LIVE_GAMES,
+    FAVORITES,
+    ALL
+}
+
+class ChannelRepository(private val context: Context) {
+    private val prefs: SharedPreferences = context.getSharedPreferences("dlive_prefs", Context.MODE_PRIVATE)
+    private val PREF_FAVORITES = "fav_channels"
+    private val PREF_HIDDEN_CHANNELS = "hidden_channels"
+    private val PREF_BASE_URL = "base_domain_url"
+    private val PREF_TIMST_BASE_URL = "timst_base_url"
+    private val PREF_AUTO_PIP_ON_BACK = "pref_auto_pip_on_back"
+    private val PREF_AUTO_UNMUTE = "pref_auto_unmute"
+    private val PREF_DEFAULT_SERVER = "pref_default_server"
+    private val CACHE_FILE_NAME = "channels_cache.json"
+
+    private var cachedChannels: List<Channel> = emptyList()
+    private var liveEvents: List<LiveEvent> = emptyList()
+
+    init {
+        loadChannels()
+    }
+
+    fun getHiddenChannelIds(): Set<String> {
+        return prefs.getStringSet(PREF_HIDDEN_CHANNELS, emptySet()) ?: emptySet()
+    }
+
+    fun hideChannel(channelId: String) {
+        val hidden = getHiddenChannelIds().toMutableSet()
+        hidden.add(channelId)
+        prefs.edit().putStringSet(PREF_HIDDEN_CHANNELS, hidden).apply()
+    }
+
+    fun unhideChannel(channelId: String) {
+        val hidden = getHiddenChannelIds().toMutableSet()
+        hidden.remove(channelId)
+        prefs.edit().putStringSet(PREF_HIDDEN_CHANNELS, hidden).apply()
+    }
+
+    fun unhideAllChannels() {
+        prefs.edit().remove(PREF_HIDDEN_CHANNELS).apply()
+    }
+
+    fun isChannelHidden(channelId: String): Boolean {
+        return getHiddenChannelIds().contains(channelId)
+    }
+
+    fun getHiddenChannels(): List<Channel> {
+        val hiddenIds = getHiddenChannelIds()
+        return cachedChannels.filter { hiddenIds.contains(it.id) }
+    }
+
+    fun isAutoPipOnBack(): Boolean = prefs.getBoolean(PREF_AUTO_PIP_ON_BACK, true)
+    fun setAutoPipOnBack(enabled: Boolean) = prefs.edit().putBoolean(PREF_AUTO_PIP_ON_BACK, enabled).apply()
+
+    fun isAutoUnmuteEnabled(): Boolean = prefs.getBoolean(PREF_AUTO_UNMUTE, true)
+    fun setAutoUnmuteEnabled(enabled: Boolean) = prefs.edit().putBoolean(PREF_AUTO_UNMUTE, enabled).apply()
+
+    fun getDefaultServer(): String = prefs.getString(PREF_DEFAULT_SERVER, "stream") ?: "stream"
+    fun setDefaultServer(server: String) = prefs.edit().putString(PREF_DEFAULT_SERVER, server).apply()
+
+    fun getBaseUrl(): String = prefs.getString(PREF_BASE_URL, "https://dlive.sx") ?: "https://dlive.sx"
+    fun setBaseUrl(newUrl: String) {
+        val clean = if (newUrl.endsWith("/")) newUrl.dropLast(1) else newUrl
+        prefs.edit().putString(PREF_BASE_URL, clean).apply()
+    }
+
+    fun getTimstBaseUrl(): String = prefs.getString(PREF_TIMST_BASE_URL, "https://timst.top") ?: "https://timst.top"
+    fun setTimstBaseUrl(newUrl: String) {
+        val clean = if (newUrl.endsWith("/")) newUrl.dropLast(1) else newUrl
+        prefs.edit().putString(PREF_TIMST_BASE_URL, clean).apply()
+    }
+
+    private fun loadChannels() {
+        val favIds = getFavoriteIds()
+
+        // 1. Internal storage cache first
+        val cacheFile = File(context.filesDir, CACHE_FILE_NAME)
+        if (cacheFile.exists()) {
+            try {
+                cacheFile.inputStream().use { inputStream ->
+                    val reader = InputStreamReader(inputStream, "UTF-8")
+                    val itemType = object : TypeToken<List<Channel>>() {}.type
+                    val list: List<Channel>? = Gson().fromJson(reader, itemType)
+                    if (!list.isNullOrEmpty()) {
+                        cachedChannels = list.map { ch ->
+                            val isPt = ch.isPortuguese
+                            val logo = ch.logoUrl ?: ChannelLogoHelper.getDefaultOnlineLogo(ch.name)
+                            ch.copy(
+                                isPt = isPt,
+                                country = if (isPt) "PT" else ch.country,
+                                category = ch.category,
+                                isFavorite = favIds.contains(ch.id),
+                                logoUrl = logo,
+                                status = ch.safeStatus
+                            )
+                        }.sortedWith(compareBy({ !it.isPortuguese }, { it.name }))
+                        return
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        // 2. Bundled assets fallback
+        try {
+            context.assets.open("channels.json").use { inputStream ->
+                val reader = InputStreamReader(inputStream, "UTF-8")
+                val itemType = object : TypeToken<List<Channel>>() {}.type
+                val list: List<Channel> = Gson().fromJson(reader, itemType) ?: emptyList()
+
+                cachedChannels = list.map { ch ->
+                    val isPt = ch.isPortuguese
+                    val logo = ch.logoUrl ?: ChannelLogoHelper.getDefaultOnlineLogo(ch.name)
+                    ch.copy(
+                        isPt = isPt,
+                        country = if (isPt) "PT" else ch.country,
+                        category = ch.category,
+                        isFavorite = favIds.contains(ch.id),
+                        logoUrl = logo,
+                        status = ch.safeStatus
+                    )
+                }.sortedWith(compareBy({ !it.isPortuguese }, { it.name }))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            cachedChannels = emptyList()
+        }
+    }
+
+    /**
+     * Sincroniza canais online de dlive.sx e enriquece com TimStreams (logos + servidores backup)
+     */
+    fun syncChannelsFromWeb(scope: CoroutineScope, onFinished: ((Boolean) -> Unit)? = null) {
+        scope.launch(Dispatchers.IO) {
+            var success = false
+            try {
+                val fetched = mutableListOf<Channel>()
+                val favIds = getFavoriteIds()
+
+                // 1. Fetch DaddyLive channels
+                val channelsUrl = "${getBaseUrl()}/24-7-channels.php"
+                val connection = (URL(channelsUrl).openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 8000
+                    readTimeout = 8000
+                    setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36")
+                }
+
+                if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                    val html = connection.inputStream.bufferedReader().use { it.readText() }
+                    val pattern = Pattern.compile("href=\"/watch\\.php\\?id=(\\d+)\"[^>]*data-title=\"([^\"]+)\"")
+                    val matcher = pattern.matcher(html)
+
+                    while (matcher.find()) {
+                        val cid = matcher.group(1) ?: continue
+                        val rawTitle = matcher.group(2) ?: continue
+                        val titleLower = rawTitle.lowercase()
+
+                        val isPt = titleLower.contains("portugal") ||
+                                titleLower.contains("benfica") ||
+                                titleLower.contains("porto canal") ||
+                                titleLower.contains("sporting tv") ||
+                                titleLower.contains("canal 11") ||
+                                titleLower.contains("tvi") ||
+                                titleLower.contains("cmtv") ||
+                                (titleLower.contains("sport tv") && !titleLower.contains("poland") && !titleLower.contains("slovenia")) ||
+                                (titleLower.contains("eleven sports") && titleLower.contains("portugal")) ||
+                                titleLower.contains("rtp") ||
+                                titleLower.contains("sic")
+
+                        val category = when {
+                            listOf("sport", "tv1", "tv2", "tv3", "tv4", "tv5", "tv6", "football", "dazn", "bein").any { titleLower.contains(it) } -> "Desporto"
+                            listOf("movie", "cinema", "film", "hbo", "action", "starz").any { titleLower.contains(it) } -> "Filmes"
+                            listOf("news", "noticias", "cnn").any { titleLower.contains(it) } -> "Notícias"
+                            listOf("kids", "disney", "cartoon", "nick").any { titleLower.contains(it) } -> "Infantil"
+                            else -> "Geral"
+                        }
+
+                        val country = if (isPt) "PT" else when {
+                            listOf(" usa", "espn", "nbc", "fox", "abc").any { titleLower.contains(it) } -> "US"
+                            listOf(" uk", "sky sports", "tnt sports", "bbc").any { titleLower.contains(it) } -> "UK"
+                            listOf(" espana", " spain", "movistar").any { titleLower.contains(it) } -> "ES"
+                            listOf(" brazil", " brasil", "premiere").any { titleLower.contains(it) } -> "BR"
+                            else -> "Outro"
+                        }
+
+                        val formattedName = rawTitle.split(" ").joinToString(" ") { word ->
+                            word.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                        }.replace("Pt", "PT").replace("Tv", "TV").replace("Sic", "SIC").replace("Rtp", "RTP").replace("Tvi", "TVI")
+
+                        val defaultLogo = ChannelLogoHelper.getDefaultOnlineLogo(formattedName)
+
+                        fetched.add(
+                            Channel(
+                                id = cid,
+                                name = formattedName,
+                                country = country,
+                                category = category,
+                                isPt = isPt,
+                                isFavorite = favIds.contains(cid),
+                                logoUrl = defaultLogo
+                            )
+                        )
+                    }
+                }
+
+                // If DaddyLive list couldn't be fetched, use existing cached channels
+                val listToEnrich = if (fetched.isNotEmpty()) fetched else cachedChannels.toMutableList()
+
+                // 2. Fetch TimStreams channels to merge logos & backup streams
+                try {
+                    val timstUrl = "${getTimstBaseUrl()}/api/channels"
+                    val timstConn = (URL(timstUrl).openConnection() as HttpURLConnection).apply {
+                        connectTimeout = 6000
+                        readTimeout = 6000
+                        setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+                    }
+
+                    if (timstConn.responseCode == HttpURLConnection.HTTP_OK) {
+                        val timstJson = timstConn.inputStream.bufferedReader().use { it.readText() }
+                        val jsonObject = JsonParser.parseString(timstJson).asJsonObject
+                        val chArray = jsonObject.getAsJsonArray("channels")
+
+                        val timstMap = mutableMapOf<String, Pair<String?, String?>>() // normName -> Pair(logo, streamUrl)
+                        if (chArray != null) {
+                            for (el in chArray) {
+                                val chObj = el.asJsonObject
+                                val tName = chObj.get("name")?.asString ?: continue
+                                val tLogo = chObj.get("logo")?.asString
+                                val streamsArr = chObj.getAsJsonArray("streams")
+                                val tStream = if (streamsArr != null && streamsArr.size() > 0) {
+                                    streamsArr[0].asJsonObject.get("url")?.asString
+                                } else null
+
+                                val norm = normalizeChannelName(tName)
+                                timstMap[norm] = Pair(tLogo, tStream)
+                            }
+                        }
+
+                        // Enrich list
+                        for (ch in listToEnrich) {
+                            val norm = normalizeChannelName(ch.name)
+                            val matched = timstMap[norm] ?: timstMap.entries.firstOrNull {
+                                norm.contains(it.key) || it.key.contains(norm)
+                            }?.value
+
+                            if (matched != null) {
+                                if (ch.logoUrl.isNullOrBlank() && !matched.first.isNullOrBlank()) {
+                                    ch.logoUrl = matched.first
+                                }
+                                if (!matched.second.isNullOrBlank()) {
+                                    ch.backupStreamUrl = matched.second
+                                }
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+                if (listToEnrich.isNotEmpty()) {
+                    listToEnrich.sortWith(compareBy({ !it.isPortuguese }, { it.name }))
+                    val cacheFile = File(context.filesDir, CACHE_FILE_NAME)
+                    cacheFile.writeText(Gson().toJson(listToEnrich))
+                    cachedChannels = listToEnrich
+                    success = true
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            withContext(Dispatchers.Main) {
+                onFinished?.invoke(success)
+            }
+        }
+    }
+
+    private fun normalizeChannelName(name: String): String {
+        return name.lowercase()
+            .replace(" ", "")
+            .replace("-", "")
+            .replace(".", "")
+            .replace("portugal", "")
+            .replace("pt", "")
+    }
+
+    /**
+     * Obter Jogos em Direto do TimStreams (Futebol prioritário)
+     */
+    fun fetchLiveMatches(scope: CoroutineScope, onResult: (List<LiveEvent>) -> Unit) {
+        scope.launch(Dispatchers.IO) {
+            val eventsList = mutableListOf<LiveEvent>()
+            try {
+                val url = "${getTimstBaseUrl()}/api/live-upcoming"
+                val conn = (URL(url).openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 6000
+                    readTimeout = 6000
+                    setRequestProperty("User-Agent", "Mozilla/5.0")
+                }
+
+                if (conn.responseCode == HttpURLConnection.HTTP_OK) {
+                    val jsonStr = conn.inputStream.bufferedReader().use { it.readText() }
+                    val root = JsonParser.parseString(jsonStr).asJsonObject
+                    val eventsArr = root.getAsJsonArray("events")
+
+                    // Build genre map
+                    val genreMap = mutableMapOf<Int, String>()
+                    val genresArr = root.getAsJsonArray("genres")
+                    if (genresArr != null) {
+                        for (g in genresArr) {
+                            val gObj = g.asJsonObject
+                            val gid = gObj.get("id")?.asInt ?: continue
+                            val gname = gObj.get("name")?.asString ?: "Desporto"
+                            genreMap[gid] = when (gid) {
+                                1 -> "⚽ Futebol"
+                                2 -> "🏎️ Motores"
+                                3 -> "🥊 Desportos Combate"
+                                6 -> "🤼 Wrestling"
+                                7 -> "🏀 Basquetebol"
+                                8 -> "🏈 Futebol Americano"
+                                9 -> "⚾ Basebol"
+                                10 -> "🎾 Ténis"
+                                11 -> "🏒 Hóquei"
+                                else -> gname
+                            }
+                        }
+                    }
+
+                    if (eventsArr != null) {
+                        for (el in eventsArr) {
+                            val ev = el.asJsonObject
+                            val id = ev.get("url")?.asString ?: System.currentTimeMillis().toString()
+                            val name = ev.get("name")?.asString ?: "Evento Desportivo"
+                            val logo = ev.get("logo")?.asString
+                            val genreId = ev.get("genre")?.asInt ?: 1
+                            val genreName = genreMap[genreId] ?: "⚽ Futebol"
+                            val time = ev.get("time")?.asString ?: ""
+                            val viewers = ev.get("viewers")?.asInt ?: 0
+
+                            val streamsList = mutableListOf<EventStream>()
+                            val streamsArr = ev.getAsJsonArray("streams")
+                            if (streamsArr != null) {
+                                for (s in streamsArr) {
+                                    val sObj = s.asJsonObject
+                                    val sName = sObj.get("name")?.asString ?: "Servidor"
+                                    val sUrl = sObj.get("url")?.asString ?: continue
+                                    streamsList.add(EventStream(sName, sUrl))
+                                }
+                            }
+
+                            val isAmericanFootball = genreName.contains("americano", ignoreCase = true) ||
+                                    genreName.contains("american", ignoreCase = true) ||
+                                    genreId == 2
+                            val isSoccer = !isAmericanFootball && (
+                                genreId == 1 ||
+                                genreName.contains("futebol", ignoreCase = true) ||
+                                genreName.contains("soccer", ignoreCase = true) ||
+                                name.contains("fc", ignoreCase = true) ||
+                                name.contains("sporting", ignoreCase = true) ||
+                                name.contains("benfica", ignoreCase = true) ||
+                                name.contains("porto", ignoreCase = true)
+                            )
+
+                            eventsList.add(
+                                LiveEvent(
+                                    id = id,
+                                    name = name,
+                                    logo = logo,
+                                    genre = genreId,
+                                    genreName = genreName,
+                                    time = formatEventTime(time),
+                                    viewers = viewers,
+                                    streams = streamsList,
+                                    isSoccer = isSoccer
+                                )
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            // Prioritize soccer, then sort by viewers descending
+            eventsList.sortWith(compareBy({ !it.isSoccer }, { -it.viewers }))
+            liveEvents = eventsList
+
+            withContext(Dispatchers.Main) {
+                onResult(eventsList)
+            }
+        }
+    }
+
+    private fun formatEventTime(rawTime: String): String {
+        return try {
+            if (rawTime.contains("T")) {
+                val parts = rawTime.split("T")
+                val time = parts[1].take(5)
+                val date = parts[0]
+                "Hoje $time"
+            } else {
+                rawTime
+            }
+        } catch (e: Exception) {
+            rawTime
+        }
+    }
+
+    /**
+     * Testar canais portugueses: verifica DaddyLive e TimStreams para cada canal
+     */
+    fun testPortugueseChannels(
+        scope: CoroutineScope,
+        onProgress: (current: Int, total: Int, channelName: String, isOnline: Boolean) -> Unit,
+        onFinished: (onlineCount: Int, totalCount: Int) -> Unit
+    ) {
+        scope.launch(Dispatchers.IO) {
+            val ptList = cachedChannels.filter { it.isPortuguese }
+            var onlineCount = 0
+
+            for ((index, ch) in ptList.withIndex()) {
+                var isOnline = false
+
+                // 1. Test DaddyLive primary stream
+                try {
+                    val streamUrl = "${getBaseUrl()}/stream/stream-${ch.id}.php"
+                    val conn = (URL(streamUrl).openConnection() as HttpURLConnection).apply {
+                        requestMethod = "HEAD"
+                        connectTimeout = 3000
+                        readTimeout = 3000
+                        setRequestProperty("User-Agent", "Mozilla/5.0")
+                        setRequestProperty("Referer", "${getBaseUrl()}/")
+                    }
+                    val code = conn.responseCode
+                    if (code == 200 || code == 302) {
+                        isOnline = true
+                    }
+                } catch (e: Exception) {
+                    // Failover to backup
+                }
+
+                // 2. If primary failed, test TimStreams backup
+                if (!isOnline && !ch.backupStreamUrl.isNullOrBlank()) {
+                    try {
+                        val backupConn = (URL(ch.backupStreamUrl).openConnection() as HttpURLConnection).apply {
+                            requestMethod = "HEAD"
+                            connectTimeout = 3000
+                            readTimeout = 3000
+                            setRequestProperty("User-Agent", "Mozilla/5.0")
+                            setRequestProperty("Referer", "${getTimstBaseUrl()}/")
+                        }
+                        val code = backupConn.responseCode
+                        if (code == 200 || code == 302) {
+                            isOnline = true
+                        }
+                    } catch (e: Exception) {
+                        // ignore
+                    }
+                }
+
+                ch.status = if (isOnline) ChannelStatus.ONLINE else ChannelStatus.OFFLINE
+                if (isOnline) onlineCount++
+
+                withContext(Dispatchers.Main) {
+                    onProgress(index + 1, ptList.size, ch.name, isOnline)
+                }
+            }
+
+            withContext(Dispatchers.Main) {
+                onFinished(onlineCount, ptList.size)
+            }
+        }
+    }
+
+    fun getFavoriteIds(): Set<String> {
+        return prefs.getStringSet(PREF_FAVORITES, emptySet()) ?: emptySet()
+    }
+
+    fun toggleFavorite(channelId: String): Boolean {
+        val favs = getFavoriteIds().toMutableSet()
+        val isNowFav = if (favs.contains(channelId)) {
+            favs.remove(channelId)
+            false
+        } else {
+            favs.add(channelId)
+            true
+        }
+        prefs.edit().putStringSet(PREF_FAVORITES, favs).apply()
+
+        cachedChannels = cachedChannels.map {
+            if (it.id == channelId) it.copy(isFavorite = isNowFav) else it
+        }
+
+        return isNowFav
+    }
+
+    fun getTopFootballChannels(query: String = ""): List<Channel> {
+        val hiddenIds = getHiddenChannelIds()
+        val footballPattern = Regex(
+            "sport tv|benfica|sporting tv|porto canal|canal 11|dazn|sky sports (premier league|football|main event)|tnt sports|espn|bein sports|super sport (premier league|football)|premier sports",
+            RegexOption.IGNORE_CASE
+        )
+
+        return cachedChannels.filter { ch ->
+            if (hiddenIds.contains(ch.id)) return@filter false
+
+            val isFootballChannel = ch.isPortuguese && (ch.category.contains("Desporto", ignoreCase = true) || footballPattern.containsMatchIn(ch.name)) ||
+                    footballPattern.containsMatchIn(ch.name) ||
+                    (ch.category.contains("Desporto", ignoreCase = true) && (ch.name.contains("league", ignoreCase = true) || ch.name.contains("football", ignoreCase = true) || ch.name.contains("soccer", ignoreCase = true)))
+
+            if (!isFootballChannel) return@filter false
+
+            if (query.isBlank()) true
+            else ch.name.contains(query, ignoreCase = true) || ch.id.contains(query)
+        }.sortedWith(compareBy({ !it.isPortuguese }, { it.name }))
+    }
+
+    fun getChannels(tab: TabFilter, query: String = "", categoryFilter: String = "Todos", includeHidden: Boolean = false): List<Channel> {
+        val hiddenIds = if (includeHidden) emptySet() else getHiddenChannelIds()
+        val baseList = when (tab) {
+            TabFilter.PORTUGAL -> cachedChannels.filter { it.isPortuguese && !hiddenIds.contains(it.id) }
+            TabFilter.LIVE_GAMES -> getTopFootballChannels(query)
+            TabFilter.FAVORITES -> cachedChannels.filter { it.isFavorite && !hiddenIds.contains(it.id) }
+            TabFilter.ALL -> cachedChannels.filter { !hiddenIds.contains(it.id) }
+        }
+
+        return baseList.filter { ch ->
+            val matchesCategory = if (categoryFilter == "Todos") true else ch.category.equals(categoryFilter, ignoreCase = true)
+            val matchesQuery = if (query.isBlank()) true else {
+                ch.name.contains(query, ignoreCase = true) ||
+                        ch.id.contains(query) ||
+                        ch.category.contains(query, ignoreCase = true)
+            }
+            matchesCategory && matchesQuery
+        }
+    }
+
+    fun getLiveEvents(query: String = ""): List<LiveEvent> {
+        if (query.isBlank()) return liveEvents
+        return liveEvents.filter {
+            it.name.contains(query, ignoreCase = true) ||
+                    it.genreName.contains(query, ignoreCase = true)
+        }
+    }
+
+    fun getAvailableCategories(tab: TabFilter): List<String> {
+        val hiddenIds = getHiddenChannelIds()
+        val list = when (tab) {
+            TabFilter.PORTUGAL -> cachedChannels.filter { it.isPortuguese && !hiddenIds.contains(it.id) }
+            TabFilter.LIVE_GAMES -> return listOf("Todos", "Futebol", "Motores", "Outros")
+            TabFilter.FAVORITES -> cachedChannels.filter { it.isFavorite && !hiddenIds.contains(it.id) }
+            TabFilter.ALL -> cachedChannels.filter { !hiddenIds.contains(it.id) }
+        }
+        val categories = list.map { it.category }.distinct().sorted()
+        return listOf("Todos") + categories
+    }
+}

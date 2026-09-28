@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/channelRowRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="12dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:focusable="true"
+    android:clickable="true"
+    android:background="@drawable/selector_channel_row">
+
+    <!-- Active Indicator / Playing Dot -->
+    <View
+        android:id="@+id/viewPlayingDot"
+        android:layout_width="4dp"
+        android:layout_height="28dp"
+        android:background="#E50914"
+        android:visibility="gone"
+        android:layout_marginEnd="8dp" />
+
+    <!-- Channel Logo or ID Badge -->
+    <FrameLayout
+        android:layout_width="40dp"
+        android:layout_height="28dp">
+
+        <ImageView
+            android:id="@+id/ivDrawerChannelLogo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:visibility="gone"
+            android:contentDescription="Logo" />
+
+        <TextView
+            android:id="@+id/tvDrawerChannelId"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="49"
+            android:textColor="#E50914"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:background="#26E50914" />
+    </FrameLayout>
+
+    <!-- Name & Info -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginStart="10dp">
+
+        <TextView
+            android:id="@+id/tvDrawerChannelName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sport TV 1 Portugal"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tvDrawerChannelCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PT 🇵🇹 • Desporto"
+            android:textColor="#9CA3AF"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- Favorite Toggle Button -->
+    <ImageButton
+        android:id="@+id/btnDrawerFavorite"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@android:drawable/star_off"
+        android:tint="#F59E0B"
+        android:contentDescription="Favorito" />
+
+</LinearLayout>

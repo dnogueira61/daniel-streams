@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:keepScreenOn="true"
+    android:background="#000000">
+
+    <!-- Main Player Screen -->
+    <RelativeLayout
+        android:id="@+id/playerRoot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000">
+
+        <!-- Top control bar (Portrait mode) -->
+        <LinearLayout
+            android:id="@+id/playerHeader"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:background="#DD0A0A0E"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:elevation="8dp">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_revert"
+                android:tint="#FFFFFF"
+                android:contentDescription="Voltar" />
+
+            <!-- IPTV Channels Drawer Button -->
+            <ImageButton
+                android:id="@+id/btnOpenChannels"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="2dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_tv_list"
+                android:tint="#E50914"
+                android:contentDescription="Lista de Canais" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp">
+
+                <TextView
+                    android:id="@+id/tvChannelTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Canal"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/tvChannelSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Daniel Streams"
+                    android:textColor="#9CA3AF"
+                    android:textSize="10sp"
+                    android:maxLines="1" />
+            </LinearLayout>
+
+            <!-- Quick Server Selector Button -->
+            <LinearLayout
+                android:id="@+id/btnServerSelect"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:background="@drawable/bg_server_badge"
+                android:gravity="center"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="4dp">
+
+                <TextView
+                    android:id="@+id/tvServerBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="S1 ▾"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/btnRefresh"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_popup_sync"
+                android:tint="#FFFFFF"
+                android:contentDescription="Recarregar" />
+
+            <ImageButton
+                android:id="@+id/btnPip"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_pip"
+                android:tint="#FFFFFF"
+                android:contentDescription="PiP" />
+
+            <ImageButton
+                android:id="@+id/btnFullscreen"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_fullscreen"
+                android:tint="#E50914"
+                android:contentDescription="Ecrã Completo" />
+        </LinearLayout>
+
+        <!-- WebView Container -->
+        <WebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/playerHeader"
+            android:background="#000000" />
+
+        <!-- Landscape Floating Controls Overlay (tap screen to toggle) -->
+        <LinearLayout
+            android:id="@+id/landscapeOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_alignParentTop="true"
+            android:background="#CC0A0A0E"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:visibility="gone"
+            android:elevation="12dp">
+
+            <ImageButton
+                android:id="@+id/btnLandscapeBack"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_revert"
+                android:tint="#FFFFFF"
+                android:contentDescription="Voltar" />
+
+            <!-- Channels Drawer Button in Landscape -->
+            <ImageButton
+                android:id="@+id/btnLandscapeChannels"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:layout_marginStart="4dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_tv_list"
+                android:tint="#E50914"
+                android:contentDescription="Canais" />
+
+            <TextView
+                android:id="@+id/tvLandscapeTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:text="Canal"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- Landscape Server Selector Button -->
+            <LinearLayout
+                android:id="@+id/btnLandscapeServer"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:background="@drawable/bg_server_badge"
+                android:gravity="center"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="6dp">
+
+                <TextView
+                    android:id="@+id/tvLandscapeServerBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="S1 ▾"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/btnLandscapePip"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_pip"
+                android:tint="#FFFFFF"
+                android:contentDescription="PiP" />
+
+            <ImageButton
+                android:id="@+id/btnLandscapeExitFullscreen"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_fullscreen_exit"
+                android:tint="#FFFFFF"
+                android:contentDescription="Sair de Fullscreen" />
+        </LinearLayout>
+
+        <!-- Temporary OSD Banner (appears for 3s when changing channels) -->
+        <LinearLayout
+            android:id="@+id/osdBanner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="36dp"
+            android:background="#D911131A"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="18dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:visibility="gone"
+            android:elevation="14dp">
+
+            <TextView
+                android:id="@+id/tvOsdId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="49"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:background="#E50914"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp" />
+
+            <TextView
+                android:id="@+id/tvOsdName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="Sport TV 1 Portugal"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvOsdTag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="PT 🇵🇹"
+                android:textColor="#10B981"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Container for HTML5 video customView -->
+        <FrameLayout
+            android:id="@+id/customViewContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#000000"
+            android:visibility="gone"
+            android:elevation="15dp" />
+
+        <!-- Loading Spinner -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="visible"
+            android:indeterminateTint="#E50914" />
+
+        <!-- Fullscreen Landscape Gesture HUD (Volume / Brightness) -->
+        <LinearLayout
+            android:id="@+id/gestureHud"
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/bg_gesture_hud"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:visibility="gone"
+            android:elevation="20dp">
+
+            <ImageView
+                android:id="@+id/ivGestureIcon"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:src="@drawable/ic_gesture_volume"
+                android:tint="#FFFFFF"
+                android:contentDescription="Indicador" />
+
+            <TextView
+                android:id="@+id/tvGestureText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:text="Volume: 80%" />
+
+            <ProgressBar
+                android:id="@+id/pbGestureProgress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginTop="10dp"
+                android:max="100"
+                android:progress="80"
+                android:progressTint="#E50914"
+                android:progressBackgroundTint="#33FFFFFF" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <!-- Translucent IPTV Lateral Channel Drawer -->
+    <LinearLayout
+        android:id="@+id/channelDrawer"
+        android:layout_width="320dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="#F20D0F16"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="16dp">
+
+        <!-- Drawer Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="12dp"
+            android:background="#20FFFFFF">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="📺 Guia de Canais"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/btnDrawerSettings"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_settings"
+                android:tint="#9CA3AF"
+                android:contentDescription="Definições" />
+
+            <ImageButton
+                android:id="@+id/btnCloseDrawer"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="4dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:tint="#9CA3AF"
+                android:contentDescription="Fechar" />
+        </LinearLayout>
+
+        <!-- Quick Tabs (PT, Favoritos, Todos) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:background="#10FFFFFF">
+
+            <Button
+                android:id="@+id/btnTabPt"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="🇵🇹 PT"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#E50914"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:padding="0dp" />
+
+            <Button
+                android:id="@+id/btnTabFav"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="⭐ Fav"
+                android:textSize="12sp"
+                android:textColor="#9CA3AF"
+                android:backgroundTint="#202330"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:padding="0dp" />
+
+            <Button
+                android:id="@+id/btnTabAll"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="🌐 Todos"
+                android:textSize="12sp"
+                android:textColor="#9CA3AF"
+                android:backgroundTint="#202330"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:padding="0dp" />
+        </LinearLayout>
+
+        <!-- Mini Search Bar -->
+        <EditText
+            android:id="@+id/etDrawerSearch"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_margin="8dp"
+            android:background="#202432"
+            android:hint="Pesquisar canal..."
+            android:textColorHint="#9CA3AF"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:singleLine="true" />
+
+        <!-- Channels List -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvDrawerChannels"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scrollbars="vertical" />
+
+        <!-- Empty text indicator -->
+        <TextView
+            android:id="@+id/tvDrawerEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="24dp"
+            android:text="Nenhum canal encontrado"
+            android:textColor="#9CA3AF"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+</androidx.drawerlayout.widget.DrawerLayout>
