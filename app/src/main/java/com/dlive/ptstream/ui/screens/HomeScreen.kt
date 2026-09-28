@@ -703,16 +703,6 @@ fun HomeScreen(
                                     Spacer(modifier = Modifier.height(4.dp))
                                 }
                             }
-                            item {
-                                channels.firstOrNull()?.let { featChannel ->
-                                    FeaturedLiveCard(
-                                        channel = featChannel,
-                                        epgProgram = repository.epgRepository.getCurrentProgram(featChannel.name),
-                                        onClick = { onChannelClick(featChannel, null) }
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                }
-                            }
                         }
                         items(channels, key = { it.id }) { channel ->
                             ChannelCard(
