@@ -719,6 +719,9 @@ fun HomeScreen(
                                 channel = channel,
                                 epgProgram = repository.epgRepository.getCurrentProgram(channel.name),
                                 onPlayClick = {
+                                    onChannelClick(channel, null)
+                                },
+                                onShowDetails = {
                                     selectedChannelForSheet = channel
                                 },
                                 onToggleFavorite = {
@@ -1319,7 +1322,8 @@ fun ChannelCard(
     epgProgram: EpgProgram? = null,
     onPlayClick: () -> Unit,
     onToggleFavorite: () -> Unit,
-    onHideChannel: () -> Unit
+    onHideChannel: () -> Unit,
+    onShowDetails: (() -> Unit)? = null
 ) {
     var showMenu by remember { mutableStateOf(false) }
     var isFocused by remember { mutableStateOf(false) }
@@ -1484,6 +1488,18 @@ fun ChannelCard(
                         onDismissRequest = { showMenu = false },
                         modifier = Modifier.background(SurfaceDark)
                     ) {
+                        if (onShowDetails != null) {
+                            DropdownMenuItem(
+                                text = { Text("Guia TV / Detalhes (EPG)", color = TextPrimary, fontSize = 13.sp) },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF38BDF8))
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    onShowDetails()
+                                }
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text("Ocultar canal", color = TextPrimary, fontSize = 13.sp) },
                             leadingIcon = {
