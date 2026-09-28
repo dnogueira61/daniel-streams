@@ -101,11 +101,13 @@ fun HomeScreen(
         }
     }
 
-    val footballChannels = remember(searchQuery, refreshKey) {
+    val channelsVersion by repository.channelsVersion
+
+    val footballChannels = remember(searchQuery, refreshKey, channelsVersion) {
         repository.getTopFootballChannels(searchQuery)
     }
 
-    val channels = remember(selectedTab, searchQuery, selectedCategory, refreshKey) {
+    val channels = remember(selectedTab, searchQuery, selectedCategory, refreshKey, channelsVersion) {
         if (selectedTab == TabFilter.LIVE_GAMES) emptyList()
         else {
             if (selectedCategory == "⭐ Favoritos") {
@@ -116,7 +118,7 @@ fun HomeScreen(
         }
     }
 
-    val categories = remember(selectedTab, refreshKey) {
+    val categories = remember(selectedTab, refreshKey, channelsVersion) {
         val list = repository.getAvailableCategories(selectedTab).filter { it != "Todos" }
         listOf("Todos", "⭐ Favoritos") + list
     }

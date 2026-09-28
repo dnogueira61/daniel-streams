@@ -38,10 +38,6 @@ class ChannelRepository(private val context: Context) {
     private var cachedChannels: List<Channel> = emptyList()
     private var liveEvents: List<LiveEvent> = emptyList()
 
-    init {
-        loadChannels()
-    }
-
     @Volatile
     private var precomputedPtChannels: List<Channel> = emptyList()
     @Volatile
@@ -52,6 +48,12 @@ class ChannelRepository(private val context: Context) {
     private var precomputedPtCategories: List<String> = listOf("Todos")
     @Volatile
     private var precomputedAllCategories: List<String> = listOf("Todos")
+
+    val channelsVersion = androidx.compose.runtime.mutableIntStateOf(0)
+
+    init {
+        loadChannels()
+    }
 
     fun rebuildPrecomputedLists() {
         val hiddenIds = getHiddenChannelIds()
@@ -75,6 +77,8 @@ class ChannelRepository(private val context: Context) {
 
         precomputedPtCategories = listOf("Todos") + ptCats
         precomputedAllCategories = listOf("Todos") + allCats
+
+        channelsVersion.intValue++
     }
 
     fun getHiddenChannelIds(): Set<String> {
