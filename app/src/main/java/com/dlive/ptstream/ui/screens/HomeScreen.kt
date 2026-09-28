@@ -1305,6 +1305,29 @@ fun SettingsDialog(
 
                     Spacer(modifier = Modifier.height(6.dp))
 
+                    var githubTokenText by remember { mutableStateOf(updateManager.getGitHubToken()) }
+                    TextField(
+                        value = githubTokenText,
+                        onValueChange = {
+                            githubTokenText = it
+                            updateManager.setGitHubToken(it)
+                        },
+                        label = { Text("Token GitHub (Opcional para repositórios privados)", fontSize = 11.sp) },
+                        placeholder = { Text("ghp_... (vazio se repo for público)", fontSize = 12.sp) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = BackgroundDark,
+                            unfocusedContainerColor = BackgroundDark,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            focusedIndicatorColor = RedPrimary
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,

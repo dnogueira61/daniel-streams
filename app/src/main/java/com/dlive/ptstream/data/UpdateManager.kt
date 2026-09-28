@@ -31,6 +31,7 @@ class UpdateManager(private val context: Context) {
     companion object {
         const val DEFAULT_REPO = "dnogueira61/daniel-streams"
         private const val PREF_REPO_KEY = "github_repo"
+        private const val PREF_TOKEN_KEY = "github_token"
         private const val PREF_CHECK_ON_START = "check_on_start"
     }
 
@@ -44,6 +45,14 @@ class UpdateManager(private val context: Context) {
             .removeSuffix(".git")
             .removeSuffix("/")
         prefs.edit().putString(PREF_REPO_KEY, clean).apply()
+    }
+
+    fun getGitHubToken(): String {
+        return prefs.getString(PREF_TOKEN_KEY, "") ?: ""
+    }
+
+    fun setGitHubToken(token: String) {
+        prefs.edit().putString(PREF_TOKEN_KEY, token.trim()).apply()
     }
 
     fun isCheckOnStartEnabled(): Boolean {
@@ -85,11 +94,15 @@ class UpdateManager(private val context: Context) {
             val repo = (repoOverride ?: getGitHubRepo()).trim()
             val apiUrl = "https://api.github.com/repos/$repo/releases/latest"
             
+            val token = getGitHubToken()
             val url = URL(apiUrl)
             val conn = (url.openConnection() as HttpURLConnection).apply {
                 requestMethod = "GET"
                 setRequestProperty("Accept", "application/vnd.github.v3+json")
                 setRequestProperty("User-Agent", "DanielStreams-App")
+                if (token.isNotBlank()) {
+                    setRequestProperty("Authorization", "Bearer $token")
+                }
                 connectTimeout = 10000
                 readTimeout = 10000
             }
@@ -165,12 +178,18 @@ class UpdateManager(private val context: Context) {
             var conn: HttpURLConnection
             var redirectCount = 0
 
+            val token = getGitHubToken()
             // Seguir redirecionamentos (301, 302, 307, 308)
             while (true) {
                 val url = URL(currentUrl)
                 conn = (url.openConnection() as HttpURLConnection).apply {
                     instanceFollowRedirects = true
                     setRequestProperty("User-Agent", "DanielStreams-App")
+                    if (token.isNotBlank()) {
+                        if (!currentUrl.contains("objects.githubusercontent.com") && !currentUrl.contains("amazonaws.com")) {
+                            setRequestProperty("Authorization", "Bearer $token")
+                        }
+                    }
                     connectTimeout = 15000
                     readTimeout = 30000
                 }
