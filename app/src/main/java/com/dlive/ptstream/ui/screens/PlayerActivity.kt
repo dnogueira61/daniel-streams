@@ -54,7 +54,11 @@ class PlayerActivity : ComponentActivity() {
             activeInstance?.get()?.let { activity ->
                 try {
                     if (!activity.isFinishing && !activity.isDestroyed) {
-                        activity.cleanupAndFinish()
+                        try {
+                            activity.webView.stopLoading()
+                            activity.webView.loadUrl("about:blank")
+                        } catch (_: Exception) {}
+                        activity.finish()
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -261,7 +265,7 @@ class PlayerActivity : ComponentActivity() {
         }
 
         findViewById<ImageButton>(R.id.btnPip).setOnClickListener {
-            enterPipMode(bringHomeToFront = true)
+            enterPipMode()
         }
 
         // Landscape / Fullscreen toggle with sensor support
@@ -279,7 +283,7 @@ class PlayerActivity : ComponentActivity() {
         }
 
         findViewById<ImageButton>(R.id.btnLandscapePip).setOnClickListener {
-            enterPipMode(bringHomeToFront = true)
+            enterPipMode()
         }
 
         findViewById<ImageButton>(R.id.btnLandscapeExitFullscreen).setOnClickListener {
@@ -1119,7 +1123,7 @@ class PlayerActivity : ComponentActivity() {
         }
     }
 
-    fun enterPipMode(bringHomeToFront: Boolean = false) {
+    fun enterPipMode() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
                 if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
@@ -1141,29 +1145,13 @@ class PlayerActivity : ComponentActivity() {
                     builder.setSourceRectHint(visibleRect)
                 }
 
-                val entered = enterPictureInPictureMode(builder.build())
-                if (entered && bringHomeToFront) {
-                    val homeIntent = Intent(this, MainActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    }
-                    startActivity(homeIntent)
-                } else if (!entered && bringHomeToFront) {
-                    cleanupAndFinish()
-                }
+                enterPictureInPictureMode(builder.build())
             } catch (e: Exception) {
                 e.printStackTrace()
-                if (bringHomeToFront) {
-                    cleanupAndFinish()
-                } else {
-                    Toast.makeText(this, "Não foi possível ativar PiP", Toast.LENGTH_SHORT).show()
-                }
+                Toast.makeText(this, "Não foi possível ativar PiP", Toast.LENGTH_SHORT).show()
             }
         } else {
-            if (bringHomeToFront) {
-                cleanupAndFinish()
-            } else {
-                Toast.makeText(this, "PiP requer Android 8.0+", Toast.LENGTH_SHORT).show()
-            }
+            Toast.makeText(this, "PiP requer Android 8.0+", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -1205,11 +1193,6 @@ class PlayerActivity : ComponentActivity() {
             return
         }
 
-        if (repository.isAutoPipOnBack() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            enterPipMode(bringHomeToFront = true)
-            return
-        }
-
         cleanupAndFinish()
     }
 
@@ -1231,16 +1214,7 @@ class PlayerActivity : ComponentActivity() {
         }
         dialogView.addView(title)
 
-        // 1. Auto PiP
-        val swPip = Switch(this).apply {
-            text = "📺 PiP Automático ao Voltar"
-            setTextColor(Color.WHITE)
-            isChecked = repository.isAutoPipOnBack()
-            setPadding(0, 10, 0, 14)
-        }
-        dialogView.addView(swPip)
-
-        // 2. Auto Unmute
+        // 1. Auto Unmute
         val swUnmute = Switch(this).apply {
             text = "🔊 Ativar Som Automaticamente"
             setTextColor(Color.WHITE)
@@ -1347,7 +1321,6 @@ class PlayerActivity : ComponentActivity() {
         AlertDialog.Builder(this)
             .setView(scroll)
             .setPositiveButton("Guardar") { _, _ ->
-                repository.setAutoPipOnBack(swPip.isChecked)
                 repository.setAutoUnmuteEnabled(swUnmute.isChecked)
                 repository.setAutoResumeEnabled(swAutoResume.isChecked)
                 val domain = etDomain.text.toString().trim()
@@ -1603,13 +1576,14 @@ class PlayerActivity : ComponentActivity() {
             webView.stopLoading()
             webView.loadUrl("about:blank")
         } catch (_: Exception) {}
-        finish()
         try {
             val homeIntent = Intent(this, MainActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                putExtra("EXTRA_DONT_AUTO_RESUME", true)
             }
             startActivity(homeIntent)
         } catch (_: Exception) {}
+        finish()
     }
 
     override fun onDestroy() {

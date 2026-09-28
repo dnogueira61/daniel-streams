@@ -26,7 +26,8 @@ class MainActivity : ComponentActivity() {
         channelRepository.syncChannelsFromWeb(lifecycleScope)
         channelRepository.epgRepository.syncEpgFromWeb(lifecycleScope)
 
-        if (!hasAutoResumedOnLaunch && savedInstanceState == null && channelRepository.isAutoResumeEnabled()) {
+        val dontResume = intent.getBooleanExtra("EXTRA_DONT_AUTO_RESUME", false)
+        if (!dontResume && !hasAutoResumedOnLaunch && savedInstanceState == null && channelRepository.isAutoResumeEnabled()) {
             hasAutoResumedOnLaunch = true
             val lastId = channelRepository.getLastWatchedChannelId()
             if (lastId != null) {
@@ -68,5 +69,10 @@ class MainActivity : ComponentActivity() {
             }
         }
         startActivity(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
     }
 }

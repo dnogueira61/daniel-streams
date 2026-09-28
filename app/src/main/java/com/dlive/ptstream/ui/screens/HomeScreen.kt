@@ -1369,7 +1369,6 @@ fun SettingsDialog(
     onUpdateFound: (ReleaseInfo) -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    var autoPip by remember { mutableStateOf(repository.isAutoPipOnBack()) }
     var autoUnmute by remember { mutableStateOf(repository.isAutoUnmuteEnabled()) }
     var autoResume by remember { mutableStateOf(repository.isAutoResumeEnabled()) }
     var baseUrl by remember { mutableStateOf(repository.getBaseUrl()) }
@@ -1431,25 +1430,6 @@ fun SettingsDialog(
             ) {
                 // SEÇÃO 1: REPRODUÇÃO & PLAYER
                 Text("📺 REPRODUÇÃO & PLAYER", color = Color(0xFF38BDF8), fontSize = 12.sp, fontWeight = FontWeight.Bold)
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                        Text("PiP Automático ao Voltar", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                        Text("Entra em Picture-in-Picture flutuante ao retroceder.", color = TextSecondary, fontSize = 11.sp)
-                    }
-                    Switch(
-                        checked = autoPip,
-                        onCheckedChange = {
-                            autoPip = it
-                            repository.setAutoPipOnBack(it)
-                        },
-                        colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF38BDF8))
-                    )
-                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
