@@ -148,20 +148,13 @@ fun HomeScreen(
                 ) {
                     if (!isSearchActive) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
+                            Image(
+                                painter = painterResource(id = com.dlive.ptstream.R.drawable.ic_app_logo),
+                                contentDescription = "Logo",
                                 modifier = Modifier
-                                    .size(34.dp)
+                                    .size(36.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF38BDF8)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Menu,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
+                            )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = when (selectedTab) {

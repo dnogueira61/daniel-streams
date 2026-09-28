@@ -16,9 +16,9 @@
     <application
         android:allowBackup="true"
         android:banner="@drawable/banner_tv"
-        android:icon="@android:drawable/ic_menu_slideshow"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@android:drawable/ic_menu_slideshow"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:hardwareAccelerated="true"
         android:usesCleartextTraffic="true"
