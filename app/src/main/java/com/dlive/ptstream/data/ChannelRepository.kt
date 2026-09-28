@@ -73,10 +73,13 @@ class ChannelRepository(private val context: Context) {
         precomputedAllChannels = all
         precomputedFavChannels = fav
 
-        val ptCats = pt.map { it.category }.distinct().sorted()
+        val preferredPtCats = listOf("Generalistas", "Desporto", "Filmes & Séries", "Entretenimento", "Infantis", "Música")
+        val availablePtCats = pt.map { it.category }.distinct()
+        val orderedPtCats = preferredPtCats.filter { availablePtCats.contains(it) } + availablePtCats.filter { !preferredPtCats.contains(it) }.sorted()
+
         val allCats = all.map { it.category }.distinct().sorted()
 
-        precomputedPtCategories = listOf("Todos") + ptCats
+        precomputedPtCategories = listOf("Todos") + orderedPtCats
         precomputedAllCategories = listOf("Todos") + allCats
 
         channelsVersion.intValue++
@@ -135,6 +138,8 @@ class ChannelRepository(private val context: Context) {
         prefs.edit().putString(PREF_TIMST_BASE_URL, clean).apply()
     }
 
+    val epgRepository = EpgRepository(context)
+
     private fun loadChannels() {
         val favIds = getFavoriteIds()
 
@@ -158,7 +163,7 @@ class ChannelRepository(private val context: Context) {
                                 logoUrl = logo,
                                 status = ch.safeStatus
                             )
-                        }.sortedWith(compareBy({ !it.isPortuguese }, { it.name }))
+                        }
                         rebuildPrecomputedLists()
                         if (precomputedPtChannels.isNotEmpty()) {
                             return
@@ -188,7 +193,7 @@ class ChannelRepository(private val context: Context) {
                         logoUrl = logo,
                         status = ch.safeStatus
                     )
-                }.sortedWith(compareBy({ !it.isPortuguese }, { it.name }))
+                }
                 rebuildPrecomputedLists()
             }
         } catch (e: Exception) {

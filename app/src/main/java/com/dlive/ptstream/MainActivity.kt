@@ -20,6 +20,7 @@ class MainActivity : ComponentActivity() {
 
         channelRepository = ChannelRepository(this)
         channelRepository.syncChannelsFromWeb(lifecycleScope)
+        channelRepository.epgRepository.syncEpgFromWeb(lifecycleScope)
 
         setContent {
             DLivePTStreamTheme {

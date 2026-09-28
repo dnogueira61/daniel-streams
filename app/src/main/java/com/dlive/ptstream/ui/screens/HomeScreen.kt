@@ -118,19 +118,23 @@ fun HomeScreen(
         }
     }
 
+    val epgVersion by repository.epgRepository.epgVersion
+
     val categories = remember(selectedTab, refreshKey, channelsVersion) {
         val list = repository.getAvailableCategories(selectedTab).filter { it != "Todos" }
         listOf("Todos", "⭐ Favoritos") + list
     }
+
+    var categoryDropdownOpen by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(BackgroundDark)
+                    .background(Color(0xFF0F121E))
             ) {
-                // Top App Bar
+                // Top App Bar (NOS TV style)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -142,26 +146,25 @@ fun HomeScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(RedPrimary),
+                                    .size(34.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF38BDF8)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.PlayArrow,
+                                    imageVector = Icons.Default.Menu,
                                     contentDescription = null,
-                                    tint = Color.White
+                                    tint = Color.White,
+                                    modifier = Modifier.size(18.dp)
                                 )
                             }
                             Spacer(modifier = Modifier.width(12.dp))
-                            Column {
-                                Text(
-                                    text = "Daniel Streams",
-                                    color = TextPrimary,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                            Text(
+                                text = if (selectedTab == TabFilter.LIVE_GAMES) "Jogos em Direto" else "Canais",
+                                color = TextPrimary,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -172,12 +175,12 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .onFocusChanged { searchFocused = it.isFocused }
                                     .focusable()
-                                    .background(if (searchFocused) Color(0x33E50914) else Color.Transparent, CircleShape)
+                                    .background(if (searchFocused) Color(0x3338BDF8) else Color.Transparent, CircleShape)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Search,
                                     contentDescription = "Pesquisar",
-                                    tint = if (searchFocused) RedPrimary else TextPrimary
+                                    tint = if (searchFocused) Color(0xFF38BDF8) else TextPrimary
                                 )
                             }
                             IconButton(
@@ -185,12 +188,12 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .onFocusChanged { settingsFocused = it.isFocused }
                                     .focusable()
-                                    .background(if (settingsFocused) Color(0x33E50914) else Color.Transparent, CircleShape)
+                                    .background(if (settingsFocused) Color(0x3338BDF8) else Color.Transparent, CircleShape)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Settings,
                                     contentDescription = "Definições",
-                                    tint = if (settingsFocused) RedPrimary else TextPrimary
+                                    tint = if (settingsFocused) Color(0xFF38BDF8) else TextPrimary
                                 )
                             }
                         }
@@ -199,7 +202,7 @@ fun HomeScreen(
                         TextField(
                             value = searchQuery,
                             onValueChange = { searchQuery = it },
-                            placeholder = { Text("Pesquisar canais ou jogos...", color = TextSecondary) },
+                            placeholder = { Text("Pesquisar canais...", color = TextSecondary) },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             leadingIcon = {
@@ -218,7 +221,7 @@ fun HomeScreen(
                                 unfocusedContainerColor = SurfaceDark,
                                 focusedTextColor = TextPrimary,
                                 unfocusedTextColor = TextPrimary,
-                                focusedIndicatorColor = RedPrimary,
+                                focusedIndicatorColor = Color(0xFF38BDF8),
                                 unfocusedIndicatorColor = Color.Transparent
                             ),
                             shape = RoundedCornerShape(12.dp)
@@ -226,136 +229,189 @@ fun HomeScreen(
                     }
                 }
 
-                // Tab Selector (3 Tabs: Portugal, Jogos em Direto, Todos)
-                TabRow(
-                    selectedTabIndex = when (selectedTab) {
-                        TabFilter.PORTUGAL -> 0
-                        TabFilter.LIVE_GAMES -> 1
-                        TabFilter.ALL -> 2
-                        else -> 0
-                    },
-                    containerColor = BackgroundDark,
-                    contentColor = RedPrimary,
-                    indicator = { tabPositions ->
-                        val idx = when (selectedTab) {
-                            TabFilter.PORTUGAL -> 0
-                            TabFilter.LIVE_GAMES -> 1
-                            TabFilter.ALL -> 2
-                            else -> 0
-                        }
-                        TabRowDefaults.SecondaryIndicator(
-                            modifier = Modifier.tabIndicatorOffset(tabPositions[idx]),
-                            height = 3.dp,
-                            color = RedPrimary
-                        )
-                    }
-                ) {
-                    var tab0Focused by remember { mutableStateOf(false) }
-                    Tab(
-                        selected = selectedTab == TabFilter.PORTUGAL,
-                        onClick = {
-                            selectedTab = TabFilter.PORTUGAL
-                            selectedCategory = "Todos"
-                        },
+                // Filter pills row (Filtrar por nome & Categoria Todos)
+                if (selectedTab != TabFilter.LIVE_GAMES && !isSearchActive) {
+                    Row(
                         modifier = Modifier
-                            .onFocusChanged { tab0Focused = it.isFocused }
-                            .focusable()
-                            .background(if (tab0Focused) Color(0x33E50914) else Color.Transparent),
-                        text = {
-                            Text(
-                                "🇵🇹 Portugal",
-                                fontWeight = if (selectedTab == TabFilter.PORTUGAL) FontWeight.Bold else FontWeight.Normal,
-                                color = if (selectedTab == TabFilter.PORTUGAL || tab0Focused) TextPrimary else TextSecondary,
-                                fontSize = 13.sp
-                            )
-                        }
-                    )
-                    var tab1Focused by remember { mutableStateOf(false) }
-                    Tab(
-                        selected = selectedTab == TabFilter.LIVE_GAMES,
-                        onClick = {
-                            selectedTab = TabFilter.LIVE_GAMES
-                            selectedCategory = "Todos"
-                        },
-                        modifier = Modifier
-                            .onFocusChanged { tab1Focused = it.isFocused }
-                            .focusable()
-                            .background(if (tab1Focused) Color(0x33E50914) else Color.Transparent),
-                        text = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    "⚽ Jogos em Direto",
-                                    fontWeight = if (selectedTab == TabFilter.LIVE_GAMES) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (selectedTab == TabFilter.LIVE_GAMES || tab1Focused) TextPrimary else TextSecondary,
-                                    fontSize = 13.sp
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Pill 1: Filtrar por nome
+                        Surface(
+                            onClick = { isSearchActive = true },
+                            shape = RoundedCornerShape(20.dp),
+                            color = if (searchQuery.isNotBlank()) Color(0x3338BDF8) else Color(0xFF1E2230),
+                            border = BorderStroke(1.dp, if (searchQuery.isNotBlank()) Color(0xFF38BDF8) else Color(0xFF374151)),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.Menu,
+                                    contentDescription = null,
+                                    tint = Color(0xFF9CA3AF),
+                                    modifier = Modifier.size(16.dp)
                                 )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Box(
-                                    modifier = Modifier
-                                        .size(7.dp)
-                                        .clip(CircleShape)
-                                        .background(AccentGreen)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = if (searchQuery.isNotBlank()) searchQuery else "Filtrar por nome",
+                                    color = if (searchQuery.isNotBlank()) Color.White else Color(0xFF9CA3AF),
+                                    fontSize = 13.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
-                    )
-                    var tab2Focused by remember { mutableStateOf(false) }
-                    Tab(
-                        selected = selectedTab == TabFilter.ALL,
-                        onClick = {
-                            selectedTab = TabFilter.ALL
-                            selectedCategory = "Todos"
-                        },
-                        modifier = Modifier
-                            .onFocusChanged { tab2Focused = it.isFocused }
-                            .focusable()
-                            .background(if (tab2Focused) Color(0x33E50914) else Color.Transparent),
-                        text = {
-                            Text(
-                                "🌐 Todos",
-                                fontWeight = if (selectedTab == TabFilter.ALL) FontWeight.Bold else FontWeight.Normal,
-                                color = if (selectedTab == TabFilter.ALL || tab2Focused) TextPrimary else TextSecondary,
-                                fontSize = 13.sp
-                            )
-                        }
-                    )
-                }
 
-                // Category Chips
-                if (selectedTab != TabFilter.LIVE_GAMES && categories.size > 1) {
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(categories) { cat ->
-                            val isSelected = selectedCategory == cat
-                            var chipFocused by remember { mutableStateOf(false) }
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { selectedCategory = cat },
-                                modifier = Modifier
-                                    .onFocusChanged { chipFocused = it.isFocused }
-                                    .focusable(),
-                                label = { Text(cat, fontSize = 12.sp) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = RedPrimary,
-                                    selectedLabelColor = Color.White,
-                                    containerColor = if (chipFocused) SurfaceVariantDark else SurfaceDark,
-                                    labelColor = TextSecondary
-                                ),
-                                border = FilterChipDefaults.filterChipBorder(
-                                    enabled = true,
-                                    selected = isSelected,
-                                    borderColor = if (chipFocused) RedPrimary else if (isSelected) RedPrimary else BorderDark,
-                                    selectedBorderColor = RedPrimary,
-                                    borderWidth = if (chipFocused) 2.dp else 1.dp
-                                )
-                            )
+                        // Pill 2: Categorias (Todos ▾)
+                        Box {
+                            Surface(
+                                onClick = { categoryDropdownOpen = true },
+                                shape = RoundedCornerShape(20.dp),
+                                color = if (selectedCategory != "Todos") Color(0x3338BDF8) else Color.White,
+                                border = BorderStroke(1.dp, if (selectedCategory != "Todos") Color(0xFF38BDF8) else Color.White)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Default.FilterList,
+                                        contentDescription = null,
+                                        tint = if (selectedCategory != "Todos") Color.White else Color.Black,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = selectedCategory,
+                                        color = if (selectedCategory != "Todos") Color.White else Color.Black,
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Icon(
+                                        Icons.Default.ArrowDropDown,
+                                        contentDescription = null,
+                                        tint = if (selectedCategory != "Todos") Color.White else Color.Black,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+
+                            DropdownMenu(
+                                expanded = categoryDropdownOpen,
+                                onDismissRequest = { categoryDropdownOpen = false },
+                                modifier = Modifier.background(SurfaceDark)
+                            ) {
+                                categories.forEach { cat ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = cat,
+                                                color = if (selectedCategory == cat) Color(0xFF38BDF8) else TextPrimary,
+                                                fontWeight = if (selectedCategory == cat) FontWeight.Bold else FontWeight.Normal
+                                            )
+                                        },
+                                        onClick = {
+                                            selectedCategory = cat
+                                            categoryDropdownOpen = false
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
+            }
+        },
+        bottomBar = {
+            NavigationBar(
+                containerColor = Color(0xFF10131E),
+                contentColor = Color.White,
+                tonalElevation = 8.dp
+            ) {
+                NavigationBarItem(
+                    selected = selectedTab == TabFilter.PORTUGAL && selectedCategory != "⭐ Favoritos",
+                    onClick = {
+                        selectedTab = TabFilter.PORTUGAL
+                        selectedCategory = "Todos"
+                    },
+                    icon = { Icon(Icons.Default.Menu, contentDescription = "Canais") },
+                    label = {
+                        Text(
+                            "Canais",
+                            fontSize = 12.sp,
+                            fontWeight = if (selectedTab == TabFilter.PORTUGAL && selectedCategory != "⭐ Favoritos") FontWeight.Bold else FontWeight.Normal
+                        )
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color(0xFF38BDF8),
+                        selectedTextColor = Color(0xFF38BDF8),
+                        indicatorColor = Color(0x2238BDF8),
+                        unselectedIconColor = TextSecondary,
+                        unselectedTextColor = TextSecondary
+                    )
+                )
+                NavigationBarItem(
+                    selected = selectedTab == TabFilter.LIVE_GAMES,
+                    onClick = {
+                        selectedTab = TabFilter.LIVE_GAMES
+                    },
+                    icon = { Icon(Icons.Default.SportsSoccer, contentDescription = "Jogos") },
+                    label = {
+                        Text(
+                            "Jogos",
+                            fontSize = 12.sp,
+                            fontWeight = if (selectedTab == TabFilter.LIVE_GAMES) FontWeight.Bold else FontWeight.Normal
+                        )
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color(0xFF38BDF8),
+                        selectedTextColor = Color(0xFF38BDF8),
+                        indicatorColor = Color(0x2238BDF8),
+                        unselectedIconColor = TextSecondary,
+                        unselectedTextColor = TextSecondary
+                    )
+                )
+                NavigationBarItem(
+                    selected = selectedCategory == "⭐ Favoritos",
+                    onClick = {
+                        selectedTab = TabFilter.PORTUGAL
+                        selectedCategory = "⭐ Favoritos"
+                    },
+                    icon = { Icon(Icons.Filled.Star, contentDescription = "Favoritos") },
+                    label = {
+                        Text(
+                            "Favoritos",
+                            fontSize = 12.sp,
+                            fontWeight = if (selectedCategory == "⭐ Favoritos") FontWeight.Bold else FontWeight.Normal
+                        )
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color(0xFF38BDF8),
+                        selectedTextColor = Color(0xFF38BDF8),
+                        indicatorColor = Color(0x2238BDF8),
+                        unselectedIconColor = TextSecondary,
+                        unselectedTextColor = TextSecondary
+                    )
+                )
+                NavigationBarItem(
+                    selected = showSettingsDialog,
+                    onClick = { showSettingsDialog = true },
+                    icon = { Icon(Icons.Default.Settings, contentDescription = "Definições") },
+                    label = { Text("Definições", fontSize = 12.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color(0xFF38BDF8),
+                        selectedTextColor = Color(0xFF38BDF8),
+                        indicatorColor = Color(0x2238BDF8),
+                        unselectedIconColor = TextSecondary,
+                        unselectedTextColor = TextSecondary
+                    )
+                )
             }
         },
         containerColor = BackgroundDark
@@ -509,6 +565,7 @@ fun HomeScreen(
                                 items(footballChannels, key = { "fb_${it.id}" }) { channel ->
                                     ChannelCard(
                                         channel = channel,
+                                        epgProgram = repository.epgRepository.getCurrentProgram(channel.name),
                                         onPlayClick = { onChannelClick(channel) },
                                         onToggleFavorite = {
                                             repository.toggleFavorite(channel.id)
@@ -536,9 +593,21 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        if (searchQuery.isBlank() && selectedCategory == "Todos" && selectedTab == TabFilter.PORTUGAL) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                channels.firstOrNull()?.let { featChannel ->
+                                    FeaturedLiveCard(
+                                        channel = featChannel,
+                                        epgProgram = repository.epgRepository.getCurrentProgram(featChannel.name),
+                                        onClick = { onChannelClick(featChannel) }
+                                    )
+                                }
+                            }
+                        }
                         items(channels, key = { it.id }) { channel ->
                             ChannelCard(
                                 channel = channel,
+                                epgProgram = repository.epgRepository.getCurrentProgram(channel.name),
                                 onPlayClick = { onChannelClick(channel) },
                                 onToggleFavorite = {
                                     repository.toggleFavorite(channel.id)
@@ -557,9 +626,22 @@ fun HomeScreen(
                         contentPadding = PaddingValues(12.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
+                        if (searchQuery.isBlank() && selectedCategory == "Todos" && selectedTab == TabFilter.PORTUGAL) {
+                            item {
+                                channels.firstOrNull()?.let { featChannel ->
+                                    FeaturedLiveCard(
+                                        channel = featChannel,
+                                        epgProgram = repository.epgRepository.getCurrentProgram(featChannel.name),
+                                        onClick = { onChannelClick(featChannel) }
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                }
+                            }
+                        }
                         items(channels, key = { it.id }) { channel ->
                             ChannelCard(
                                 channel = channel,
+                                epgProgram = repository.epgRepository.getCurrentProgram(channel.name),
                                 onPlayClick = { onChannelClick(channel) },
                                 onToggleFavorite = {
                                     repository.toggleFavorite(channel.id)
@@ -720,15 +802,157 @@ fun LiveEventCard(
 }
 
 @Composable
+fun FeaturedLiveCard(
+    channel: Channel,
+    epgProgram: EpgProgram?,
+    onClick: () -> Unit
+) {
+    var isFocused by remember { mutableStateOf(false) }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 14.dp, vertical = 6.dp)
+            .onFocusChanged { isFocused = it.isFocused }
+            .focusable()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isFocused) Color(0xFF232838) else Color(0xFF161A26)
+        ),
+        border = if (isFocused) BorderStroke(2.dp, Color(0xFF38BDF8)) else BorderStroke(1.dp, Color(0xFF262C3D))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val localLogo = ChannelLogoHelper.getLocalLogoRes(channel.name)
+            val onlineLogo = channel.logoUrl ?: ChannelLogoHelper.getLogoUrl(channel.name)
+
+            Box(
+                modifier = Modifier
+                    .size(width = 74.dp, height = 54.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFF0F121C)),
+                contentAlignment = Alignment.Center
+            ) {
+                if (onlineLogo != null) {
+                    AsyncImage(
+                        model = onlineLogo,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize().padding(4.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                } else if (localLogo != null) {
+                    Image(
+                        painter = painterResource(id = localLogo),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize().padding(4.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                } else {
+                    Text(
+                        text = channel.name.take(3).uppercase(),
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0xFFDC2626))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "DIRETO",
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = channel.name,
+                        color = Color(0xFF9CA3AF),
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                val programTitle = epgProgram?.title ?: channel.name
+                Text(
+                    text = programTitle,
+                    color = Color.White,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                val progress = epgProgram?.getProgress() ?: 0.40f
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .height(3.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(Color(0xFF2D3243))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(progress)
+                            .fillMaxHeight()
+                            .background(Color(0xFF84CC16))
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                val timeStr = epgProgram?.timeRange ?: "Emissão em Direto"
+                Text(
+                    text = timeStr,
+                    color = Color(0xFF9CA3AF),
+                    fontSize = 11.sp
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Assistir",
+                tint = Color(0xFF38BDF8),
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(Color(0x2238BDF8))
+                    .padding(8.dp)
+            )
+        }
+    }
+}
+
+@Composable
 fun ChannelCard(
     channel: Channel,
+    epgProgram: EpgProgram? = null,
     onPlayClick: () -> Unit,
     onToggleFavorite: () -> Unit,
     onHideChannel: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
     var isFocused by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(if (isFocused) 1.025f else 1.0f, label = "channel_scale")
+    val scale by animateFloatAsState(if (isFocused) 1.02f else 1.0f, label = "channel_scale")
 
     Card(
         modifier = Modifier
@@ -737,20 +961,20 @@ fun ChannelCard(
             .onFocusChanged { isFocused = it.isFocused }
             .focusable()
             .clickable { onPlayClick() },
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isFocused) SurfaceVariantDark else SurfaceDark
+            containerColor = if (isFocused) Color(0xFF222634) else Color(0xFF151824)
         ),
         border = if (isFocused) {
-            BorderStroke(2.5.dp, RedPrimary)
+            BorderStroke(2.dp, Color(0xFF38BDF8))
         } else {
-            CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(BorderDark))
+            BorderStroke(1.dp, Color(0xFF222636))
         }
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -758,15 +982,15 @@ fun ChannelCard(
                 modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Channel Logo or ID Badge
+                // Channel Logo
                 val localLogo = ChannelLogoHelper.getLocalLogoRes(channel.name)
                 val onlineLogo = channel.logoUrl ?: ChannelLogoHelper.getLogoUrl(channel.name)
 
                 Box(
                     modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(if (channel.isPortuguese) RedPrimary.copy(alpha = 0.15f) else SurfaceVariantDark),
+                        .size(width = 56.dp, height = 40.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(Color(0xFF1E2230)),
                     contentAlignment = Alignment.Center
                 ) {
                     if (onlineLogo != null) {
@@ -784,117 +1008,89 @@ fun ChannelCard(
                             contentDescription = channel.name,
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(6.dp),
+                                .padding(4.dp),
                             contentScale = ContentScale.Fit
                         )
                     } else {
-                        val initials = if (channel.id.startsWith("ntv-") || channel.id.startsWith("timst-") || channel.id.length > 4) {
-                            val words = channel.name.replace("(", "").replace(")", "").split(" ").filter { it.isNotBlank() }
-                            if (words.size >= 2) {
-                                (words[0].take(1) + words[1].take(1)).uppercase()
-                            } else {
-                                channel.name.take(3).uppercase()
-                            }
-                        } else {
-                            channel.id
-                        }
+                        val initials = channel.name.replace("(", "").replace(")", "").split(" ")
+                            .filter { it.isNotBlank() }.take(2).map { it.first().uppercase() }.joinToString("")
                         Text(
-                            text = initials,
-                            color = if (channel.isPortuguese) RedPrimary else TextSecondary,
+                            text = initials.ifBlank { channel.id.take(3) },
+                            color = Color.White,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(14.dp))
 
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = channel.name,
-                            color = TextPrimary,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f, fill = false)
+                Column(modifier = Modifier.weight(1f)) {
+                    val programTitle = epgProgram?.title ?: channel.name
+                    Text(
+                        text = programTitle,
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Spacer(modifier = Modifier.height(5.dp))
+
+                    val progress = epgProgram?.getProgress() ?: 0.35f
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.85f)
+                            .height(3.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(Color(0xFF2D3243))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(progress)
+                                .fillMaxHeight()
+                                .background(Color(0xFF84CC16))
                         )
-                        // Online / Offline Status Dot
-                        if (channel.safeStatus == ChannelStatus.ONLINE) {
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(AccentGreen)
-                            )
-                        } else if (channel.safeStatus == ChannelStatus.OFFLINE) {
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(RedPrimary)
-                            )
-                        }
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (channel.isPortuguese) {
-                            TagBadge(text = "PT 🇵🇹", color = RedPrimary)
-                            Spacer(modifier = Modifier.width(6.dp))
-                        } else if (channel.country.isNotBlank() && channel.country != "Outro") {
-                            TagBadge(text = channel.country, color = AccentGreen)
-                            Spacer(modifier = Modifier.width(6.dp))
-                        }
 
-                        TagBadge(text = channel.category, color = TextSecondary)
-
-                        if (!channel.backupStreamUrl.isNullOrBlank()) {
-                            Spacer(modifier = Modifier.width(6.dp))
-                            val isNtv = channel.backupStreamUrl?.contains("epicsports") == true || channel.id.startsWith("ntv-")
-                            val badgeText = if (isNtv) "⚡ NTV" else "⚡ TimStreams"
-                            val badgeColor = if (isNtv) androidx.compose.ui.graphics.Color(0xFF10B981) else androidx.compose.ui.graphics.Color(0xFF3B82F6)
-                            TagBadge(text = badgeText, color = badgeColor)
-                        }
-                    }
+                    val timeRange = epgProgram?.timeRange ?: (if (channel.isPortuguese) "Em Direto • Portugal" else "Em Direto")
+                    Text(
+                        text = timeRange,
+                        color = Color(0xFF9CA3AF),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal
+                    )
                 }
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // Favorite Button
-                IconButton(onClick = onToggleFavorite) {
+                IconButton(
+                    onClick = onToggleFavorite,
+                    modifier = Modifier.size(36.dp)
+                ) {
                     Icon(
                         imageVector = if (channel.isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
                         contentDescription = "Favorito",
-                        tint = if (channel.isFavorite) AccentGold else TextSecondary
+                        tint = if (channel.isFavorite) AccentGold else Color(0xFF6B7280),
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
-                // Play Button
-                IconButton(
-                    onClick = onPlayClick,
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(RedPrimary)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Reproduzir",
-                        tint = Color.White
-                    )
-                }
-
-                // Options Menu (Hide channel)
+                // Options Menu
                 Box {
-                    IconButton(onClick = { showMenu = true }) {
+                    IconButton(
+                        onClick = { showMenu = true },
+                        modifier = Modifier.size(32.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             contentDescription = "Mais opções",
-                            tint = TextSecondary
+                            tint = Color(0xFF6B7280),
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                     DropdownMenu(
@@ -903,7 +1099,7 @@ fun ChannelCard(
                         modifier = Modifier.background(SurfaceDark)
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Ocultar da lista", color = TextPrimary, fontSize = 13.sp) },
+                            text = { Text("Ocultar canal", color = TextPrimary, fontSize = 13.sp) },
                             leadingIcon = {
                                 Icon(Icons.Default.VisibilityOff, contentDescription = null, tint = RedPrimary)
                             },
@@ -987,23 +1183,21 @@ fun SettingsDialog(
     val scope = rememberCoroutineScope()
     var autoPip by remember { mutableStateOf(repository.isAutoPipOnBack()) }
     var autoUnmute by remember { mutableStateOf(repository.isAutoUnmuteEnabled()) }
-    var selectedServer by remember { mutableStateOf(repository.getDefaultServer()) }
     var baseUrl by remember { mutableStateOf(repository.getBaseUrl()) }
     var timstBaseUrl by remember { mutableStateOf(repository.getTimstBaseUrl()) }
 
-    var isSyncing by remember { mutableStateOf(false) }
-    var syncMessage by remember { mutableStateOf<String?>(null) }
+    var isSyncingChannels by remember { mutableStateOf(false) }
+    var syncChannelsMsg by remember { mutableStateOf<String?>(null) }
 
-    var isTestingChannels by remember { mutableStateOf(false) }
-    var testStatusText by remember { mutableStateOf<String?>(null) }
+    var isSyncingEpg by remember { mutableStateOf(false) }
+    var syncEpgMsg by remember { mutableStateOf<String?>(null) }
 
-    val serverOptions = listOf(
-        "stream" to "Servidor 1 (Stream)",
-        "cast" to "Servidor 2 (Cast)",
-        "watch" to "Servidor 3 (Watch)",
-        "player" to "Servidor 4 (Player)",
-        "plus" to "Servidor 5 (Plus)"
-    )
+    var checkOnStart by remember { mutableStateOf(updateManager.isCheckOnStartEnabled()) }
+    var isCheckingUpdate by remember { mutableStateOf(false) }
+    var updateStatusMessage by remember { mutableStateOf<String?>(null) }
+
+    val epgProgramsCount = repository.epgRepository.getProgramsCount()
+    val hiddenCount = repository.getHiddenChannelIds().size
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -1014,7 +1208,7 @@ fun SettingsDialog(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Settings, contentDescription = null, tint = RedPrimary)
+                    Icon(Icons.Default.Settings, contentDescription = null, tint = Color(0xFF38BDF8))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Definições",
@@ -1026,13 +1220,13 @@ fun SettingsDialog(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
-                        .background(RedPrimary.copy(alpha = 0.15f))
-                        .border(1.dp, RedPrimary.copy(alpha = 0.5f), RoundedCornerShape(6.dp))
+                        .background(Color(0x3338BDF8))
+                        .border(1.dp, Color(0xFF38BDF8), RoundedCornerShape(6.dp))
                         .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
                     Text(
                         text = "v${updateManager.getCurrentVersionName()}",
-                        color = RedPrimary,
+                        color = Color(0xFF38BDF8),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -1046,15 +1240,17 @@ fun SettingsDialog(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // 1. Auto PiP
+                // SEÇÃO 1: REPRODUÇÃO & PLAYER
+                Text("📺 REPRODUÇÃO & PLAYER", color = Color(0xFF38BDF8), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                        Text("📺 PiP Automático ao Voltar", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                        Text("Entra em modo janela flutuante sem perguntar ao retroceder.", color = TextSecondary, fontSize = 11.sp)
+                        Text("PiP Automático ao Voltar", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Entra em Picture-in-Picture flutuante ao retroceder.", color = TextSecondary, fontSize = 11.sp)
                     }
                     Switch(
                         checked = autoPip,
@@ -1062,24 +1258,18 @@ fun SettingsDialog(
                             autoPip = it
                             repository.setAutoPipOnBack(it)
                         },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = RedPrimary
-                        )
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF38BDF8))
                     )
                 }
 
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderDark))
-
-                // 2. Auto Unmute
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                        Text("🔊 Ativar Som Automaticamente", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                        Text("Desmuta a stream logo que carrega no leitor.", color = TextSecondary, fontSize = 11.sp)
+                        Text("Ativar Som Automaticamente", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Desmuta a transmissão assim que o vídeo inicia.", color = TextSecondary, fontSize = 11.sp)
                     }
                     Switch(
                         checked = autoUnmute,
@@ -1087,78 +1277,66 @@ fun SettingsDialog(
                             autoUnmute = it
                             repository.setAutoUnmuteEnabled(it)
                         },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = RedPrimary
-                        )
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF38BDF8))
                     )
                 }
 
                 Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderDark))
 
-                // 3. Servidor Padrao
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text("🌐 Servidor Padrão Inicial", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                    Text("Escolha a fonte principal de carregamento das streams:", color = TextSecondary, fontSize = 11.sp)
-                    Spacer(modifier = Modifier.height(6.dp))
-                    serverOptions.forEach { (key, label) ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .clickable {
-                                    selectedServer = key
-                                    repository.setDefaultServer(key)
-                                }
-                                .padding(vertical = 4.dp, horizontal = 2.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = selectedServer == key,
-                                onClick = {
-                                    selectedServer = key
-                                    repository.setDefaultServer(key)
-                                },
-                                colors = RadioButtonDefaults.colors(selectedColor = RedPrimary)
-                            )
-                            Text(label, color = TextPrimary, fontSize = 12.sp)
+                // SEÇÃO 2: GUIA DE PROGRAMAÇÃO (EPG)
+                Text("📅 GUIA DE PROGRAMAÇÃO (EPG)", color = Color(0xFF38BDF8), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = "Fonte: JohnPulse iptv-epg Strong8K\nProgramas em cache: $epgProgramsCount",
+                    color = TextSecondary,
+                    fontSize = 12.sp
+                )
+                Button(
+                    onClick = {
+                        isSyncingEpg = true
+                        syncEpgMsg = null
+                        repository.epgRepository.syncEpgFromWeb(scope) { success, msg ->
+                            isSyncingEpg = false
+                            syncEpgMsg = msg
                         }
+                    },
+                    enabled = !isSyncingEpg,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    if (isSyncingEpg) {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("A atualizar Guia TV...", fontSize = 13.sp)
+                    } else {
+                        Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("🔄 Atualizar Guia TV (EPG) Agora", fontSize = 13.sp)
                     }
                 }
-
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderDark))
-
-                // 4. TimStreams Domain
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text("🔗 Domínio TimStreams (Jogos & Backup)", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                    Text("Altere se o domínio mudar (.st, .top, .cfd, etc.):", color = TextSecondary, fontSize = 11.sp)
-                    Spacer(modifier = Modifier.height(6.dp))
-                    TextField(
-                        value = timstBaseUrl,
-                        onValueChange = {
-                            timstBaseUrl = it
-                            repository.setTimstBaseUrl(it)
-                        },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = BackgroundDark,
-                            unfocusedContainerColor = BackgroundDark,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary,
-                            focusedIndicatorColor = RedPrimary
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    )
+                syncEpgMsg?.let {
+                    Text(it, color = AccentGreen, fontSize = 12.sp)
                 }
 
                 Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderDark))
 
-                // 5. DaddyLive Domain
+                // SEÇÃO 3: SERVIDORES & REDE
+                Text("📡 SERVIDORES & REDE", color = Color(0xFF38BDF8), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text("🔗 Domínio DaddyLive (Base URL)", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                    Text("Caso o domínio mude ou esteja bloqueado pelo operador:", color = TextSecondary, fontSize = 11.sp)
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Domínio DaddyLive:", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                        TextButton(onClick = {
+                            baseUrl = "https://dlive.sx"
+                            repository.setBaseUrl(baseUrl)
+                        }) {
+                            Text("Repor dlive.sx", fontSize = 11.sp, color = Color(0xFF38BDF8))
+                        }
+                    }
                     TextField(
                         value = baseUrl,
                         onValueChange = {
@@ -1171,291 +1349,149 @@ fun SettingsDialog(
                             focusedContainerColor = BackgroundDark,
                             unfocusedContainerColor = BackgroundDark,
                             focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary,
-                            focusedIndicatorColor = RedPrimary
+                            unfocusedTextColor = TextPrimary
                         ),
                         shape = RoundedCornerShape(8.dp)
                     )
                 }
 
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderDark))
-
-                // 6. Testar Canais Portugueses (ON / OFF)
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Button(
-                        onClick = {
-                            isTestingChannels = true
-                            testStatusText = "A iniciar teste aos canais portugueses..."
-                            repository.testPortugueseChannels(
-                                scope = scope,
-                                onProgress = { current, total, name, isOnline ->
-                                    testStatusText = "A testar [$current/$total]: $name (${if (isOnline) "🟢 ON" else "🔴 OFF"})"
-                                },
-                                onFinished = { onlineCount, totalCount ->
-                                    isTestingChannels = false
-                                    testStatusText = "✅ Teste concluído: $onlineCount de $totalCount canais operacionais!"
-                                    onChannelsSynced()
-                                }
-                            )
-                        },
-                        enabled = !isTestingChannels,
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = AccentGreen),
-                        shape = RoundedCornerShape(8.dp)
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (isTestingChannels) {
-                            CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("A testar streams...", fontSize = 13.sp)
-                        } else {
-                            Icon(Icons.Default.Speed, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("🧪 Testar Canais PT (ON / OFF)", fontSize = 13.sp)
+                        Text("Domínio TimStreams:", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                        TextButton(onClick = {
+                            timstBaseUrl = "https://timst.top"
+                            repository.setTimstBaseUrl(timstBaseUrl)
+                        }) {
+                            Text("Repor timst.top", fontSize = 11.sp, color = Color(0xFF38BDF8))
                         }
                     }
-
-                    testStatusText?.let {
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(it, color = AccentGreen, fontSize = 12.sp)
-                    }
-                }
-
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderDark))
-
-                // 7. Sincronizar Canais
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Button(
-                        onClick = {
-                            isSyncing = true
-                            syncMessage = null
-                            repository.syncChannelsFromWeb(scope) { success ->
-                                isSyncing = false
-                                syncMessage = if (success) "✅ Lista de canais e backup TimStreams sincronizados!" else "⚠️ Falha ao contactar servidor. Usando catálogo local."
-                                onChannelsSynced()
-                            }
+                    TextField(
+                        value = timstBaseUrl,
+                        onValueChange = {
+                            timstBaseUrl = it
+                            repository.setTimstBaseUrl(it)
                         },
-                        enabled = !isSyncing,
+                        singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = RedPrimary),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = BackgroundDark,
+                            unfocusedContainerColor = BackgroundDark,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary
+                        ),
                         shape = RoundedCornerShape(8.dp)
-                    ) {
-                        if (isSyncing) {
-                            CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("A sincronizar...", fontSize = 13.sp)
-                        } else {
-                            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Sincronizar Canais & Backup Online", fontSize = 13.sp)
-                        }
-                    }
-
-                    syncMessage?.let {
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(it, color = if (it.startsWith("✅")) AccentGreen else RedPrimary, fontSize = 12.sp)
-                    }
-                }
-
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderDark))
-
-                // 8. Canais Ocultos
-                var localHiddenRefresh by remember { mutableStateOf(0) }
-                val hiddenChannels = remember(localHiddenRefresh) { repository.getHiddenChannels() }
-                var showHiddenChannelsDialog by remember { mutableStateOf(false) }
-
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text("👁️ Canais Ocultos", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                    Text(
-                        if (hiddenChannels.isEmpty()) "Nenhum canal oculto no momento."
-                        else "${hiddenChannels.size} canais atualmente ocultos da lista.",
-                        color = TextSecondary,
-                        fontSize = 11.sp
                     )
-                    if (hiddenChannels.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedButton(
-                                onClick = { showHiddenChannelsDialog = true },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(8.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, BorderDark)
-                            ) {
-                                Text("Ver Canais (${hiddenChannels.size})", fontSize = 11.sp)
-                            }
-                            Button(
-                                onClick = {
-                                    repository.unhideAllChannels()
-                                    localHiddenRefresh++
-                                    onChannelsSynced()
-                                },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(8.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = RedPrimary)
-                            ) {
-                                Text("Restaurar Todos", fontSize = 11.sp)
-                            }
-                        }
-                    }
                 }
 
-                if (showHiddenChannelsDialog) {
-                    HiddenChannelsDialog(
-                        repository = repository,
-                        onDismiss = { showHiddenChannelsDialog = false },
-                        onRestored = {
-                            localHiddenRefresh++
+                Button(
+                    onClick = {
+                        isSyncingChannels = true
+                        syncChannelsMsg = null
+                        repository.syncChannelsFromWeb(scope) { success ->
+                            isSyncingChannels = false
+                            syncChannelsMsg = if (success) "✅ Lista de canais atualizada!" else "⚠️ Falha ao contactar servidor."
                             onChannelsSynced()
                         }
-                    )
+                    },
+                    enabled = !isSyncingChannels,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF374151)),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    if (isSyncingChannels) {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("A sincronizar...", fontSize = 13.sp)
+                    } else {
+                        Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Sincronizar Canais Online", fontSize = 13.sp)
+                    }
+                }
+                syncChannelsMsg?.let {
+                    Text(it, color = AccentGreen, fontSize = 12.sp)
                 }
 
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderDark))
-
-                // 9. Atualizações da Aplicação (GitHub OTA)
-                var githubRepoText by remember { mutableStateOf(updateManager.getGitHubRepo()) }
-                var checkOnStart by remember { mutableStateOf(updateManager.isCheckOnStartEnabled()) }
-                var isCheckingUpdate by remember { mutableStateOf(false) }
-                var updateStatusMessage by remember { mutableStateOf<String?>(null) }
-
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("🚀 Atualizações da Aplicação", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                        Text("Instalada: v${updateManager.getCurrentVersionName()}", color = AccentGreen, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Text("Atualizações diretas via GitHub Releases (OTA sem fios):", color = TextSecondary, fontSize = 11.sp)
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    TextField(
-                        value = githubRepoText,
-                        onValueChange = {
-                            githubRepoText = it
-                            updateManager.setGitHubRepo(it)
-                        },
-                        label = { Text("Repositório GitHub", fontSize = 11.sp) },
-                        placeholder = { Text("ex: dnogueira61/daniel-streams", fontSize = 12.sp) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = BackgroundDark,
-                            unfocusedContainerColor = BackgroundDark,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary,
-                            focusedIndicatorColor = RedPrimary
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    var githubTokenText by remember { mutableStateOf(updateManager.getGitHubToken()) }
-                    TextField(
-                        value = githubTokenText,
-                        onValueChange = {
-                            githubTokenText = it
-                            updateManager.setGitHubToken(it)
-                        },
-                        label = { Text("Token GitHub (Opcional para repositórios privados)", fontSize = 11.sp) },
-                        placeholder = { Text("ghp_... (vazio se repo for público)", fontSize = 12.sp) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = BackgroundDark,
-                            unfocusedContainerColor = BackgroundDark,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary,
-                            focusedIndicatorColor = RedPrimary
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Verificar ao iniciar a app", color = TextPrimary, fontSize = 12.sp)
-                        Switch(
-                            checked = checkOnStart,
-                            onCheckedChange = {
-                                checkOnStart = it
-                                updateManager.setCheckOnStartEnabled(it)
-                            },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.White,
-                                checkedTrackColor = RedPrimary
-                            )
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
+                // SEÇÃO 4: GESTÃO DE CANAIS
+                if (hiddenCount > 0) {
+                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderDark))
+                    Text("📋 GESTÃO DE CANAIS", color = Color(0xFF38BDF8), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     Button(
                         onClick = {
-                            isCheckingUpdate = true
-                            updateStatusMessage = null
-                            scope.launch {
-                                val result = updateManager.checkForUpdate()
-                                isCheckingUpdate = false
-                                result.fold(
-                                    onSuccess = { release ->
-                                        if (release != null) {
-                                            updateStatusMessage = "Nova versão v${release.versionName} encontrada!"
-                                            onUpdateFound(release)
-                                        } else {
-                                            updateStatusMessage = "✅ Estás na versão mais recente (v${updateManager.getCurrentVersionName()})!"
-                                        }
-                                    },
-                                    onFailure = { err ->
-                                        updateStatusMessage = "ℹ️ ${err.message ?: "Erro ao contactar GitHub"}"
-                                    }
-                                )
-                            }
+                            repository.unhideAllChannels()
+                            onChannelsSynced()
                         },
-                        enabled = !isCheckingUpdate,
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = RedPrimary),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4B5563)),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        if (isCheckingUpdate) {
-                            CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("A procurar atualizações...", fontSize = 13.sp)
-                        } else {
-                            Icon(Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Procurar Atualizações Agora", fontSize = 13.sp)
-                        }
-                    }
-
-                    updateStatusMessage?.let {
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            it,
-                            color = if (it.startsWith("✅")) AccentGreen else if (it.startsWith("ℹ️")) AccentGold else RedPrimary,
-                            fontSize = 12.sp
-                        )
+                        Icon(Icons.Default.Visibility, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Restaurar Canais Ocultos ($hiddenCount)", fontSize = 13.sp)
                     }
                 }
 
                 Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderDark))
 
-                // 10. Informações
-                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Daniel Streams v${updateManager.getCurrentVersionName()} (Build ${updateManager.getCurrentVersionCode()})", color = TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    Text("Telemóvel & Google TV / Android TV", color = TextSecondary, fontSize = 11.sp)
+                // SEÇÃO 5: ATUALIZAÇÕES (OTA)
+                Text("ℹ️ SOBRE & ATUALIZAÇÕES", color = Color(0xFF38BDF8), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Verificar atualizações ao iniciar", color = TextPrimary, fontSize = 13.sp)
+                    Switch(
+                        checked = checkOnStart,
+                        onCheckedChange = {
+                            checkOnStart = it
+                            updateManager.setCheckOnStartEnabled(it)
+                        },
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF38BDF8))
+                    )
+                }
+                Button(
+                    onClick = {
+                        isCheckingUpdate = true
+                        updateStatusMessage = null
+                        scope.launch {
+                            val res = updateManager.checkForUpdate()
+                            isCheckingUpdate = false
+                            val rel = res.getOrNull()
+                            if (rel != null) {
+                                onUpdateFound(rel)
+                            } else {
+                                updateStatusMessage = "A aplicação já está na versão mais recente!"
+                            }
+                        }
+                    },
+                    enabled = !isCheckingUpdate,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669)),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    if (isCheckingUpdate) {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("A procurar atualizações...", fontSize = 13.sp)
+                    } else {
+                        Icon(Icons.Default.SystemUpdate, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Procurar Atualizações Agora", fontSize = 13.sp)
+                    }
+                }
+                updateStatusMessage?.let {
+                    Text(it, color = Color(0xFF34D399), fontSize = 12.sp)
                 }
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Fechar", color = RedPrimary, fontWeight = FontWeight.Bold)
+                Text("Fechar", color = Color(0xFF38BDF8), fontWeight = FontWeight.Bold)
             }
         },
         containerColor = SurfaceDark,

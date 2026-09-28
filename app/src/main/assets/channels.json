@@ -1,191 +1,187 @@
 [
   {
-    "id": "ntv-f-67f03c95",
-    "name": "24 Kitchen (PT)",
+    "id": "719",
+    "name": "RTP 1",
     "country": "PT",
-    "category": "Entretenimento",
+    "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4230",
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33068",
     "logoUrl": null
   },
   {
-    "id": "ntv-f-3aa1e102",
-    "name": "A Bola TV (PT)",
+    "id": "720",
+    "name": "RTP 2",
     "country": "PT",
-    "category": "Desporto",
+    "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43603",
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33069",
     "logoUrl": null
   },
   {
-    "id": "ntv-f-6afe41bd",
-    "name": "AMC (PT)",
+    "id": "722",
+    "name": "SIC",
     "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=23178",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-2bcc3d81",
-    "name": "AMC Break (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43605",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-01599df0",
-    "name": "AMC Crime (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=23185",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-e2a7453e",
-    "name": "AXN (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4236",
-    "logoUrl": null
-  },
-  {
-    "id": "717",
-    "name": "AXN Movies Portugal",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4235"
-  },
-  {
-    "id": "ntv-f-da160c3f",
-    "name": "AXN White (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4237",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-0d128de7",
-    "name": "Afro Music (PT)",
-    "country": "PT",
-    "category": "Música",
+    "category": "Generalistas",
     "isPt": true,
     "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4233",
     "logoUrl": null
   },
   {
-    "id": "ntv-f-f33c3c27",
-    "name": "Alma Lusa (PT)",
+    "id": "723",
+    "name": "TVI",
     "country": "PT",
-    "category": "Música",
+    "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43604",
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43598",
     "logoUrl": null
   },
   {
-    "id": "380",
-    "name": "Benfica TV PT",
+    "id": "721",
+    "name": "RTP 3",
     "country": "PT",
-    "category": "Geral",
+    "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=23841"
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43628",
+    "logoUrl": null
   },
   {
-    "id": "ntv-f-32b579cd",
-    "name": "CBS Reality (PT)",
+    "id": "718",
+    "name": "Porto Canal",
     "country": "PT",
-    "category": "Entretenimento",
+    "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4248",
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43627",
     "logoUrl": null
   },
   {
     "id": "790",
-    "name": "CMTV Portugal",
+    "name": "CMTV",
     "country": "PT",
-    "category": "Notícias",
-    "isPt": true
-  },
-  {
-    "id": "ntv-f-4938b228",
-    "name": "Cacavision (PT)",
-    "country": "PT",
-    "category": "Geral",
+    "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4247",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-c36e6e34",
-    "name": "Campo Pequeno TV (PT)",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43606",
+    "backupStreamUrl": null,
     "logoUrl": null
   },
   {
     "id": "540",
-    "name": "Canal 11 Portugal",
+    "name": "Canal 11",
     "country": "PT",
-    "category": "Geral",
+    "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43607"
-  },
-  {
-    "id": "ntv-f-7b7939bd",
-    "name": "Canal NOS (PT)",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43608",
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43607",
     "logoUrl": null
   },
   {
-    "id": "ntv-f-f781dcbb",
-    "name": "Canal Q (PT)",
+    "id": "ntv-f-0f8f041a",
+    "name": "V+ TVI",
     "country": "PT",
-    "category": "Geral",
+    "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4244",
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=5392",
     "logoUrl": null
   },
   {
-    "id": "ntv-f-80f8dc7c",
-    "name": "Casa E Cozinha (PT)",
+    "id": "ntv-f-efbb7b65",
+    "name": "RTP Memória",
     "country": "PT",
-    "category": "Entretenimento",
+    "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43609",
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4286",
     "logoUrl": null
   },
   {
-    "id": "ntv-f-70cc3f93",
-    "name": "Cinemundo (PT)",
+    "id": "ntv-f-ef434e73",
+    "name": "RTP Açores",
     "country": "PT",
-    "category": "Filmes",
+    "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43610",
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4284",
     "logoUrl": null
   },
   {
-    "id": "ntv-f-950fb101",
-    "name": "Clubbing TV (PT)",
+    "id": "ntv-f-429b3c0c",
+    "name": "RTP Madeira",
     "country": "PT",
-    "category": "Música",
+    "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43585",
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4285",
     "logoUrl": null
   },
   {
-    "id": "ntv-f-dd6c488a",
-    "name": "DAZN 1 (PT)",
+    "id": "ntv-f-98701c0d",
+    "name": "RTP África",
+    "country": "PT",
+    "category": "Generalistas",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4287",
+    "logoUrl": null
+  },
+  {
+    "id": "49",
+    "name": "Sport TV 1",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://exmxbxe.cfd/oqq5c86g-7521",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
+  },
+  {
+    "id": "74",
+    "name": "Sport TV 2",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://exmxbxe.cfd/6dw9r22a-7192",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
+  },
+  {
+    "id": "454",
+    "name": "Sport TV 3",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://exmxbxe.cfd/dbo09jwh-5404",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
+  },
+  {
+    "id": "289",
+    "name": "Sport TV 4",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://exmxbxe.cfd/t218wwwk-3361",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
+  },
+  {
+    "id": "290",
+    "name": "Sport TV 5",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://exmxbxe.cfd/twg31g84-6394",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
+  },
+  {
+    "id": "291",
+    "name": "Sport TV 6",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=49068",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-7e11574d",
+    "name": "Sport TV 7",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=97839",
+    "logoUrl": null
+  },
+  {
+    "id": "455",
+    "name": "DAZN 1 Portugal (Eleven 1)",
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
@@ -193,17 +189,8 @@
     "logoUrl": null
   },
   {
-    "id": "timst-dazn-1-portugal",
-    "name": "DAZN 1 Portugal (TimStreams)",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://exmxbxe.cfd/3zhczzbl-9086",
-    "logoUrl": "https://image.discovery.indazn.com/ca/v2/ca/image?id=1o4eamzb4env61ddc8wv4ra06l_image-header_pRow_1720521601000&amp;amp;amp;amp;amp;amp;amp;quality=70"
-  },
-  {
-    "id": "ntv-f-f596b0fd",
-    "name": "DAZN 2 (PT)",
+    "id": "456",
+    "name": "DAZN 2 Portugal (Eleven 2)",
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
@@ -211,8 +198,8 @@
     "logoUrl": null
   },
   {
-    "id": "ntv-f-f860a221",
-    "name": "DAZN 3 (PT)",
+    "id": "457",
+    "name": "DAZN 3 Portugal (Eleven 3)",
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
@@ -220,8 +207,8 @@
     "logoUrl": null
   },
   {
-    "id": "ntv-f-4db7b95c",
-    "name": "DAZN 4 (PT)",
+    "id": "458",
+    "name": "DAZN 4 Portugal (Eleven 4)",
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
@@ -229,8 +216,8 @@
     "logoUrl": null
   },
   {
-    "id": "ntv-f-e4b344fe",
-    "name": "DAZN 5 (PT)",
+    "id": "459",
+    "name": "DAZN 5 Portugal (Eleven 5)",
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
@@ -239,11 +226,389 @@
   },
   {
     "id": "ntv-f-853c2ec1",
-    "name": "DAZN 6 (PT)",
+    "name": "DAZN 6 Portugal",
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
     "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=49080",
+    "logoUrl": null
+  },
+  {
+    "id": "380",
+    "name": "Benfica TV",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=23841",
+    "logoUrl": null
+  },
+  {
+    "id": "716",
+    "name": "Sporting TV",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33091",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-3aa1e102",
+    "name": "A Bola TV",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43603",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-1bed965f",
+    "name": "Eurosport 1 PT",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43614",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-cdf46d87",
+    "name": "Eurosport 2 PT",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43615",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-036a4e2d",
+    "name": "Fight Network",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43616",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-98b7b6e2",
+    "name": "Motorvision",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=5469",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-881b3ed5",
+    "name": "TVCine Top",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33101",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-5fb26785",
+    "name": "TVCine Edition",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33099",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-67a0228e",
+    "name": "TVCine Emotion",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33100",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-6347232a",
+    "name": "TVCine Action",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33098",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-a6f5b8b4",
+    "name": "Canal Hollywood",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43580",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-70cc3f93",
+    "name": "Cinemundo",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43610",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-3fd6fad9",
+    "name": "NOS Studios",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33064",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-2c8f0998",
+    "name": "Star Channel",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33042",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-39e50e45",
+    "name": "Star Movies",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33044",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-d9dcda72",
+    "name": "Star Comedy",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33040",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-d0696541",
+    "name": "Star Crime",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33041",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-96dd7a61",
+    "name": "Star Life",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33043",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-e2a7453e",
+    "name": "AXN",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4236",
+    "logoUrl": null
+  },
+  {
+    "id": "717",
+    "name": "AXN Movies",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4235",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-da160c3f",
+    "name": "AXN White",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4237",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-6afe41bd",
+    "name": "AMC",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=23178",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-2bcc3d81",
+    "name": "AMC Break",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43605",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-01599df0",
+    "name": "AMC Crime",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=23185",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-b05751a8",
+    "name": "Syfy",
+    "country": "PT",
+    "category": "Filmes & Séries",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33092",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-67f03c95",
+    "name": "24 Kitchen",
+    "country": "PT",
+    "category": "Entretenimento",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4230",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-80f8dc7c",
+    "name": "Casa e Cozinha",
+    "country": "PT",
+    "category": "Entretenimento",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43609",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-051bc6c8",
+    "name": "TLC",
+    "country": "PT",
+    "category": "Entretenimento",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4302",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-54d054ad",
+    "name": "E! Entertainment",
+    "country": "PT",
+    "category": "Entretenimento",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43613",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-f781dcbb",
+    "name": "Canal Q",
+    "country": "PT",
+    "category": "Entretenimento",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4244",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-6e0d9d75",
+    "name": "Trace Urban",
+    "country": "PT",
+    "category": "Música",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=23227",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-0ddb36b0",
+    "name": "MCM Pop",
+    "country": "PT",
+    "category": "Música",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=5468",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-a81413a4",
+    "name": "Mezzo",
+    "country": "PT",
+    "category": "Música",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=30805",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-0fc49734",
+    "name": "Stingray iConcerts",
+    "country": "PT",
+    "category": "Música",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43622",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-957bed26",
+    "name": "Kuriakos TV",
+    "country": "PT",
+    "category": "Geral",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43623",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-f33c3c27",
+    "name": "Alma Lusa",
+    "country": "PT",
+    "category": "Música",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43604",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-32b579cd",
+    "name": "CBS Reality",
+    "country": "PT",
+    "category": "Entretenimento",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4248",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-4938b228",
+    "name": "Cacavision",
+    "country": "PT",
+    "category": "Geral",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4247",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-c36e6e34",
+    "name": "Campo Pequeno TV",
+    "country": "PT",
+    "category": "Geral",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43606",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-7b7939bd",
+    "name": "Canal NOS",
+    "country": "PT",
+    "category": "Geral",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43608",
+    "logoUrl": null
+  },
+  {
+    "id": "ntv-f-950fb101",
+    "name": "Clubbing TV",
+    "country": "PT",
+    "category": "Música",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43585",
     "logoUrl": null
   },
   {
@@ -255,7 +620,7 @@
   },
   {
     "id": "ntv-f-8db667bc",
-    "name": "Dog TV (PT)",
+    "name": "Dog TV",
     "country": "PT",
     "category": "Entretenimento",
     "isPt": true,
@@ -263,78 +628,8 @@
     "logoUrl": null
   },
   {
-    "id": "ntv-f-54d054ad",
-    "name": "E! Entertainment (PT)",
-    "country": "PT",
-    "category": "Entretenimento",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43613",
-    "logoUrl": null
-  },
-  {
-    "id": "455",
-    "name": "Eleven Sports 1 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://exmxbxe.cfd/gg28wwh4-6849",
-    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
-  },
-  {
-    "id": "456",
-    "name": "Eleven Sports 2 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://exmxbxe.cfd/pw0y0gzx-7614",
-    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
-  },
-  {
-    "id": "457",
-    "name": "Eleven Sports 3 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://exmxbxe.cfd/ytjrtde4-6087",
-    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
-  },
-  {
-    "id": "458",
-    "name": "Eleven Sports 4 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://exmxbxe.cfd/boc7cv4y-6161",
-    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
-  },
-  {
-    "id": "459",
-    "name": "Eleven Sports 5 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true
-  },
-  {
-    "id": "ntv-f-1bed965f",
-    "name": "Eurosport 1 (PT)",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43614",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-cdf46d87",
-    "name": "Eurosport 2 (PT)",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43615",
-    "logoUrl": null
-  },
-  {
     "id": "ntv-f-87d8d58b",
-    "name": "Fashion TV (PT)",
+    "name": "Fashion TV",
     "country": "PT",
     "category": "Entretenimento",
     "isPt": true,
@@ -342,17 +637,8 @@
     "logoUrl": null
   },
   {
-    "id": "ntv-f-036a4e2d",
-    "name": "Fight Network (PT)",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43616",
-    "logoUrl": null
-  },
-  {
     "id": "ntv-f-292c23c7",
-    "name": "Food Network (PT)",
+    "name": "Food Network",
     "country": "PT",
     "category": "Entretenimento",
     "isPt": true,
@@ -361,7 +647,7 @@
   },
   {
     "id": "ntv-f-8c32cba5",
-    "name": "Fuel TV (PT)",
+    "name": "Fuel TV",
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
@@ -370,7 +656,7 @@
   },
   {
     "id": "ntv-f-2b0dced0",
-    "name": "Ginx (PT)",
+    "name": "Ginx",
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
@@ -378,35 +664,8 @@
     "logoUrl": null
   },
   {
-    "id": "ntv-f-a6f5b8b4",
-    "name": "Hollywood (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43580",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-0fc49734",
-    "name": "IConcerts (PT)",
-    "country": "PT",
-    "category": "Música",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43622",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-957bed26",
-    "name": "Kuriakos TV (PT)",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43623",
-    "logoUrl": null
-  },
-  {
     "id": "ntv-f-ae7e6ba2",
-    "name": "Local Visao (PT)",
+    "name": "Local Visao",
     "country": "PT",
     "category": "Geral",
     "isPt": true,
@@ -414,17 +673,8 @@
     "logoUrl": null
   },
   {
-    "id": "ntv-f-0ddb36b0",
-    "name": "MCM POP (PT)",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=5468",
-    "logoUrl": null
-  },
-  {
     "id": "ntv-f-b3d23487",
-    "name": "MTV (PT)",
+    "name": "MTV",
     "country": "PT",
     "category": "Música",
     "isPt": true,
@@ -433,7 +683,7 @@
   },
   {
     "id": "ntv-f-012b1f66",
-    "name": "MTV 00's (PT)",
+    "name": "MTV 00's",
     "country": "PT",
     "category": "Música",
     "isPt": true,
@@ -442,7 +692,7 @@
   },
   {
     "id": "ntv-f-954cc29e",
-    "name": "MTV Live (PT)",
+    "name": "MTV Live",
     "country": "PT",
     "category": "Música",
     "isPt": true,
@@ -450,26 +700,8 @@
     "logoUrl": null
   },
   {
-    "id": "ntv-f-a81413a4",
-    "name": "Mezzo (PT)",
-    "country": "PT",
-    "category": "Música",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=30805",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-98b7b6e2",
-    "name": "Motorvision (PT)",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=5469",
-    "logoUrl": null
-  },
-  {
     "id": "ntv-f-e21178b2",
-    "name": "NBA (PT)",
+    "name": "NBA",
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
@@ -477,17 +709,8 @@
     "logoUrl": null
   },
   {
-    "id": "ntv-f-3fd6fad9",
-    "name": "NOS Studios (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33064",
-    "logoUrl": null
-  },
-  {
     "id": "ntv-f-770e9c76",
-    "name": "OPTO (PT)",
+    "name": "OPTO",
     "country": "PT",
     "category": "Geral",
     "isPt": true,
@@ -496,7 +719,7 @@
   },
   {
     "id": "ntv-f-56940dcc",
-    "name": "PFC (PT)",
+    "name": "PFC",
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
@@ -504,58 +727,8 @@
     "logoUrl": null
   },
   {
-    "id": "718",
-    "name": "Porto Canal Portugal",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43627"
-  },
-  {
-    "id": "719",
-    "name": "RTP 1 Portugal",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33068"
-  },
-  {
-    "id": "720",
-    "name": "RTP 2 Portugal",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33069"
-  },
-  {
-    "id": "721",
-    "name": "RTP 3 Portugal",
-    "country": "PT",
-    "category": "Notícias",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43628"
-  },
-  {
-    "id": "ntv-f-ef434e73",
-    "name": "RTP Acores (PT)",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4284",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-98701c0d",
-    "name": "RTP Africa (PT)",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4287",
-    "logoUrl": null
-  },
-  {
     "id": "ntv-f-1db9795f",
-    "name": "RTP Internacional (PT)",
+    "name": "RTP Internacional",
     "country": "PT",
     "category": "Geral",
     "isPt": true,
@@ -563,26 +736,8 @@
     "logoUrl": null
   },
   {
-    "id": "ntv-f-429b3c0c",
-    "name": "RTP Madeira (PT)",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4285",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-efbb7b65",
-    "name": "RTP Memoria (PT)",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4286",
-    "logoUrl": null
-  },
-  {
     "id": "ntv-f-b84d4c03",
-    "name": "S+ (PT)",
+    "name": "S+",
     "country": "PT",
     "category": "Geral",
     "isPt": true,
@@ -590,88 +745,8 @@
     "logoUrl": null
   },
   {
-    "id": "ntv-f-d65986b0",
-    "name": "SIC Caras (PT)",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43631",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-4cffe297",
-    "name": "SIC Mulher (PT)",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43633",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-1a9ad916",
-    "name": "SIC Novelas (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=142658",
-    "logoUrl": null
-  },
-  {
-    "id": "722",
-    "name": "SIC Portugal",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33077"
-  },
-  {
-    "id": "ntv-f-722c8fe8",
-    "name": "SIC Radical (PT)",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43635",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-d9dcda72",
-    "name": "STAR Comedy (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33040",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-d0696541",
-    "name": "STAR Crime (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33041",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-96dd7a61",
-    "name": "STAR Life (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33043",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-39e50e45",
-    "name": "STAR Movies (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33044",
-    "logoUrl": null
-  },
-  {
     "id": "ntv-f-3dc01685",
-    "name": "Santuario Fatima (PT)",
+    "name": "Santuario Fatima",
     "country": "PT",
     "category": "Geral",
     "isPt": true,
@@ -679,202 +754,8 @@
     "logoUrl": null
   },
   {
-    "id": "ntv-f-7e11574d",
-    "name": "Sport TV 7 (PT)",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=97839",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-0f8f041a",
-    "name": "Sport TV+ (PT)",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=5392",
-    "logoUrl": null
-  },
-  {
-    "id": "49",
-    "name": "Sport TV1 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://exmxbxe.cfd/oqq5c86g-7521",
-    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
-  },
-  {
-    "id": "74",
-    "name": "Sport TV2 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://exmxbxe.cfd/6dw9r22a-7192",
-    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
-  },
-  {
-    "id": "454",
-    "name": "Sport TV3 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://exmxbxe.cfd/dbo09jwh-5404",
-    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
-  },
-  {
-    "id": "289",
-    "name": "Sport TV4 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://exmxbxe.cfd/t218wwwk-3361",
-    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
-  },
-  {
-    "id": "290",
-    "name": "Sport TV5 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://exmxbxe.cfd/twg31g84-6394",
-    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
-  },
-  {
-    "id": "291",
-    "name": "Sport TV6 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=49068"
-  },
-  {
-    "id": "716",
-    "name": "Sporting TV Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33091"
-  },
-  {
-    "id": "ntv-f-2c8f0998",
-    "name": "Star Channel (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33042",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-b05751a8",
-    "name": "Syfy (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33092",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-051bc6c8",
-    "name": "TLC (PT)",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4302",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-6347232a",
-    "name": "TVCine Action (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33098",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-5fb26785",
-    "name": "TVCine Edition (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33099",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-67a0228e",
-    "name": "TVCine Emotion (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33100",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-881b3ed5",
-    "name": "TVCine Top (PT)",
-    "country": "PT",
-    "category": "Filmes",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33101",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-19074671",
-    "name": "TVI Reality Camara Exclusiva 1 (PT)",
-    "country": "PT",
-    "category": "Entretenimento",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43598",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-21b9e24a",
-    "name": "TVI Reality Camara Exclusiva 2 (PT)",
-    "country": "PT",
-    "category": "Entretenimento",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43599",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-b006680d",
-    "name": "TVI Reality Camara Exclusiva 3 (PT)",
-    "country": "PT",
-    "category": "Entretenimento",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43600",
-    "logoUrl": null
-  },
-  {
-    "id": "ntv-f-0d3f91cb",
-    "name": "TVI Reality Camara Exclusiva 4 (PT)",
-    "country": "PT",
-    "category": "Entretenimento",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43601",
-    "logoUrl": null
-  },
-  {
-    "id": "723",
-    "name": "TVi Portugal",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33107"
-  },
-  {
-    "id": "724",
-    "name": "TVi Reality Portugal",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43641"
-  },
-  {
     "id": "ntv-f-9521bd95",
-    "name": "Toros TV (PT)",
+    "name": "Toros TV",
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
@@ -883,7 +764,7 @@
   },
   {
     "id": "ntv-f-1ad1d080",
-    "name": "Trace Africa (PT)",
+    "name": "Trace Africa",
     "country": "PT",
     "category": "Música",
     "isPt": true,
@@ -892,7 +773,7 @@
   },
   {
     "id": "ntv-f-80139bfe",
-    "name": "Trace Latina (PT)",
+    "name": "Trace Latina",
     "country": "PT",
     "category": "Música",
     "isPt": true,
@@ -901,7 +782,7 @@
   },
   {
     "id": "ntv-f-0b3fc492",
-    "name": "Trace Toca (PT)",
+    "name": "Trace Toca",
     "country": "PT",
     "category": "Música",
     "isPt": true,
@@ -909,17 +790,8 @@
     "logoUrl": null
   },
   {
-    "id": "ntv-f-6e0d9d75",
-    "name": "Trace Urban (PT)",
-    "country": "PT",
-    "category": "Música",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=23227",
-    "logoUrl": null
-  },
-  {
     "id": "ntv-f-10d186d1",
-    "name": "Travel Channel (PT)",
+    "name": "Travel Channel",
     "country": "PT",
     "category": "Entretenimento",
     "isPt": true,
@@ -928,7 +800,7 @@
   },
   {
     "id": "ntv-f-b3c757ff",
-    "name": "Travel XP (PT)",
+    "name": "Travel XP",
     "country": "PT",
     "category": "Entretenimento",
     "isPt": true,
@@ -936,17 +808,8 @@
     "logoUrl": null
   },
   {
-    "id": "ntv-f-89e46113",
-    "name": "V+ TVI (PT)",
-    "country": "PT",
-    "category": "Geral",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43640",
-    "logoUrl": null
-  },
-  {
     "id": "ntv-f-7c2fcc1b",
-    "name": "ZAP Viva (PT)",
+    "name": "ZAP Viva",
     "country": "PT",
     "category": "Geral",
     "isPt": true,
