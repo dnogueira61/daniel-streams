@@ -15,6 +15,7 @@ import android.text.TextWatcher
 import android.util.Rational
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import android.webkit.*
 import android.widget.*
 import androidx.activity.ComponentActivity
@@ -145,14 +146,18 @@ class PlayerActivity : ComponentActivity() {
     private var currentFailoverIndex = 0
     private var streamLoadedSuccessfully = false
     private val failoverTimeoutMs = 15000L // 15 seconds before trying next server
+    private fun showSilentRecoveryHud(serverName: String) {
+        runOnUiThread {
+            Toast.makeText(this@PlayerActivity, "⚡ A estabilizar sinal... ($serverName)", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private val failoverTimeoutRunnable = Runnable {
         if (!streamLoadedSuccessfully && currentFailoverIndex < failoverServers.size - 1) {
             currentFailoverIndex++
             val next = failoverServers[currentFailoverIndex]
-            runOnUiThread {
-                Toast.makeText(this, "A tentar servidor seguinte...", Toast.LENGTH_SHORT).show()
-                applyServerOption(next)
-            }
+            showSilentRecoveryHud(next.label)
+            applyServerOption(next)
         }
     }
 
@@ -182,6 +187,10 @@ class PlayerActivity : ComponentActivity() {
             Toast.makeText(this, "ID de canal inválido", Toast.LENGTH_SHORT).show()
             finish()
             return
+        }
+
+        if (!channelId.startsWith("event_") && channelId.isNotBlank()) {
+            repository.setLastWatchedChannelId(channelId)
         }
 
         initViews()
@@ -437,6 +446,7 @@ class PlayerActivity : ComponentActivity() {
         channelId = newChannel.id
         channelName = newChannel.name
         backupDirectUrl = newChannel.backupStreamUrl
+        repository.setLastWatchedChannelId(channelId)
 
         if (newChannel.id.toIntOrNull() == null) {
             activeDirectUrl = newChannel.backupStreamUrl
@@ -515,78 +525,10 @@ class PlayerActivity : ComponentActivity() {
     )
 
     private fun showServerSelectionDialog() {
-        val currentChannel = repository.getChannels(TabFilter.PORTUGAL).firstOrNull { it.id == channelId }
-            ?: repository.getChannels(TabFilter.ALL).firstOrNull { it.id == channelId }
-
-        val options = mutableListOf<ServerOption>()
-
-        // 1. Direct stream 1
-        val s1Direct = if (currentChannel != null && currentChannel.id.toIntOrNull() == null) {
-            currentChannel.backupStreamUrl ?: directStreamUrl
-        } else if (directStreamUrl != null) {
-            directStreamUrl
-        } else null
-
-        if (s1Direct != null) {
-            val s1Title = when {
-                s1Direct.contains("impresa.pt") -> "Servidor 1: SIC Oficial (Full HD Direto)"
-                s1Direct.contains("rtp.pt") -> "Servidor 1: RTP Oficial (Direto)"
-                s1Direct.contains("github.com") || s1Direct.contains("TVI") -> "Servidor 1: TVI Oficial (Direto)"
-                s1Direct.contains("cloudfront") -> "Servidor 1: Canal 11 Oficial (Direto)"
-                s1Direct.contains("fastly") -> "Servidor 1: Porto Canal Oficial (Direto)"
-                s1Direct.contains("exmxbxe") -> "Servidor 1: TimStreams (Full HD Direto)"
-                s1Direct.contains("epicsports") || s1Direct.contains("ntv.st") -> "Servidor 1: NTV / EpicSports (Full HD Direto)"
-                else -> "Servidor 1: Direto Principal"
-            }
-            options.add(ServerOption(s1Title, isDirect = true, directUrl = s1Direct))
-        }
-
-        // 2. DaddyLive
-        val hasDaddyLive = (currentChannel?.id?.toIntOrNull() != null) || (channelId.toIntOrNull() != null)
-        if (hasDaddyLive) {
-            options.add(ServerOption("Servidor ${options.size + 1}: DaddyLive (Stream Web • Recomendado)", isDirect = false, folder = "stream"))
-        }
-
-        // 3. Backup direct stream 1
-        val s2Direct = if (currentChannel != null && currentChannel.id.toIntOrNull() == null) {
-            currentChannel.backupStreamUrl2
-        } else {
-            currentChannel?.backupStreamUrl ?: backupDirectUrl
-        }
-
-        if (s2Direct != null && options.none { it.directUrl == s2Direct }) {
-            val s2Title = when {
-                s2Direct.contains("epicsports") || s2Direct.contains("ntv.st") -> "Servidor ${options.size + 1}: NTV / EpicSports (Full HD Direto)"
-                s2Direct.contains("exmxbxe") -> "Servidor ${options.size + 1}: TimStreams (Full HD Direto)"
-                s2Direct.contains("rtp.pt") -> "Servidor ${options.size + 1}: RTP Oficial (Direto)"
-                s2Direct.contains("impresa.pt") -> "Servidor ${options.size + 1}: SIC Oficial (Direto)"
-                else -> "Servidor ${options.size + 1}: Servidor Backup (Direto)"
-            }
-            options.add(ServerOption(s2Title, isDirect = true, directUrl = s2Direct))
-        }
-
-        // 4. Backup direct stream 2
-        val s3Direct = currentChannel?.backupStreamUrl2
-        if (s3Direct != null && options.none { it.directUrl == s3Direct }) {
-            val s3Title = when {
-                s3Direct.contains("rtp.pt") -> "Servidor ${options.size + 1}: RTP Oficial M3UPT (Direto)"
-                s3Direct.contains("epicsports") || s3Direct.contains("ntv.st") -> "Servidor ${options.size + 1}: NTV / EpicSports (Full HD Direto)"
-                s3Direct.contains("exmxbxe") -> "Servidor ${options.size + 1}: TimStreams (Full HD Direto)"
-                else -> "Servidor ${options.size + 1}: Servidor Backup 2 (Direto)"
-            }
-            options.add(ServerOption(s3Title, isDirect = true, directUrl = s3Direct))
-        }
-
-        // 5. DaddyLive mirrors
-        if (hasDaddyLive) {
-            options.add(ServerOption("Servidor Espelho: Cast (Muito Estável)", isDirect = false, folder = "cast"))
-            options.add(ServerOption("Servidor Espelho: Watch", isDirect = false, folder = "watch"))
-            options.add(ServerOption("Servidor Espelho: Player (HTML5)", isDirect = false, folder = "player"))
-            options.add(ServerOption("Servidor Espelho: Plus (1080p)", isDirect = false, folder = "plus"))
-        }
-
+        val options = buildFailoverList()
         if (options.isEmpty()) {
-            options.add(ServerOption("Servidor 1: Stream Padrão", isDirect = false, folder = "stream"))
+            Toast.makeText(this, "Nenhum servidor alternativo disponível", Toast.LENGTH_SHORT).show()
+            return
         }
 
         val titles = options.map { it.label }.toTypedArray()
@@ -599,18 +541,11 @@ class PlayerActivity : ComponentActivity() {
         }.coerceAtLeast(0)
 
         AlertDialog.Builder(this)
-            .setTitle("Selecionar Servidor")
+            .setTitle("Servidores Disponíveis")
             .setSingleChoiceItems(titles, currentSelectedIndex) { dialog, which ->
                 dialog.dismiss()
                 val selected = options[which]
-                if (selected.isDirect) {
-                    activeDirectUrl = selected.directUrl
-                } else {
-                    activeDirectUrl = null
-                    currentFolder = selected.folder ?: "stream"
-                }
-                updateServerBadgeText()
-                loadCurrentStream()
+                applyServerOption(selected)
             }
             .setNegativeButton("Fechar", null)
             .show()
@@ -789,10 +724,8 @@ class PlayerActivity : ComponentActivity() {
                     if (currentFailoverIndex < failoverServers.size - 1) {
                         currentFailoverIndex++
                         val next = failoverServers[currentFailoverIndex]
-                        runOnUiThread {
-                            Toast.makeText(this@PlayerActivity, "Stream indisponível. A tentar alternativa...", Toast.LENGTH_SHORT).show()
-                            applyServerOption(next)
-                        }
+                        showSilentRecoveryHud(next.label)
+                        applyServerOption(next)
                     }
                 }
             }
@@ -991,14 +924,18 @@ class PlayerActivity : ComponentActivity() {
         val options = mutableListOf<ServerOption>()
 
         if (currentChannel == null) {
-            if (!directStreamUrl.isNullOrBlank()) {
-                options.add(ServerOption("Servidor 1", isDirect = true, directUrl = directStreamUrl))
-            }
-            if (!backupDirectUrl.isNullOrBlank()) {
-                options.add(ServerOption("Servidor 2", isDirect = true, directUrl = backupDirectUrl))
-            }
-            if (!backupDirectUrl2.isNullOrBlank()) {
-                options.add(ServerOption("Servidor 3", isDirect = true, directUrl = backupDirectUrl2))
+            val list = listOfNotNull(directStreamUrl, backupDirectUrl, backupDirectUrl2)
+            list.forEachIndexed { idx, url ->
+                val name = when {
+                    url.contains("kobra") -> "Servidor Principal (NTV Kobra)"
+                    url.contains("falcon") -> "Servidor Alternativo 1 (NTV Falcon)"
+                    url.contains("raptor") -> "Servidor Alternativo 2 (NTV Raptor)"
+                    url.contains("exmxbxe") || url.contains("timst") -> "Servidor Rápido (TimStreams)"
+                    idx == 0 -> "Servidor Principal (Direto)"
+                    idx == 1 -> "Servidor Alternativo 1 (Direto)"
+                    else -> "Servidor Reserva $idx (Direto)"
+                }
+                options.add(ServerOption(name, isDirect = true, directUrl = url))
             }
             return options
         }
@@ -1006,20 +943,22 @@ class PlayerActivity : ComponentActivity() {
         // 1. DaddyLive (highest priority if channel has numeric ID)
         val hasDaddyLive = (currentChannel?.id?.toIntOrNull() != null) || (channelId.toIntOrNull() != null)
         if (hasDaddyLive) {
-            options.add(ServerOption("DaddyLive", isDirect = false, folder = "stream"))
+            options.add(ServerOption("Servidor Principal (DaddyLive)", isDirect = false, folder = "stream"))
         }
 
         // 2. NTV/EpicSports backup
         val ntvUrl = currentChannel?.backupStreamUrl
         if (ntvUrl != null && (ntvUrl.contains("epicsports") || ntvUrl.contains("ntv.st"))) {
-            options.add(ServerOption("NTV", isDirect = true, directUrl = ntvUrl))
+            val label = if (hasDaddyLive) "Servidor Alternativo 1 (NTV)" else "Servidor Principal (NTV)"
+            options.add(ServerOption(label, isDirect = true, directUrl = ntvUrl))
         }
 
         // 3. TimStreams backup
         val timstUrl = if (ntvUrl != null && ntvUrl.contains("exmxbxe")) ntvUrl
             else currentChannel?.backupStreamUrl2?.takeIf { it.contains("exmxbxe") }
         if (timstUrl != null) {
-            options.add(ServerOption("TimStreams", isDirect = true, directUrl = timstUrl))
+            val label = if (options.size == 1) "Servidor Alternativo 1 (TimStreams)" else "Servidor Alternativo 2 (TimStreams)"
+            options.add(ServerOption(label, isDirect = true, directUrl = timstUrl))
         }
 
         // 4. M3UPT / Official direct stream
@@ -1031,18 +970,18 @@ class PlayerActivity : ComponentActivity() {
             it.contains("cloudfront") || it.contains("fastly") || it.contains("livextend")
         }
         if (officialUrl != null && options.none { it.directUrl == officialUrl }) {
-            options.add(ServerOption("Oficial", isDirect = true, directUrl = officialUrl))
+            options.add(ServerOption("Servidor Oficial (M3U)", isDirect = true, directUrl = officialUrl))
         }
 
         // 5. Non-NTV backup (if backupStreamUrl is not NTV)
         if (ntvUrl != null && !ntvUrl.contains("epicsports") && !ntvUrl.contains("ntv.st") && !ntvUrl.contains("exmxbxe") && options.none { it.directUrl == ntvUrl }) {
-            options.add(ServerOption("Backup", isDirect = true, directUrl = ntvUrl))
+            options.add(ServerOption("Servidor Alternativo (Direto)", isDirect = true, directUrl = ntvUrl))
         }
 
         // 6. DaddyLive mirrors as last resort
         if (hasDaddyLive) {
-            options.add(ServerOption("Cast", isDirect = false, folder = "cast"))
-            options.add(ServerOption("Watch", isDirect = false, folder = "watch"))
+            options.add(ServerOption("Servidor Reserva 1 (DaddyLive Cast)", isDirect = false, folder = "cast"))
+            options.add(ServerOption("Servidor Reserva 2 (DaddyLive Watch)", isDirect = false, folder = "watch"))
         }
 
         return options
@@ -1310,6 +1249,15 @@ class PlayerActivity : ComponentActivity() {
         }
         dialogView.addView(swUnmute)
 
+        // 3. Auto Resume Last Channel
+        val swAutoResume = Switch(this).apply {
+            text = "📺 Abrir Último Canal ao Iniciar"
+            setTextColor(Color.WHITE)
+            isChecked = repository.isAutoResumeEnabled()
+            setPadding(0, 10, 0, 14)
+        }
+        dialogView.addView(swAutoResume)
+
         // 3. TimStreams Base Domain
         val tvTimstTitle = TextView(this).apply {
             text = "🔗 Domínio TimStreams (Jogos/Backup):"
@@ -1401,6 +1349,7 @@ class PlayerActivity : ComponentActivity() {
             .setPositiveButton("Guardar") { _, _ ->
                 repository.setAutoPipOnBack(swPip.isChecked)
                 repository.setAutoUnmuteEnabled(swUnmute.isChecked)
+                repository.setAutoResumeEnabled(swAutoResume.isChecked)
                 val domain = etDomain.text.toString().trim()
                 if (domain.isNotBlank()) repository.setBaseUrl(domain)
                 val timst = etTimstDomain.text.toString().trim()
@@ -1411,11 +1360,121 @@ class PlayerActivity : ComponentActivity() {
             .show()
     }
 
+    private fun showEpgDialog() {
+        val schedule = repository.epgRepository.getChannelSchedule(channelName)
+        val current = repository.epgRepository.getCurrentProgram(channelName)
+
+        val dialog = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+        val view = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(40, 32, 40, 24)
+            setBackgroundColor(Color.parseColor("#12151E"))
+        }
+
+        val titleView = TextView(this).apply {
+            text = "📅 Programação: $channelName"
+            textSize = 17f
+            setTextColor(Color.WHITE)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(0, 0, 0, 16)
+        }
+        view.addView(titleView)
+
+        if (current != null) {
+            val curCard = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(24, 20, 24, 20)
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(Color.parseColor("#1E293B"))
+                    cornerRadius = 16f
+                    setStroke(2, Color.parseColor("#38BDF8"))
+                }
+            }
+            val tag = TextView(this).apply {
+                text = "🔴 A DAR AGORA • ${current.timeRange}"
+                textSize = 12f
+                setTextColor(Color.parseColor("#38BDF8"))
+                setTypeface(null, android.graphics.Typeface.BOLD)
+            }
+            val curTitle = TextView(this).apply {
+                text = current.title
+                textSize = 15f
+                setTextColor(Color.WHITE)
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                setPadding(0, 6, 0, 0)
+            }
+            curCard.addView(tag)
+            curCard.addView(curTitle)
+            view.addView(curCard)
+
+            val spacer = View(this).apply {
+                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 20)
+            }
+            view.addView(spacer)
+        }
+
+        val scroll = ScrollView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 650)
+        }
+        val progList = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+
+        val upcoming = schedule.filter { it != current }
+        if (upcoming.isEmpty() && current == null) {
+            val emptyTv = TextView(this).apply {
+                text = "Guia de programação não disponível para este canal."
+                textSize = 13f
+                setTextColor(Color.parseColor("#9CA3AF"))
+                setPadding(0, 20, 0, 20)
+            }
+            progList.addView(emptyTv)
+        } else {
+            val upHeader = TextView(this).apply {
+                text = "A SEGUIR:"
+                textSize = 12f
+                setTextColor(Color.parseColor("#94A3B8"))
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                setPadding(0, 0, 0, 10)
+            }
+            progList.addView(upHeader)
+
+            for (prog in upcoming.take(15)) {
+                val row = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    setPadding(0, 8, 0, 8)
+                }
+                val timeTv = TextView(this).apply {
+                    text = prog.timeRange.split("-").firstOrNull()?.trim() ?: ""
+                    textSize = 13f
+                    setTextColor(Color.parseColor("#38BDF8"))
+                    setTypeface(null, android.graphics.Typeface.BOLD)
+                    layoutParams = LinearLayout.LayoutParams(140, ViewGroup.LayoutParams.WRAP_CONTENT)
+                }
+                val nameTv = TextView(this).apply {
+                    text = prog.title
+                    textSize = 13f
+                    setTextColor(Color.WHITE)
+                    layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                }
+                row.addView(timeTv)
+                row.addView(nameTv)
+                progList.addView(row)
+            }
+        }
+
+        scroll.addView(progList)
+        view.addView(scroll)
+
+        dialog.setView(view)
+        dialog.setPositiveButton("Fechar", null)
+        dialog.show()
+    }
+
     override fun dispatchTouchEvent(ev: android.view.MotionEvent?): Boolean {
         if (ev == null) return super.dispatchTouchEvent(ev)
 
-        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        if (!isLandscape || drawerLayout.isDrawerOpen(GravityCompat.START)) {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             return super.dispatchTouchEvent(ev)
         }
 
@@ -1442,12 +1501,14 @@ class PlayerActivity : ComponentActivity() {
                 val deltaX = ev.x - touchStartX
                 val deltaY = touchStartY - ev.y // Swiping UP is positive, DOWN is negative
                 val touchSlop = android.view.ViewConfiguration.get(this).scaledTouchSlop
+                val screenWidth = resources.displayMetrics.widthPixels
 
                 if (!isSwipingGesture) {
-                    if (Math.abs(deltaY) > touchSlop && Math.abs(deltaY) > Math.abs(deltaX) * 1.2f) {
+                    val isEdgeLeft = touchStartX < screenWidth * 0.20f
+                    val isEdgeRight = touchStartX > screenWidth * 0.80f
+                    if ((isEdgeLeft || isEdgeRight) && Math.abs(deltaY) > touchSlop && Math.abs(deltaY) > Math.abs(deltaX) * 1.2f) {
                         isSwipingGesture = true
-                        val screenWidth = resources.displayMetrics.widthPixels
-                        gestureMode = if (touchStartX < screenWidth / 2f) GestureMode.VOLUME else GestureMode.BRIGHTNESS
+                        gestureMode = if (isEdgeLeft) GestureMode.VOLUME else GestureMode.BRIGHTNESS
                     }
                 }
 
@@ -1479,16 +1540,40 @@ class PlayerActivity : ComponentActivity() {
                     handler.removeCallbacks(gestureHudHideRunnable)
                     handler.postDelayed(gestureHudHideRunnable, 900)
                     return true
-                } else {
-                    // Tap toggle overlay
-                    if (landscapeOverlay.visibility == View.VISIBLE) {
-                        landscapeOverlay.visibility = View.GONE
-                        handler.removeCallbacks(overlayHideRunnable)
+                }
+
+                val deltaX = ev.x - touchStartX
+                val deltaY = touchStartY - ev.y // UP is positive, DOWN is negative
+                val absX = Math.abs(deltaX)
+                val absY = Math.abs(deltaY)
+                val screenWidth = resources.displayMetrics.widthPixels
+                val minSwipeDist = 110f
+
+                val isCenterZone = touchStartX >= screenWidth * 0.20f && touchStartX <= screenWidth * 0.80f
+
+                if (absX > minSwipeDist && absX > absY * 1.2f) {
+                    // Gestos horizontais:
+                    if (deltaX < 0) {
+                        // Deslizar para a esquerda: Canal Seguinte
+                        zapNextChannel()
                     } else {
-                        landscapeOverlay.visibility = View.VISIBLE
-                        handler.removeCallbacks(overlayHideRunnable)
-                        handler.postDelayed(overlayHideRunnable, 4000)
+                        // Deslizar para a direita: Canal Anterior
+                        zapPreviousChannel()
                     }
+                    return true
+                } else if (isCenterZone && absY > minSwipeDist && absY > absX * 1.2f) {
+                    // Gestos verticais no centro:
+                    if (deltaY < 0) {
+                        // Deslizar para baixo no centro: Abre Canais
+                        openDrawer()
+                    } else {
+                        // Deslizar para cima: Abre EPG
+                        showEpgDialog()
+                    }
+                    return true
+                } else if (absX < 25f && absY < 25f) {
+                    // Toque simples: alterna overlay
+                    toggleControlsOverlay()
                 }
             }
         }

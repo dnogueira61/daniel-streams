@@ -107,6 +107,10 @@ fun HomeScreen(
         repository.getTopFootballChannels(searchQuery)
     }
 
+    val favChannels = remember(refreshKey, channelsVersion) {
+        repository.getChannels(TabFilter.FAVORITES)
+    }
+
     val channels = remember(selectedTab, searchQuery, selectedCategory, refreshKey, channelsVersion) {
         if (selectedTab == TabFilter.LIVE_GAMES) emptyList()
         else {
@@ -624,6 +628,14 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         if (searchQuery.isBlank() && selectedCategory == "Todos" && selectedTab == TabFilter.PORTUGAL) {
+                            if (favChannels.isNotEmpty()) {
+                                item(span = { GridItemSpan(maxLineSpan) }) {
+                                    FavoritesQuickBar(
+                                        favorites = favChannels,
+                                        onChannelClick = onChannelClick
+                                    )
+                                }
+                            }
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 channels.firstOrNull()?.let { featChannel ->
                                     FeaturedLiveCard(
@@ -657,6 +669,15 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         if (searchQuery.isBlank() && selectedCategory == "Todos" && selectedTab == TabFilter.PORTUGAL) {
+                            if (favChannels.isNotEmpty()) {
+                                item {
+                                    FavoritesQuickBar(
+                                        favorites = favChannels,
+                                        onChannelClick = onChannelClick
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                }
+                            }
                             item {
                                 channels.firstOrNull()?.let { featChannel ->
                                     FeaturedLiveCard(
@@ -827,6 +848,134 @@ fun LiveEventCard(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("Assistir", fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
+        }
+    }
+}
+
+@Composable
+fun FavoritesQuickBar(
+    favorites: List<Channel>,
+    onChannelClick: (Channel) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (favorites.isEmpty()) return
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp, vertical = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Filled.Star,
+                    contentDescription = null,
+                    tint = AccentGold,
+                    modifier = Modifier.size(15.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "Os Meus Favoritos",
+                    color = TextPrimary,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Text(
+                text = "${favorites.size} canais",
+                color = TextSecondary,
+                fontSize = 11.sp
+            )
+        }
+
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp)
+        ) {
+            items(favorites, key = { "fav_bar_${it.id}" }) { channel ->
+                FavoriteQuickCard(
+                    channel = channel,
+                    onClick = { onChannelClick(channel) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun FavoriteQuickCard(
+    channel: Channel,
+    onClick: () -> Unit
+) {
+    var isFocused by remember { mutableStateOf(false) }
+    val localLogo = ChannelLogoHelper.getLocalLogoRes(channel.name)
+    val onlineLogo = channel.logoUrl ?: ChannelLogoHelper.getLogoUrl(channel.name)
+
+    Card(
+        modifier = Modifier
+            .width(112.dp)
+            .height(76.dp)
+            .onFocusChanged { isFocused = it.isFocused }
+            .focusable()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isFocused) Color(0xFF232838) else Color(0xFF161A26)
+        ),
+        border = if (isFocused) BorderStroke(2.dp, Color(0xFF38BDF8)) else BorderStroke(1.dp, Color(0xFF262C3D))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 6.dp, vertical = 6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(width = 46.dp, height = 32.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(Color(0xFF0F121C)),
+                contentAlignment = Alignment.Center
+            ) {
+                if (onlineLogo != null) {
+                    AsyncImage(
+                        model = onlineLogo,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize().padding(2.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                } else if (localLogo != null) {
+                    Image(
+                        painter = painterResource(id = localLogo),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize().padding(2.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                } else {
+                    Text(
+                        text = channel.name.take(3).uppercase(),
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = channel.name,
+                color = TextPrimary,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -1229,6 +1378,7 @@ fun SettingsDialog(
     val scope = rememberCoroutineScope()
     var autoPip by remember { mutableStateOf(repository.isAutoPipOnBack()) }
     var autoUnmute by remember { mutableStateOf(repository.isAutoUnmuteEnabled()) }
+    var autoResume by remember { mutableStateOf(repository.isAutoResumeEnabled()) }
     var baseUrl by remember { mutableStateOf(repository.getBaseUrl()) }
     var timstBaseUrl by remember { mutableStateOf(repository.getTimstBaseUrl()) }
 
@@ -1322,6 +1472,25 @@ fun SettingsDialog(
                         onCheckedChange = {
                             autoUnmute = it
                             repository.setAutoUnmuteEnabled(it)
+                        },
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF38BDF8))
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                        Text("Abrir Último Canal ao Iniciar", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Inicia diretamente no último canal reproduzido.", color = TextSecondary, fontSize = 11.sp)
+                    }
+                    Switch(
+                        checked = autoResume,
+                        onCheckedChange = {
+                            autoResume = it
+                            repository.setAutoResumeEnabled(it)
                         },
                         colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF38BDF8))
                     )

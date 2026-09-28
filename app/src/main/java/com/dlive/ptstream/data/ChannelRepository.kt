@@ -34,6 +34,8 @@ class ChannelRepository(private val context: Context) {
     private val PREF_AUTO_PIP_ON_BACK = "pref_auto_pip_on_back"
     private val PREF_AUTO_UNMUTE = "pref_auto_unmute"
     private val PREF_DEFAULT_SERVER = "pref_default_server"
+    private val PREF_AUTO_RESUME_LAST_CHANNEL = "pref_auto_resume_last_channel"
+    private val PREF_LAST_WATCHED_CHANNEL_ID = "pref_last_watched_channel_id"
     private val CACHE_FILE_NAME = "channels_cache.json"
 
     private var cachedChannels: List<Channel> = emptyList()
@@ -123,6 +125,12 @@ class ChannelRepository(private val context: Context) {
 
     fun getDefaultServer(): String = prefs.getString(PREF_DEFAULT_SERVER, "stream") ?: "stream"
     fun setDefaultServer(server: String) = prefs.edit().putString(PREF_DEFAULT_SERVER, server).apply()
+
+    fun isAutoResumeEnabled(): Boolean = prefs.getBoolean(PREF_AUTO_RESUME_LAST_CHANNEL, false)
+    fun setAutoResumeEnabled(enabled: Boolean) = prefs.edit().putBoolean(PREF_AUTO_RESUME_LAST_CHANNEL, enabled).apply()
+
+    fun getLastWatchedChannelId(): String? = prefs.getString(PREF_LAST_WATCHED_CHANNEL_ID, null)
+    fun setLastWatchedChannelId(channelId: String) = prefs.edit().putString(PREF_LAST_WATCHED_CHANNEL_ID, channelId).apply()
 
     fun getBaseUrl(): String = prefs.getString(PREF_BASE_URL, "https://dlive.sx") ?: "https://dlive.sx"
     fun setBaseUrl(newUrl: String) {

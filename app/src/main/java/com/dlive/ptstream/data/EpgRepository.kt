@@ -183,6 +183,23 @@ class EpgRepository(private val context: Context) {
         return null
     }
 
+    fun getChannelSchedule(channelName: String): List<EpgProgram> {
+        val lower = channelName.lowercase().trim()
+        val epgIds = channelToEpgIds.entries.firstOrNull { (key, _) ->
+            lower.contains(key) || key.contains(lower)
+        }?.value ?: listOf(channelName)
+
+        val now = System.currentTimeMillis() - 2 * 3600 * 1000L // show from 2 hours ago onwards
+        synchronized(programMap) {
+            for (epgId in epgIds) {
+                val list = programMap[epgId] ?: continue
+                val upcoming = list.filter { it.stopEpoch >= now }.sortedBy { it.startEpoch }
+                if (upcoming.isNotEmpty()) return upcoming
+            }
+        }
+        return emptyList()
+    }
+
     fun getProgramsCount(): Int {
         synchronized(programMap) {
             return programMap.values.sumOf { it.size }
