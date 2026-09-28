@@ -118,6 +118,15 @@
             </LinearLayout>
 
             <ImageButton
+                android:id="@+id/btnQuickUnmute"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_gesture_volume"
+                android:tint="#FFFFFF"
+                android:contentDescription="Ativar Som" />
+
+            <ImageButton
                 android:id="@+id/btnRefresh"
                 android:layout_width="34dp"
                 android:layout_height="34dp"
@@ -157,7 +166,7 @@
         <LinearLayout
             android:id="@+id/landscapeOverlay"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="52dp"
             android:layout_alignParentTop="true"
             android:background="#CC0A0A0E"
             android:gravity="center_vertical"
@@ -246,19 +255,19 @@
             <LinearLayout
                 android:id="@+id/btnLandscapeUnmute"
                 android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:layout_marginEnd="6dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_channels_pill"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:paddingStart="8dp"
-                android:paddingEnd="10dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="14dp"
                 android:clickable="true"
                 android:focusable="true">
 
                 <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
                     android:src="@drawable/ic_gesture_volume"
                     android:tint="#FFFFFF"
                     android:contentDescription="Ativar Som" />
@@ -266,17 +275,17 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
+                    android:layout_marginStart="6dp"
                     android:text="Som"
                     android:textColor="#FFFFFF"
-                    android:textSize="12sp"
+                    android:textSize="13sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <ImageButton
                 android:id="@+id/btnLandscapePip"
-                android:layout_width="38dp"
-                android:layout_height="38dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_pip"
                 android:tint="#FFFFFF"
@@ -284,8 +293,8 @@
 
             <ImageButton
                 android:id="@+id/btnLandscapeExitFullscreen"
-                android:layout_width="38dp"
-                android:layout_height="38dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_marginEnd="16dp"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_fullscreen_exit"

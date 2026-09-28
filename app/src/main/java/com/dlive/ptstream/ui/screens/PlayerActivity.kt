@@ -12,6 +12,9 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Message
+import android.os.SystemClock
+import android.view.MotionEvent
+import android.view.ViewConfiguration
 import android.view.ViewParent
 import android.view.animation.AccelerateDecelerateInterpolator
 import coil.load
@@ -315,13 +318,22 @@ class PlayerActivity : ComponentActivity() {
             loadCurrentStream()
         }
 
+        // Portrait Quick Unmute Button
+        findViewById<ImageButton>(R.id.btnQuickUnmute)?.setOnClickListener {
+            performSafeUnmute()
+        }
+
         findViewById<ImageButton>(R.id.btnPip).setOnClickListener {
             enterPipMode()
         }
 
-        // Landscape / Fullscreen toggle with sensor support
-        findViewById<ImageButton>(R.id.btnFullscreen).setOnClickListener {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        // Fullscreen toggle (Portrait -> Landscape)
+        val btnFullscreen = findViewById<ImageButton>(R.id.btnFullscreen)
+        btnFullscreen.setOnClickListener {
+            val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+            if (!isLandscape) {
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            }
         }
 
         // Landscape overlay buttons
@@ -343,10 +355,9 @@ class PlayerActivity : ComponentActivity() {
 
         val btnLandscapeExitFullscreen = findViewById<ImageButton>(R.id.btnLandscapeExitFullscreen)
         btnLandscapeExitFullscreen.setOnClickListener {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
-        val btnFullscreen = findViewById<ImageButton>(R.id.btnFullscreen)
         val isTv = packageManager.hasSystemFeature("android.software.leanback") ||
                 packageManager.hasSystemFeature("android.hardware.type.television")
         if (isTv) {
@@ -902,14 +913,6 @@ class PlayerActivity : ComponentActivity() {
                 document.head.appendChild(style);
 
                 window.open = function() { return null; };
-
-                var children = document.body.children;
-                for (var i = 0; i < children.length; i++) {
-                    var el = children[i];
-                    if (el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE' && el.id !== 'thatframe' && el.id !== 'player' && el.id !== 'streamPlayer' && !el.classList.contains('preview-wrap') && !el.classList.contains('watch-player-wrapper') && !el.contains(document.getElementById('thatframe')) && !el.contains(document.getElementById('streamPlayer'))) {
-                        el.style.display = 'none';
-                    }
-                }
             })();
         """.trimIndent()
         view?.evaluateJavascript(js, null)
@@ -917,52 +920,28 @@ class PlayerActivity : ComponentActivity() {
 
     private fun startAutoUnmuteSequence() {
         if (!repository.isAutoUnmuteEnabled()) return
-        val safeUnmuteJs = """
-            (function() {
-                var fsSel = '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"]';
-                document.querySelectorAll(fsSel).forEach(function(b) { b.style.setProperty('display', 'none', 'important'); });
-
-                function unmuteDom(root) {
-                    if (!root) return;
-                    try {
-                        root.querySelectorAll('video, audio').forEach(function(v) {
-                            try {
-                                if (v.muted) v.muted = false;
-                                if (v.defaultMuted) v.defaultMuted = false;
-                                v.volume = 1.0;
-                            } catch(e) {}
-                        });
-                    } catch(e) {}
-                }
-
-                unmuteDom(document);
-
-                var iframes = document.querySelectorAll('iframe');
-                for (var i = 0; i < iframes.length; i++) {
-                    try {
-                        var doc = iframes[i].contentDocument || iframes[i].contentWindow.document;
-                        if (doc) unmuteDom(doc);
-                    } catch(e) {}
-                }
-
-                try {
-                    if (window.jwplayer && typeof window.jwplayer === 'function') {
-                        var jw = window.jwplayer();
-                        if (jw && typeof jw.getMute === 'function' && jw.getMute()) {
-                            jw.setMute(false);
-                            jw.setVolume(100);
-                        }
-                    }
-                } catch(e) {}
-            })();
-        """.trimIndent()
-
-        val delays = listOf(800L, 2000L)
+        val delays = listOf(1000L, 2500L)
         for (d in delays) {
             handler.postDelayed({
                 try {
+                    val safeUnmuteJs = """
+                        (function() {
+                            var vids = document.querySelectorAll('video, audio');
+                            for (var i = 0; i < vids.length; i++) {
+                                try { vids[i].muted = false; vids[i].volume = 1.0; } catch(e){}
+                            }
+                            if (window.jwplayer && typeof window.jwplayer === 'function') {
+                                try { window.jwplayer().setMute(false); window.jwplayer().setVolume(100); } catch(e){}
+                            }
+                        })();
+                    """.trimIndent()
                     webView.evaluateJavascript(safeUnmuteJs, null)
-                } catch (e: Exception) {}
+                    val w = webView.width.toFloat()
+                    val h = webView.height.toFloat()
+                    if (w > 0 && h > 0) {
+                        simulateTouchOnWebView(w * 0.5f, h * 0.5f)
+                    }
+                } catch (_: Exception) {}
             }, d)
         }
     }
@@ -1090,6 +1069,19 @@ class PlayerActivity : ComponentActivity() {
         view?.evaluateJavascript(watcherJs, null)
     }
 
+    private fun simulateTouchOnWebView(x: Float, y: Float) {
+        if (webView.width <= 0 || webView.height <= 0) return
+        try {
+            val now = SystemClock.uptimeMillis()
+            val down = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, x, y, 0)
+            val up = MotionEvent.obtain(now, now + 50, MotionEvent.ACTION_UP, x, y, 0)
+            webView.dispatchTouchEvent(down)
+            webView.dispatchTouchEvent(up)
+            down.recycle()
+            up.recycle()
+        } catch (_: Exception) {}
+    }
+
     private fun performSafeUnmute() {
         val safeUnmuteJs = """
             (function() {
@@ -1139,9 +1131,17 @@ class PlayerActivity : ComponentActivity() {
             })();
         """.trimIndent()
 
-        webView.evaluateJavascript(safeUnmuteJs) {
-            Toast.makeText(this, "🔊 Áudio ativado", Toast.LENGTH_SHORT).show()
+        webView.evaluateJavascript(safeUnmuteJs, null)
+
+        val w = webView.width.toFloat()
+        val h = webView.height.toFloat()
+        if (w > 0 && h > 0) {
+            simulateTouchOnWebView(w * 0.5f, h * 0.5f)
+            simulateTouchOnWebView(w * 0.88f, h * 0.12f)
+            simulateTouchOnWebView(w * 0.12f, h * 0.88f)
         }
+
+        Toast.makeText(this, "🔊 Áudio ativado", Toast.LENGTH_SHORT).show()
     }
 
     private fun loadCurrentStream() {
@@ -1332,20 +1332,35 @@ class PlayerActivity : ComponentActivity() {
         switchChannel(list[prevIndex])
     }
 
-    private fun toggleControlsOverlay() {
+    private fun showControlsOverlay() {
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (isLandscape) {
-            if (landscapeOverlay.visibility == View.VISIBLE) {
-                landscapeOverlay.visibility = View.GONE
-                handler.removeCallbacks(overlayHideRunnable)
-            } else {
-                landscapeOverlay.visibility = View.VISIBLE
-                findViewById<ImageButton>(R.id.btnLandscapeChannels)?.requestFocus()
-                handler.removeCallbacks(overlayHideRunnable)
-                handler.postDelayed(overlayHideRunnable, 5000)
-            }
+            landscapeOverlay.visibility = View.VISIBLE
+            findViewById<View>(R.id.btnLandscapeChannels)?.requestFocus()
+            handler.removeCallbacks(overlayHideRunnable)
+            handler.postDelayed(overlayHideRunnable, 5000)
         } else {
-            playerHeader.visibility = if (playerHeader.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+            playerHeader.visibility = View.VISIBLE
+        }
+    }
+
+    private fun hideControlsOverlay() {
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        if (isLandscape) {
+            landscapeOverlay.visibility = View.GONE
+            handler.removeCallbacks(overlayHideRunnable)
+        } else {
+            playerHeader.visibility = View.GONE
+        }
+    }
+
+    private fun toggleControlsOverlay() {
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val isVisible = if (isLandscape) landscapeOverlay.visibility == View.VISIBLE else playerHeader.visibility == View.VISIBLE
+        if (isVisible) {
+            hideControlsOverlay()
+        } else {
+            showControlsOverlay()
         }
     }
 
@@ -1838,7 +1853,10 @@ class PlayerActivity : ComponentActivity() {
                 val absX = Math.abs(deltaX)
                 val absY = Math.abs(deltaY)
                 val screenWidth = resources.displayMetrics.widthPixels
-                val minSwipeDist = 110f
+
+                val density = resources.displayMetrics.density
+                val touchSlop = (ViewConfiguration.get(this).scaledTouchSlop.toFloat()).coerceAtLeast(28f * density)
+                val minSwipeDist = 70f * density
 
                 val isEdgeBackZone = touchStartX < screenWidth * 0.12f || touchStartX > screenWidth * 0.88f
                 val isCenterZone = touchStartX >= screenWidth * 0.20f && touchStartX <= screenWidth * 0.80f
@@ -1863,7 +1881,7 @@ class PlayerActivity : ComponentActivity() {
                         showEpgDialog()
                     }
                     return true
-                } else if (absX < 25f && absY < 25f) {
+                } else if (absX < touchSlop && absY < touchSlop) {
                     val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
                     val wasOverlayVisible = if (isLandscape) {
                         landscapeOverlay.visibility == View.VISIBLE
@@ -1874,15 +1892,22 @@ class PlayerActivity : ComponentActivity() {
                     if (wasOverlayVisible) {
                         val touchY = ev.y
                         val overlayHeight = if (isLandscape) landscapeOverlay.height.toFloat() else playerHeader.height.toFloat()
-                        if (touchY > overlayHeight && overlayHeight > 0) {
-                            toggleControlsOverlay()
-                            return true
+                        // Se o toque foi na barra superior, entrega normalmente o clique aos botões!
+                        if (touchY <= overlayHeight && overlayHeight > 0) {
+                            return super.dispatchTouchEvent(ev)
                         }
-                        return super.dispatchTouchEvent(ev)
+                        // Se o toque foi na área de vídeo abaixo da barra, recolhe os controlos
+                        hideControlsOverlay()
                     } else {
-                        toggleControlsOverlay()
-                        return true
+                        // Se os controlos estavam escondidos, agenda a exibição no próximo ciclo
+                        // para que este ACTION_UP atual não ative nenhum botão que apareça agora
+                        handler.post {
+                            showControlsOverlay()
+                        }
                     }
+                    // CRÍTICO: Permite que o ACTION_UP passe para a WebView para que o utilizador
+                    // consiga clicar diretamente no Unmute, Play ou controlos do leitor web!
+                    return super.dispatchTouchEvent(ev)
                 }
             }
         }
