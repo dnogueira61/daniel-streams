@@ -988,15 +988,35 @@ fun SettingsDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Settings, contentDescription = null, tint = RedPrimary)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Definições",
-                    color = TextPrimary,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Settings, contentDescription = null, tint = RedPrimary)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Definições",
+                        color = TextPrimary,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(RedPrimary.copy(alpha = 0.15f))
+                        .border(1.dp, RedPrimary.copy(alpha = 0.5f), RoundedCornerShape(6.dp))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = "v${updateManager.getCurrentVersionName()}",
+                        color = RedPrimary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         },
         text = {
@@ -1279,7 +1299,14 @@ fun SettingsDialog(
                 var updateStatusMessage by remember { mutableStateOf<String?>(null) }
 
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text("🚀 Atualizações da Aplicação", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("🚀 Atualizações da Aplicação", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Instalada: v${updateManager.getCurrentVersionName()}", color = AccentGreen, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
                     Text("Atualizações diretas via GitHub Releases (OTA sem fios):", color = TextSecondary, fontSize = 11.sp)
                     Spacer(modifier = Modifier.height(8.dp))
 
