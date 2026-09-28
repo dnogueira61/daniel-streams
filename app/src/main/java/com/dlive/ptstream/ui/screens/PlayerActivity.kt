@@ -164,19 +164,49 @@ class PlayerActivity : ComponentActivity() {
     private var failoverServers: List<ServerOption> = emptyList()
     private var currentFailoverIndex = 0
     private var streamLoadedSuccessfully = false
-    private val failoverTimeoutMs = 15000L // 15 seconds before trying next server
+    private val failoverTimeoutMs = 10000L // 10 seconds before trying next server
+    private var lastFailoverTime = 0L
+
+    inner class FailoverBridge {
+        @android.webkit.JavascriptInterface
+        fun onPlaybackError(reason: String) {
+            runOnUiThread {
+                triggerFailoverDueToPlaybackError(reason)
+            }
+        }
+    }
+
     private fun showSilentRecoveryHud(serverName: String) {
         runOnUiThread {
             Toast.makeText(this@PlayerActivity, "⚡ A estabilizar sinal... ($serverName)", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private val failoverTimeoutRunnable = Runnable {
-        if (!streamLoadedSuccessfully && currentFailoverIndex < failoverServers.size - 1) {
+    fun triggerFailoverDueToPlaybackError(reason: String) {
+        val now = System.currentTimeMillis()
+        if (now - lastFailoverTime < 2500L) return
+        lastFailoverTime = now
+
+        handler.removeCallbacks(failoverTimeoutRunnable)
+
+        if (currentFailoverIndex < failoverServers.size - 1) {
             currentFailoverIndex++
             val next = failoverServers[currentFailoverIndex]
-            showSilentRecoveryHud(next.label)
-            applyServerOption(next)
+            runOnUiThread {
+                Toast.makeText(this@PlayerActivity, "⚡ Erro na stream. A tentar ${next.label}...", Toast.LENGTH_SHORT).show()
+                applyServerOption(next)
+            }
+        } else {
+            runOnUiThread {
+                hideConnectingOverlay()
+                Toast.makeText(this@PlayerActivity, "⚠️ Todas as transmissões deste canal falharam", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private val failoverTimeoutRunnable = Runnable {
+        if (!streamLoadedSuccessfully) {
+            triggerFailoverDueToPlaybackError("timeout")
         }
     }
 
@@ -659,6 +689,7 @@ class PlayerActivity : ComponentActivity() {
         webView.isFocusableInTouchMode = true
         webView.isClickable = true
         webView.requestFocus()
+        webView.addJavascriptInterface(FailoverBridge(), "AndroidFailover")
 
         if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
             val startScript = """
@@ -689,6 +720,22 @@ class PlayerActivity : ComponentActivity() {
                             document.head.appendChild(style);
                         }
                     }
+
+                    function reportFailover(reason) {
+                        try {
+                            var b = window.AndroidFailover || (window.top && window.top.AndroidFailover);
+                            if (b && typeof b.onPlaybackError === 'function') {
+                                b.onPlaybackError(reason);
+                            }
+                        } catch(e) {}
+                    }
+
+                    window.addEventListener('error', function(e) {
+                        var msg = (e && e.message ? e.message : '').toLowerCase();
+                        if (msg.indexOf('playback') !== -1 || msg.indexOf('stream') !== -1 || msg.indexOf('media') !== -1) {
+                            reportFailover('window_error: ' + msg);
+                        }
+                    }, true);
 
                     if (document.readyState === 'loading') {
                         document.addEventListener('DOMContentLoaded', cleanPlayer);
@@ -756,6 +803,7 @@ class PlayerActivity : ComponentActivity() {
                 progressBar.visibility = View.GONE
                 injectCleanPlayerStyle(view)
                 startAutoUnmuteSequence()
+                injectPlaybackErrorWatcher(view)
                 handler.postDelayed({
                     hideConnectingOverlay()
                     markStreamSuccess()
@@ -765,14 +813,14 @@ class PlayerActivity : ComponentActivity() {
             override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
                 super.onReceivedError(view, request, error)
                 if (request?.isForMainFrame == true) {
-                    // Main frame failed to load — trigger failover immediately
-                    handler.removeCallbacks(failoverTimeoutRunnable)
-                    if (currentFailoverIndex < failoverServers.size - 1) {
-                        currentFailoverIndex++
-                        val next = failoverServers[currentFailoverIndex]
-                        showSilentRecoveryHud(next.label)
-                        applyServerOption(next)
-                    }
+                    triggerFailoverDueToPlaybackError("network_error")
+                }
+            }
+
+            override fun onReceivedHttpError(view: WebView?, request: WebResourceRequest?, errorResponse: WebResourceResponse?) {
+                super.onReceivedHttpError(view, request, errorResponse)
+                if (request?.isForMainFrame == true && (errorResponse?.statusCode ?: 200) >= 400) {
+                    triggerFailoverDueToPlaybackError("http_error_${errorResponse?.statusCode}")
                 }
             }
         }
@@ -885,6 +933,129 @@ class PlayerActivity : ComponentActivity() {
         }
     }
 
+    private fun injectPlaybackErrorWatcher(view: WebView?) {
+        val watcherJs = """
+            (function() {
+                if (window._failoverWatcherInstalled) return;
+                window._failoverWatcherInstalled = true;
+
+                var reported = false;
+                function reportError(detail) {
+                    if (reported) return;
+                    reported = true;
+                    try {
+                        var bridge = window.AndroidFailover || (window.top && window.top.AndroidFailover) || (window.parent && window.parent.AndroidFailover);
+                        if (bridge && typeof bridge.onPlaybackError === 'function') {
+                            bridge.onPlaybackError(detail);
+                        }
+                    } catch(e) {}
+                }
+
+                function scanVideos(doc) {
+                    if (!doc) return;
+                    try {
+                        var vids = doc.querySelectorAll('video');
+                        for (var i = 0; i < vids.length; i++) {
+                            var v = vids[i];
+                            if (!v._errHooked) {
+                                v._errHooked = true;
+                                v.addEventListener('error', function() {
+                                    var errCode = (this.error ? this.error.code : 0);
+                                    if (errCode >= 2) {
+                                        reportError('video_code_' + errCode);
+                                    }
+                                }, true);
+                            }
+                        }
+                    } catch(e) {}
+                }
+
+                function scanJWPlayer() {
+                    try {
+                        if (window.jwplayer && typeof window.jwplayer === 'function') {
+                            var jw = window.jwplayer();
+                            if (jw && typeof jw.on === 'function' && !jw._errHooked) {
+                                jw._errHooked = true;
+                                jw.on('error', function(e) {
+                                    reportError('jw_error: ' + (e ? e.message : ''));
+                                });
+                                jw.on('setupError', function(e) {
+                                    reportError('jw_setupError');
+                                });
+                            }
+                        }
+                    } catch(e) {}
+                }
+
+                var errorKeywords = [
+                    'playback error',
+                    'stream error',
+                    'error loading player',
+                    'no playable sources',
+                    'the media could not be loaded',
+                    'this stream is offline',
+                    'stream is offline',
+                    'stream unavailable',
+                    'channel is offline',
+                    'video playback was aborted'
+                ];
+
+                var errorSelectors = [
+                    '.jw-error', '.jw-error-msg', '.vjs-error-display',
+                    '.clappr-error', '[class*="stream-offline" i]',
+                    '.player-error', '.playback-error'
+                ];
+
+                function scanDom(doc) {
+                    if (!doc || reported) return;
+                    try {
+                        for (var s = 0; s < errorSelectors.length; s++) {
+                            var el = doc.querySelector(errorSelectors[s]);
+                            if (el && el.offsetParent !== null) {
+                                var txt = (el.innerText || el.textContent || '').trim();
+                                if (txt.length > 0) {
+                                    reportError('selector: ' + txt.substring(0, 40));
+                                    return;
+                                }
+                            }
+                        }
+
+                        var text = (doc.body ? doc.body.innerText : '') || '';
+                        var lower = text.toLowerCase();
+                        for (var k = 0; k < errorKeywords.length; k++) {
+                            if (lower.indexOf(errorKeywords[k]) !== -1) {
+                                reportError('keyword: ' + errorKeywords[k]);
+                                return;
+                            }
+                        }
+                    } catch(e) {}
+                }
+
+                function checkAll() {
+                    if (reported) return;
+                    scanVideos(document);
+                    scanJWPlayer();
+                    scanDom(document);
+
+                    try {
+                        var frames = document.querySelectorAll('iframe');
+                        for (var f = 0; f < frames.length; f++) {
+                            var fdoc = frames[f].contentDocument || frames[f].contentWindow.document;
+                            if (fdoc) {
+                                scanVideos(fdoc);
+                                scanDom(fdoc);
+                            }
+                        }
+                    } catch(e) {}
+                }
+
+                var checkTimer = setInterval(checkAll, 500);
+                setTimeout(function() { clearInterval(checkTimer); }, 15000);
+            })();
+        """.trimIndent()
+        view?.evaluateJavascript(watcherJs, null)
+    }
+
     private fun loadCurrentStream() {
         showConnectingOverlay(channelName)
         progressBar.visibility = View.VISIBLE
@@ -928,8 +1099,20 @@ class PlayerActivity : ComponentActivity() {
                                 hls.loadSource(src);
                                 hls.attachMedia(video);
                                 hls.on(Hls.Events.MANIFEST_PARSED, function() { video.play().catch(function(){}); });
+                                hls.on(Hls.Events.ERROR, function(event, data) {
+                                    if (data && data.fatal) {
+                                        try {
+                                            if (window.AndroidFailover) window.AndroidFailover.onPlaybackError('hls_fatal_' + data.type);
+                                        } catch(e) {}
+                                    }
+                                });
                             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                                 video.src = src;
+                                video.onerror = function() {
+                                    try {
+                                        if (window.AndroidFailover) window.AndroidFailover.onPlaybackError('video_onerror');
+                                    } catch(e) {}
+                                };
                                 video.play().catch(function(){});
                             }
                         </script>
