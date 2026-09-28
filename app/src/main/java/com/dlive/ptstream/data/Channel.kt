@@ -17,6 +17,7 @@ data class Channel(
     var isFavorite: Boolean = false,
     @SerializedName("logoUrl") var logoUrl: String? = null,
     @SerializedName("backupStreamUrl") var backupStreamUrl: String? = null,
+    @SerializedName("backupStreamUrl2") var backupStreamUrl2: String? = null,
     var status: ChannelStatus? = ChannelStatus.UNKNOWN
 ) {
     val safeStatus: ChannelStatus get() = status ?: ChannelStatus.UNKNOWN

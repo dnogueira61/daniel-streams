@@ -881,21 +881,22 @@ fun FeaturedLiveCard(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = channel.name,
-                        color = Color(0xFF9CA3AF),
-                        fontSize = 12.sp,
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(3.dp))
 
-                val programTitle = epgProgram?.title ?: channel.name
+                val programTitle = epgProgram?.title ?: "Emissão em Direto"
                 Text(
                     text = programTitle,
-                    color = Color.White,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF38BDF8),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1026,18 +1027,32 @@ fun ChannelCard(
                 Spacer(modifier = Modifier.width(14.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
-                    val programTitle = epgProgram?.title ?: channel.name
+                    // 1. Channel Name in highlight (EM DESTAQUE)
                     Text(
-                        text = programTitle,
+                        text = channel.name,
                         color = Color.White,
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
 
-                    Spacer(modifier = Modifier.height(5.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
 
+                    // 2. Program Title from EPG
+                    val programTitle = epgProgram?.title ?: "Emissão em Direto"
+                    Text(
+                        text = programTitle,
+                        color = Color(0xFF38BDF8),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // 3. Progress bar
                     val progress = epgProgram?.getProgress() ?: 0.35f
                     Box(
                         modifier = Modifier
@@ -1054,13 +1069,14 @@ fun ChannelCard(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(3.dp))
 
-                    val timeRange = epgProgram?.timeRange ?: (if (channel.isPortuguese) "Em Direto • Portugal" else "Em Direto")
+                    // 4. Time range
+                    val timeRange = epgProgram?.timeRange ?: "Em Direto"
                     Text(
                         text = timeRange,
                         color = Color(0xFF9CA3AF),
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Normal
                     )
                 }

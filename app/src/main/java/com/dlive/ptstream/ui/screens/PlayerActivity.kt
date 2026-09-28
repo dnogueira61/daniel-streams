@@ -121,6 +121,7 @@ class PlayerActivity : ComponentActivity() {
     private var directStreamUrl: String? = null
     private var backupDirectUrl: String? = null
     private var isBackupSelected: Boolean = false
+    private var activeDirectUrl: String? = null
     private var currentFolder: String = "stream"
 
     private val handler = Handler(Looper.getMainLooper())
@@ -157,6 +158,7 @@ class PlayerActivity : ComponentActivity() {
         channelName = intent.getStringExtra("EXTRA_CHANNEL_NAME") ?: "Stream"
         directStreamUrl = intent.getStringExtra("EXTRA_DIRECT_STREAM_URL")
         backupDirectUrl = intent.getStringExtra("EXTRA_BACKUP_STREAM_URL")
+        activeDirectUrl = directStreamUrl
 
         if (channelId.isBlank() && directStreamUrl.isNullOrBlank()) {
             Toast.makeText(this, "ID de canal inválido", Toast.LENGTH_SHORT).show()
@@ -321,10 +323,11 @@ class PlayerActivity : ComponentActivity() {
         )
         rvDrawerChannels.adapter = drawerAdapter
 
+        btnTabPt.text = "Canais"
+        btnTabTimst.visibility = View.GONE
+        btnTabAll.visibility = View.GONE
         btnTabPt.setOnClickListener { selectDrawerTab(TabFilter.PORTUGAL) }
-        btnTabTimst.setOnClickListener { selectDrawerTab(TabFilter.TIMSTREAMS) }
         btnTabFav.setOnClickListener { selectDrawerTab(TabFilter.FAVORITES) }
-        btnTabAll.setOnClickListener { selectDrawerTab(TabFilter.ALL) }
 
         etDrawerSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -406,7 +409,7 @@ class PlayerActivity : ComponentActivity() {
     }
 
     private fun switchChannel(newChannel: Channel) {
-        if (newChannel.id == channelId && directStreamUrl == null) {
+        if (newChannel.id == channelId && activeDirectUrl == null && directStreamUrl == null) {
             drawerLayout.closeDrawer(GravityCompat.START)
             return
         }
@@ -415,12 +418,15 @@ class PlayerActivity : ComponentActivity() {
         channelName = newChannel.name
         backupDirectUrl = newChannel.backupStreamUrl
 
-        if (newChannel.id.startsWith("timst-") || newChannel.id.startsWith("ntv-") || newChannel.category == "TimStreams") {
+        if (newChannel.id.toIntOrNull() == null) {
+            activeDirectUrl = newChannel.backupStreamUrl
             directStreamUrl = newChannel.backupStreamUrl
             isBackupSelected = false
         } else {
+            activeDirectUrl = null
             directStreamUrl = null
             isBackupSelected = false
+            currentFolder = repository.getDefaultServer()
         }
 
         tvChannelTitle.text = channelName
@@ -428,8 +434,7 @@ class PlayerActivity : ComponentActivity() {
 
         drawerLayout.closeDrawer(GravityCompat.START)
 
-        val tag = if (newChannel.isPortuguese) "PT 🇵🇹" else newChannel.country
-        showOsdBanner(channelId, channelName, tag)
+        showOsdBanner(channelId, channelName, "PT 🇵🇹")
 
         setupServerBadge()
         loadCurrentStream()
@@ -450,125 +455,138 @@ class PlayerActivity : ComponentActivity() {
     }
 
     private fun updateServerBadgeText() {
-        val currentChannel = repository.getChannels(TabFilter.ALL).firstOrNull { it.id == channelId }
-        val hasBackup = currentChannel?.backupStreamUrl != null || backupDirectUrl != null
-
-        val label = if (isBackupSelected) {
-            val backupName = if (currentChannel?.backupStreamUrl?.contains("epicsports") == true || currentChannel?.backupStreamUrl?.contains("ntv.st") == true) "NTV" else "TimST"
-            "S2 ($backupName)"
-        } else if (directStreamUrl != null) {
-            if (directStreamUrl!!.contains("epicsports") || directStreamUrl!!.contains("ntv.st")) "NTV Direto" else "TimST Principal"
+        val label = if (activeDirectUrl != null) {
+            val u = activeDirectUrl!!
+            when {
+                u.contains("impresa.pt") -> "S (SIC)"
+                u.contains("rtp.pt") -> "S (RTP)"
+                u.contains("TVI") || u.contains("github") -> "S (TVI)"
+                u.contains("cloudfront") -> "S (C11)"
+                u.contains("fastly") -> "S (Porto)"
+                u.contains("exmxbxe") -> "S (TimST)"
+                u.contains("epicsports") || u.contains("ntv.st") -> "S (NTV)"
+                else -> "S (Direto)"
+            }
         } else {
             when (currentFolder) {
-                "stream" -> "S1 (DLive)"
-                "cast" -> if (hasBackup) "S3 (Cast)" else "S2 (Cast)"
-                "watch" -> if (hasBackup) "S4 (Watch)" else "S3 (Watch)"
-                "player" -> if (hasBackup) "S5 (Player)" else "S4 (Player)"
-                "plus" -> if (hasBackup) "S6 (Plus)" else "S5 (Plus)"
-                else -> currentFolder.uppercase()
+                "stream" -> "S (DLive)"
+                "cast" -> "S (Cast)"
+                "watch" -> "S (Watch)"
+                "player" -> "S (Player)"
+                "plus" -> "S (Plus)"
+                else -> "S (${currentFolder.uppercase()})"
             }
         }
         tvServerBadge.text = "$label ▾"
         tvLandscapeServerBadge.text = "$label ▾"
     }
 
+    private data class ServerOption(
+        val label: String,
+        val isDirect: Boolean,
+        val directUrl: String? = null,
+        val folder: String? = null
+    )
+
     private fun showServerSelectionDialog() {
-        val currentChannel = repository.getChannels(TabFilter.ALL).firstOrNull { it.id == channelId }
-        val hasBackup = currentChannel?.backupStreamUrl != null || backupDirectUrl != null
+        val currentChannel = repository.getChannels(TabFilter.PORTUGAL).firstOrNull { it.id == channelId }
+            ?: repository.getChannels(TabFilter.ALL).firstOrNull { it.id == channelId }
 
-        val options: List<String>
-        val currentSelectedIndex: Int
+        val options = mutableListOf<ServerOption>()
 
-        if (directStreamUrl != null) {
-            val serverName = if (directStreamUrl!!.contains("epicsports") || directStreamUrl!!.contains("ntv.st")) "NTV / EpicSports (Full HD Direto)" else "TimStreams (Full HD Direto)"
-            options = if (backupDirectUrl != null && backupDirectUrl != directStreamUrl) {
-                listOf(
-                    "Servidor 1: $serverName",
-                    "Servidor 2: Backup (Direto)"
-                )
-            } else {
-                listOf("Servidor 1: $serverName")
+        // 1. Direct stream 1
+        val s1Direct = if (currentChannel != null && currentChannel.id.toIntOrNull() == null) {
+            currentChannel.backupStreamUrl ?: directStreamUrl
+        } else if (directStreamUrl != null) {
+            directStreamUrl
+        } else null
+
+        if (s1Direct != null) {
+            val s1Title = when {
+                s1Direct.contains("impresa.pt") -> "Servidor 1: SIC Oficial (Full HD Direto)"
+                s1Direct.contains("rtp.pt") -> "Servidor 1: RTP Oficial (Direto)"
+                s1Direct.contains("github.com") || s1Direct.contains("TVI") -> "Servidor 1: TVI Oficial (Direto)"
+                s1Direct.contains("cloudfront") -> "Servidor 1: Canal 11 Oficial (Direto)"
+                s1Direct.contains("fastly") -> "Servidor 1: Porto Canal Oficial (Direto)"
+                s1Direct.contains("exmxbxe") -> "Servidor 1: TimStreams (Full HD Direto)"
+                s1Direct.contains("epicsports") || s1Direct.contains("ntv.st") -> "Servidor 1: NTV / EpicSports (Full HD Direto)"
+                else -> "Servidor 1: Direto Principal"
             }
-            currentSelectedIndex = if (isBackupSelected) 1 else 0
-        } else {
-            if (hasBackup) {
-                val backupTitle = if (currentChannel?.backupStreamUrl?.contains("epicsports") == true || currentChannel?.backupStreamUrl?.contains("ntv.st") == true) {
-                    "Servidor 2: NTV / EpicSports (Full HD Direto)"
-                } else {
-                    "Servidor 2: TimStreams (Full HD Direto)"
-                }
-                options = listOf(
-                    "Servidor 1: DaddyLive (Stream Web • Recomendado)",
-                    backupTitle,
-                    "Servidor 3: Cast (Muito Estável)",
-                    "Servidor 4: Watch (Espelho)",
-                    "Servidor 5: Player (HTML5)",
-                    "Servidor 6: Plus (Alta Definição • 1080p)"
-                )
-                currentSelectedIndex = if (isBackupSelected) {
-                    1
-                } else {
-                    when (currentFolder) {
-                        "stream" -> 0
-                        "cast" -> 2
-                        "watch" -> 3
-                        "player" -> 4
-                        "plus" -> 5
-                        else -> 0
-                    }
-                }
-            } else {
-                options = listOf(
-                    "Servidor 1: Stream (Rápido • Recomendado)",
-                    "Servidor 2: Cast (Muito Estável)",
-                    "Servidor 3: Watch (Espelho)",
-                    "Servidor 4: Player (HTML5)",
-                    "Servidor 5: Plus (Alta Definição • 1080p)"
-                )
-                currentSelectedIndex = serverFolders.indexOf(currentFolder).coerceAtLeast(0)
-            }
+            options.add(ServerOption(s1Title, isDirect = true, directUrl = s1Direct))
         }
+
+        // 2. DaddyLive
+        val hasDaddyLive = (currentChannel?.id?.toIntOrNull() != null) || (channelId.toIntOrNull() != null)
+        if (hasDaddyLive) {
+            options.add(ServerOption("Servidor ${options.size + 1}: DaddyLive (Stream Web • Recomendado)", isDirect = false, folder = "stream"))
+        }
+
+        // 3. Backup direct stream 1
+        val s2Direct = if (currentChannel != null && currentChannel.id.toIntOrNull() == null) {
+            currentChannel.backupStreamUrl2
+        } else {
+            currentChannel?.backupStreamUrl ?: backupDirectUrl
+        }
+
+        if (s2Direct != null && options.none { it.directUrl == s2Direct }) {
+            val s2Title = when {
+                s2Direct.contains("epicsports") || s2Direct.contains("ntv.st") -> "Servidor ${options.size + 1}: NTV / EpicSports (Full HD Direto)"
+                s2Direct.contains("exmxbxe") -> "Servidor ${options.size + 1}: TimStreams (Full HD Direto)"
+                s2Direct.contains("rtp.pt") -> "Servidor ${options.size + 1}: RTP Oficial (Direto)"
+                s2Direct.contains("impresa.pt") -> "Servidor ${options.size + 1}: SIC Oficial (Direto)"
+                else -> "Servidor ${options.size + 1}: Servidor Backup (Direto)"
+            }
+            options.add(ServerOption(s2Title, isDirect = true, directUrl = s2Direct))
+        }
+
+        // 4. Backup direct stream 2
+        val s3Direct = currentChannel?.backupStreamUrl2
+        if (s3Direct != null && options.none { it.directUrl == s3Direct }) {
+            val s3Title = when {
+                s3Direct.contains("rtp.pt") -> "Servidor ${options.size + 1}: RTP Oficial M3UPT (Direto)"
+                s3Direct.contains("epicsports") || s3Direct.contains("ntv.st") -> "Servidor ${options.size + 1}: NTV / EpicSports (Full HD Direto)"
+                s3Direct.contains("exmxbxe") -> "Servidor ${options.size + 1}: TimStreams (Full HD Direto)"
+                else -> "Servidor ${options.size + 1}: Servidor Backup 2 (Direto)"
+            }
+            options.add(ServerOption(s3Title, isDirect = true, directUrl = s3Direct))
+        }
+
+        // 5. DaddyLive mirrors
+        if (hasDaddyLive) {
+            options.add(ServerOption("Servidor Espelho: Cast (Muito Estável)", isDirect = false, folder = "cast"))
+            options.add(ServerOption("Servidor Espelho: Watch", isDirect = false, folder = "watch"))
+            options.add(ServerOption("Servidor Espelho: Player (HTML5)", isDirect = false, folder = "player"))
+            options.add(ServerOption("Servidor Espelho: Plus (1080p)", isDirect = false, folder = "plus"))
+        }
+
+        if (options.isEmpty()) {
+            options.add(ServerOption("Servidor 1: Stream Padrão", isDirect = false, folder = "stream"))
+        }
+
+        val titles = options.map { it.label }.toTypedArray()
+        val currentSelectedIndex = options.indexOfFirst { opt ->
+            if (opt.isDirect) {
+                activeDirectUrl == opt.directUrl
+            } else {
+                activeDirectUrl == null && currentFolder == opt.folder
+            }
+        }.coerceAtLeast(0)
 
         AlertDialog.Builder(this)
             .setTitle("Selecionar Servidor")
-            .setSingleChoiceItems(options.toTypedArray(), currentSelectedIndex) { dialog, which ->
+            .setSingleChoiceItems(titles, currentSelectedIndex) { dialog, which ->
                 dialog.dismiss()
-                if (directStreamUrl != null) {
-                    isBackupSelected = (which == 1)
-                } else if (hasBackup) {
-                    when (which) {
-                        0 -> {
-                            isBackupSelected = false
-                            currentFolder = "stream"
-                        }
-                        1 -> {
-                            isBackupSelected = true
-                        }
-                        2 -> {
-                            isBackupSelected = false
-                            currentFolder = "cast"
-                        }
-                        3 -> {
-                            isBackupSelected = false
-                            currentFolder = "watch"
-                        }
-                        4 -> {
-                            isBackupSelected = false
-                            currentFolder = "player"
-                        }
-                        5 -> {
-                            isBackupSelected = false
-                            currentFolder = "plus"
-                        }
-                    }
+                val selected = options[which]
+                if (selected.isDirect) {
+                    activeDirectUrl = selected.directUrl
                 } else {
-                    isBackupSelected = false
-                    currentFolder = serverFolders.getOrElse(which) { "stream" }
+                    activeDirectUrl = null
+                    currentFolder = selected.folder ?: "stream"
                 }
                 updateServerBadgeText()
                 loadCurrentStream()
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton("Fechar", null)
             .show()
     }
 
@@ -777,28 +795,17 @@ class PlayerActivity : ComponentActivity() {
     private fun loadCurrentStream() {
         progressBar.visibility = View.VISIBLE
 
-        if (directStreamUrl != null) {
-            val targetUrl = if (isBackupSelected && backupDirectUrl != null) backupDirectUrl!! else directStreamUrl!!
-            val referer = if (targetUrl.contains("epicsports") || targetUrl.contains("ntv.st")) {
-                "https://ntv.st/"
-            } else {
-                "${repository.getTimstBaseUrl()}/"
+        val targetDirect = activeDirectUrl ?: directStreamUrl
+        if (targetDirect != null) {
+            val referer = when {
+                targetDirect.contains("impresa.pt") -> "https://sic.pt/"
+                targetDirect.contains("rtp.pt") -> "https://www.rtp.pt/"
+                targetDirect.contains("TVI") || targetDirect.contains("iol.pt") || targetDirect.contains("raw.githubusercontent.com") -> "https://tviplayer.iol.pt/"
+                targetDirect.contains("epicsports") || targetDirect.contains("ntv.st") -> "https://ntv.st/"
+                else -> "${repository.getTimstBaseUrl()}/"
             }
             val headers = mapOf("Referer" to referer)
-            webView.loadUrl(targetUrl, headers)
-            return
-        }
-
-        val currentChannel = repository.getChannels(TabFilter.ALL).firstOrNull { it.id == channelId }
-        if (isBackupSelected && currentChannel?.backupStreamUrl != null) {
-            val targetUrl = currentChannel.backupStreamUrl!!
-            val referer = if (targetUrl.contains("epicsports") || targetUrl.contains("ntv.st")) {
-                "https://ntv.st/"
-            } else {
-                "${repository.getTimstBaseUrl()}/"
-            }
-            val headers = mapOf("Referer" to referer)
-            webView.loadUrl(targetUrl, headers)
+            webView.loadUrl(targetDirect, headers)
             return
         }
 

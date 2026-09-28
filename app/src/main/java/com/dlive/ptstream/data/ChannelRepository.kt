@@ -73,14 +73,12 @@ class ChannelRepository(private val context: Context) {
         precomputedAllChannels = all
         precomputedFavChannels = fav
 
-        val preferredPtCats = listOf("Generalistas", "Desporto", "Filmes & Séries", "Entretenimento", "Infantis", "Música")
+        val preferredPtCats = listOf("Generalistas", "Desporto", "Filmes & Séries")
         val availablePtCats = pt.map { it.category }.distinct()
         val orderedPtCats = preferredPtCats.filter { availablePtCats.contains(it) } + availablePtCats.filter { !preferredPtCats.contains(it) }.sorted()
 
-        val allCats = all.map { it.category }.distinct().sorted()
-
         precomputedPtCategories = listOf("Todos") + orderedPtCats
-        precomputedAllCategories = listOf("Todos") + allCats
+        precomputedAllCategories = precomputedPtCategories
 
         channelsVersion.intValue++
     }
@@ -143,39 +141,15 @@ class ChannelRepository(private val context: Context) {
     private fun loadChannels() {
         val favIds = getFavoriteIds()
 
-        // 1. Internal storage cache first
+        // Clean stale cache file if present
         val cacheFile = File(context.filesDir, CACHE_FILE_NAME)
         if (cacheFile.exists()) {
             try {
-                cacheFile.inputStream().use { inputStream ->
-                    val reader = InputStreamReader(inputStream, "UTF-8")
-                    val itemType = object : TypeToken<List<Channel>>() {}.type
-                    val list: List<Channel>? = Gson().fromJson(reader, itemType)
-                    if (!list.isNullOrEmpty()) {
-                        cachedChannels = list.map { ch ->
-                            val isPt = ch.isPortuguese
-                            val logo = ch.logoUrl ?: ChannelLogoHelper.getDefaultOnlineLogo(ch.name)
-                            ch.copy(
-                                isPt = isPt,
-                                country = if (isPt) "PT" else ch.country,
-                                category = ch.category,
-                                isFavorite = favIds.contains(ch.id),
-                                logoUrl = logo,
-                                status = ch.safeStatus
-                            )
-                        }
-                        rebuildPrecomputedLists()
-                        if (precomputedPtChannels.isNotEmpty()) {
-                            return
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+                cacheFile.delete()
+            } catch (e: Exception) {}
         }
 
-        // 2. Bundled assets fallback
+        // Bundled curated channels
         try {
             context.assets.open("channels.json").use { inputStream ->
                 val reader = InputStreamReader(inputStream, "UTF-8")
@@ -204,254 +178,14 @@ class ChannelRepository(private val context: Context) {
     }
 
     /**
-     * Sincroniza canais online de dlive.sx e enriquece com TimStreams (logos + servidores backup)
+     * Sincroniza canais online e atualiza grelha
      */
     fun syncChannelsFromWeb(scope: CoroutineScope, onFinished: ((Boolean) -> Unit)? = null) {
         scope.launch(Dispatchers.IO) {
             var success = false
             try {
-                val fetched = mutableListOf<Channel>()
-                val favIds = getFavoriteIds()
-
-                // 1. Fetch DaddyLive channels
-                val channelsUrl = "${getBaseUrl()}/24-7-channels.php"
-                val connection = (URL(channelsUrl).openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 8000
-                    readTimeout = 8000
-                    setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36")
-                }
-
-                if (connection.responseCode == HttpURLConnection.HTTP_OK) {
-                    val html = connection.inputStream.bufferedReader().use { it.readText() }
-                    val pattern = Pattern.compile("href=\"/watch\\.php\\?id=(\\d+)\"[^>]*data-title=\"([^\"]+)\"")
-                    val matcher = pattern.matcher(html)
-
-                    while (matcher.find()) {
-                        val cid = matcher.group(1) ?: continue
-                        val rawTitle = matcher.group(2) ?: continue
-                        val titleLower = rawTitle.lowercase()
-
-                        val isPt = titleLower.contains("portugal") ||
-                                titleLower.contains("benfica") ||
-                                titleLower.contains("porto canal") ||
-                                titleLower.contains("sporting tv") ||
-                                titleLower.contains("canal 11") ||
-                                titleLower.contains("tvi") ||
-                                titleLower.contains("cmtv") ||
-                                (titleLower.contains("sport tv") && !titleLower.contains("poland") && !titleLower.contains("slovenia")) ||
-                                (titleLower.contains("eleven sports") && titleLower.contains("portugal")) ||
-                                titleLower.contains("rtp") ||
-                                titleLower.contains("sic")
-
-                        val category = when {
-                            listOf("sport", "tv1", "tv2", "tv3", "tv4", "tv5", "tv6", "football", "dazn", "bein").any { titleLower.contains(it) } -> "Desporto"
-                            listOf("movie", "cinema", "film", "hbo", "action", "starz").any { titleLower.contains(it) } -> "Filmes"
-                            listOf("news", "noticias", "cnn").any { titleLower.contains(it) } -> "Notícias"
-                            listOf("kids", "disney", "cartoon", "nick").any { titleLower.contains(it) } -> "Infantil"
-                            else -> "Geral"
-                        }
-
-                        val country = if (isPt) "PT" else when {
-                            listOf(" usa", "espn", "nbc", "fox", "abc").any { titleLower.contains(it) } -> "US"
-                            listOf(" uk", "sky sports", "tnt sports", "bbc").any { titleLower.contains(it) } -> "UK"
-                            listOf(" espana", " spain", "movistar").any { titleLower.contains(it) } -> "ES"
-                            listOf(" brazil", " brasil", "premiere").any { titleLower.contains(it) } -> "BR"
-                            else -> "Outro"
-                        }
-
-                        val formattedName = rawTitle.split(" ").joinToString(" ") { word ->
-                            word.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-                        }.replace("Pt", "PT").replace("Tv", "TV").replace("Sic", "SIC").replace("Rtp", "RTP").replace("Tvi", "TVI")
-
-                        val defaultLogo = ChannelLogoHelper.getDefaultOnlineLogo(formattedName)
-
-                        fetched.add(
-                            Channel(
-                                id = cid,
-                                name = formattedName,
-                                country = country,
-                                category = category,
-                                isPt = isPt,
-                                isFavorite = favIds.contains(cid),
-                                logoUrl = defaultLogo
-                            )
-                        )
-                    }
-                }
-
-                // If DaddyLive list couldn't be fetched, use existing cached channels
-                val listToEnrich = if (fetched.isNotEmpty()) fetched else cachedChannels.toMutableList()
-
-                // 2. Fetch TimStreams channels to merge logos & backup streams
-                try {
-                    val timstUrl = "${getTimstBaseUrl()}/api/channels"
-                    val timstConn = (URL(timstUrl).openConnection() as HttpURLConnection).apply {
-                        connectTimeout = 6000
-                        readTimeout = 6000
-                        setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
-                    }
-
-                    if (timstConn.responseCode == HttpURLConnection.HTTP_OK) {
-                        val timstJson = timstConn.inputStream.bufferedReader().use { it.readText() }
-                        val jsonObject = JsonParser.parseString(timstJson).asJsonObject
-                        val chArray = jsonObject.getAsJsonArray("channels")
-
-                        val timstMap = mutableMapOf<String, Pair<String?, String?>>() // normName -> Pair(logo, streamUrl)
-                        val uniqueTimstList = mutableListOf<Channel>()
-
-                        if (chArray != null) {
-                            for (el in chArray) {
-                                val chObj = el.asJsonObject
-                                val tName = chObj.get("name")?.asString ?: continue
-                                val tSlug = chObj.get("url")?.asString ?: ""
-                                val tLogo = chObj.get("logo")?.asString
-                                val streamsArr = chObj.getAsJsonArray("streams")
-                                val tStream = if (streamsArr != null && streamsArr.size() > 0) {
-                                    streamsArr[0].asJsonObject.get("url")?.asString
-                                } else null
-
-                                val norm = normalizeChannelName(tName)
-                                timstMap[norm] = Pair(tLogo, tStream)
-
-                                val isDaznPt = tSlug == "dazn-1-portugal" || tName.contains("DAZN 1 Portugal", ignoreCase = true)
-                                val flag = chObj.get("flag")?.asString ?: "Outro"
-
-                                val cat = when {
-                                    listOf("sport", "dazn", "bein", "canal+", "golf").any { tName.contains(it, ignoreCase = true) } -> "Desporto"
-                                    listOf("hbo", "movie", "cinema").any { tName.contains(it, ignoreCase = true) } -> "Filmes"
-                                    listOf("disney", "cbeebies", "nick", "cartoon").any { tName.contains(it, ignoreCase = true) } -> "Infantil"
-                                    else -> "TimStreams"
-                                }
-
-                                if (tStream != null) {
-                                    uniqueTimstList.add(
-                                        Channel(
-                                            id = "timst-$tSlug",
-                                            name = if (isDaznPt) "DAZN 1 Portugal (TimStreams)" else "$tName (TimStreams)",
-                                            country = if (isDaznPt) "PT" else flag.uppercase(),
-                                            category = cat,
-                                            isPt = isDaznPt,
-                                            isFavorite = favIds.contains("timst-$tSlug"),
-                                            logoUrl = tLogo,
-                                            backupStreamUrl = tStream
-                                        )
-                                    )
-                                }
-                            }
-                        }
-
-                        // Enrich DaddyLive channels
-                        val existingIds = listToEnrich.map { it.id }.toSet()
-                        val existingNormNames = listToEnrich.map { normalizeChannelName(it.name) }.toSet()
-
-                        for (ch in listToEnrich) {
-                            val norm = normalizeChannelName(ch.name)
-                            val matched = timstMap[norm] ?: timstMap.entries.firstOrNull {
-                                (norm.length > 3 && it.key.contains(norm)) || (it.key.length > 3 && norm.contains(it.key))
-                            }?.value
-
-                            if (matched != null) {
-                                if (ch.logoUrl.isNullOrBlank() && !matched.first.isNullOrBlank()) {
-                                    ch.logoUrl = matched.first
-                                }
-                                if (!matched.second.isNullOrBlank()) {
-                                    ch.backupStreamUrl = matched.second
-                                }
-                            }
-                        }
-
-                        // Add unique TimStreams channels that don't duplicate existing DaddyLive channels
-                        for (tch in uniqueTimstList) {
-                            if (!existingIds.contains(tch.id) && (!existingNormNames.contains(normalizeChannelName(tch.name)) || tch.isPortuguese)) {
-                                listToEnrich.add(tch)
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-
-                // 3. Fetch NTV Portuguese channels (TVCine, Hollywood, Cinemundo, A Bola TV, etc.)
-                try {
-                    val ntvUrl = "https://ntv.st/api/get-channels?limit=150&q=(pt)"
-                    val ntvConn = (URL(ntvUrl).openConnection() as HttpURLConnection).apply {
-                        connectTimeout = 7000
-                        readTimeout = 7000
-                        setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-                        setRequestProperty("Accept", "application/json")
-                    }
-
-                    if (ntvConn.responseCode == HttpURLConnection.HTTP_OK) {
-                        val ntvJson = ntvConn.inputStream.bufferedReader().use { it.readText() }
-                        val jsonObject = JsonParser.parseString(ntvJson).asJsonObject
-                        val chArray = jsonObject.getAsJsonArray("channels")
-                        if (chArray != null) {
-                            val existingIds = listToEnrich.map { it.id }.toSet()
-
-                            for (el in chArray) {
-                                val chObj = el.asJsonObject
-                                val rawName = chObj.get("channel_name")?.asString ?: continue
-                                val cid = chObj.get("channel_id")?.asString ?: ""
-                                val streamUrl = chObj.get("channel_url")?.asString ?: continue
-                                if (streamUrl.isBlank()) continue
-
-                                val cleanName = rawName.replace("(PT)", "").replace("(pt)", "").trim()
-                                val norm = normalizeChannelName(cleanName)
-
-                                val matched = listToEnrich.firstOrNull { normalizeChannelName(it.name) == norm }
-                                if (matched != null) {
-                                    if (matched.backupStreamUrl.isNullOrBlank()) {
-                                        matched.backupStreamUrl = streamUrl
-                                    }
-                                } else {
-                                    val lower = cleanName.lowercase()
-                                    val cat = when {
-                                        listOf("sport", "dazn", "bola", "eurosport", "fight", "motor", "nba", "pfc", "toros", "fuel", "ginx").any { lower.contains(it) } -> "Desporto"
-                                        listOf("tvcine", "hollywood", "cinemundo", "axn", "amc", "star", "syfy", "nos studios", "novelas").any { lower.contains(it) } -> "Filmes"
-                                        listOf("kitchen", "casa", "food", "travel", "fashion", "dog", "e!", "reality").any { lower.contains(it) } -> "Entretenimento"
-                                        listOf("noticias", "rtp 3", "cmtv", "cnn").any { lower.contains(it) } -> "Notícias"
-                                        listOf("music", "mtv", "trace", "mezzo", "clubbing", "lusa", "afro", "iconcerts").any { lower.contains(it) } -> "Música"
-                                        else -> "Geral"
-                                    }
-                                    val ntvId = if (cid.startsWith("ntv-")) cid else "ntv-$cid"
-                                    if (!existingIds.contains(ntvId)) {
-                                        listToEnrich.add(
-                                            Channel(
-                                                id = ntvId,
-                                                name = cleanName,
-                                                country = "PT",
-                                                category = cat,
-                                                isPt = true,
-                                                isFavorite = favIds.contains(ntvId),
-                                                logoUrl = ChannelLogoHelper.getDefaultOnlineLogo(cleanName),
-                                                backupStreamUrl = streamUrl
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-
-                // 4. Always preserve bundled and previously cached NTV channels
-                val currentEnrichedIds = listToEnrich.map { it.id }.toSet()
-                for (ch in cachedChannels) {
-                    if (ch.id.startsWith("ntv-") && !currentEnrichedIds.contains(ch.id)) {
-                        listToEnrich.add(ch)
-                    }
-                }
-
-                if (listToEnrich.isNotEmpty()) {
-                    listToEnrich.sortWith(compareBy({ !it.isPortuguese }, { it.name }))
-                    val cacheFile = File(context.filesDir, CACHE_FILE_NAME)
-                    cacheFile.writeText(Gson().toJson(listToEnrich))
-                    cachedChannels = listToEnrich
-                    rebuildPrecomputedLists()
-                    success = true
-                }
+                loadChannels()
+                success = true
             } catch (e: Exception) {
                 e.printStackTrace()
             }

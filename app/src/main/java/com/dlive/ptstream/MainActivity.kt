@@ -31,10 +31,16 @@ class MainActivity : ComponentActivity() {
                         val intent = Intent(this, PlayerActivity::class.java).apply {
                             putExtra("EXTRA_CHANNEL_ID", channel.id)
                             putExtra("EXTRA_CHANNEL_NAME", channel.name)
-                            if (channel.id.startsWith("timst-") || channel.id.startsWith("ntv-") || channel.category == "TimStreams") {
+                            if (channel.id.toIntOrNull() == null) {
                                 putExtra("EXTRA_DIRECT_STREAM_URL", channel.backupStreamUrl)
+                                if (channel.backupStreamUrl2 != null) {
+                                    putExtra("EXTRA_BACKUP_STREAM_URL", channel.backupStreamUrl2)
+                                }
                             } else if (channel.backupStreamUrl != null) {
                                 putExtra("EXTRA_BACKUP_STREAM_URL", channel.backupStreamUrl)
+                                if (channel.backupStreamUrl2 != null) {
+                                    putExtra("EXTRA_TERTIARY_STREAM_URL", channel.backupStreamUrl2)
+                                }
                             }
                         }
                         startActivity(intent)
