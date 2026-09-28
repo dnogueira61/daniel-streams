@@ -758,7 +758,7 @@ fun ChannelCard(
             ) {
                 // Channel Logo or ID Badge
                 val localLogo = ChannelLogoHelper.getLocalLogoRes(channel.name)
-                val onlineLogo = channel.logoUrl
+                val onlineLogo = channel.logoUrl ?: ChannelLogoHelper.getLogoUrl(channel.name)
 
                 Box(
                     modifier = Modifier

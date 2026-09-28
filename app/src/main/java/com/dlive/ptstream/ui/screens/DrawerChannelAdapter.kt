@@ -46,7 +46,7 @@ class DrawerChannelAdapter(
 
         // Logo binding
         val localLogo = ChannelLogoHelper.getLocalLogoRes(channel.name)
-        val onlineLogo = channel.logoUrl
+        val onlineLogo = channel.logoUrl ?: ChannelLogoHelper.getLogoUrl(channel.name)
 
         if (onlineLogo != null) {
             holder.ivLogo.visibility = View.VISIBLE
