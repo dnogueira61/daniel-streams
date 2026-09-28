@@ -160,7 +160,11 @@ fun HomeScreen(
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                text = if (selectedTab == TabFilter.LIVE_GAMES) "Jogos em Direto" else "Canais",
+                                text = when (selectedTab) {
+                                    TabFilter.LIVE_GAMES -> "Jogos em Direto"
+                                    TabFilter.ALL -> "Mundo"
+                                    else -> "Canais"
+                                },
                                 color = TextPrimary,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold
@@ -378,6 +382,28 @@ fun HomeScreen(
                     )
                 )
                 NavigationBarItem(
+                    selected = selectedTab == TabFilter.ALL && selectedCategory != "⭐ Favoritos",
+                    onClick = {
+                        selectedTab = TabFilter.ALL
+                        selectedCategory = "Todos"
+                    },
+                    icon = { Icon(Icons.Default.Public, contentDescription = "Mundo") },
+                    label = {
+                        Text(
+                            "Mundo",
+                            fontSize = 12.sp,
+                            fontWeight = if (selectedTab == TabFilter.ALL && selectedCategory != "⭐ Favoritos") FontWeight.Bold else FontWeight.Normal
+                        )
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color(0xFF38BDF8),
+                        selectedTextColor = Color(0xFF38BDF8),
+                        indicatorColor = Color(0x2238BDF8),
+                        unselectedIconColor = TextSecondary,
+                        unselectedTextColor = TextSecondary
+                    )
+                )
+                NavigationBarItem(
                     selected = selectedCategory == "⭐ Favoritos",
                     onClick = {
                         selectedTab = TabFilter.PORTUGAL
@@ -524,12 +550,16 @@ fun HomeScreen(
                                                 PlayerActivity.closeActivePip()
                                                 val streamUrl = event.streams.firstOrNull()?.url ?: ""
                                                 val backupUrl = if (event.streams.size > 1) event.streams[1].url else null
+                                                val backupUrl2 = if (event.streams.size > 2) event.streams[2].url else null
                                                 val intent = Intent(context, PlayerActivity::class.java).apply {
                                                     putExtra("EXTRA_CHANNEL_ID", "event_${event.id}")
                                                     putExtra("EXTRA_CHANNEL_NAME", event.name)
                                                     putExtra("EXTRA_DIRECT_STREAM_URL", streamUrl)
                                                     if (backupUrl != null) {
                                                         putExtra("EXTRA_BACKUP_STREAM_URL", backupUrl)
+                                                    }
+                                                    if (backupUrl2 != null) {
+                                                        putExtra("EXTRA_BACKUP_STREAM_URL2", backupUrl2)
                                                     }
                                                 }
                                                 context.startActivity(intent)

@@ -120,6 +120,7 @@ class PlayerActivity : ComponentActivity() {
     private var channelName: String = ""
     private var directStreamUrl: String? = null
     private var backupDirectUrl: String? = null
+    private var backupDirectUrl2: String? = null
     private var isBackupSelected: Boolean = false
     private var activeDirectUrl: String? = null
     private var currentFolder: String = "stream"
@@ -138,6 +139,22 @@ class PlayerActivity : ComponentActivity() {
     }
 
     private val serverFolders = listOf("stream", "cast", "watch", "player", "plus")
+
+    // Auto-failover: ordered list of servers to try
+    private var failoverServers: List<ServerOption> = emptyList()
+    private var currentFailoverIndex = 0
+    private var streamLoadedSuccessfully = false
+    private val failoverTimeoutMs = 15000L // 15 seconds before trying next server
+    private val failoverTimeoutRunnable = Runnable {
+        if (!streamLoadedSuccessfully && currentFailoverIndex < failoverServers.size - 1) {
+            currentFailoverIndex++
+            val next = failoverServers[currentFailoverIndex]
+            runOnUiThread {
+                Toast.makeText(this, "A tentar servidor seguinte...", Toast.LENGTH_SHORT).show()
+                applyServerOption(next)
+            }
+        }
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -158,6 +175,7 @@ class PlayerActivity : ComponentActivity() {
         channelName = intent.getStringExtra("EXTRA_CHANNEL_NAME") ?: "Stream"
         directStreamUrl = intent.getStringExtra("EXTRA_DIRECT_STREAM_URL")
         backupDirectUrl = intent.getStringExtra("EXTRA_BACKUP_STREAM_URL")
+        backupDirectUrl2 = intent.getStringExtra("EXTRA_BACKUP_STREAM_URL2")
         activeDirectUrl = directStreamUrl
 
         if (channelId.isBlank() && directStreamUrl.isNullOrBlank()) {
@@ -325,8 +343,10 @@ class PlayerActivity : ComponentActivity() {
 
         btnTabPt.text = "Canais"
         btnTabTimst.visibility = View.GONE
-        btnTabAll.visibility = View.GONE
+        btnTabAll.visibility = View.VISIBLE
+        btnTabAll.text = "Mundo"
         btnTabPt.setOnClickListener { selectDrawerTab(TabFilter.PORTUGAL) }
+        btnTabAll.setOnClickListener { selectDrawerTab(TabFilter.ALL) }
         btnTabFav.setOnClickListener { selectDrawerTab(TabFilter.FAVORITES) }
 
         etDrawerSearch.addTextChangedListener(object : TextWatcher {
@@ -435,6 +455,12 @@ class PlayerActivity : ComponentActivity() {
         drawerLayout.closeDrawer(GravityCompat.START)
 
         showOsdBanner(channelId, channelName, "PT 🇵🇹")
+
+        // Reset failover state for the new channel
+        failoverServers = emptyList()
+        currentFailoverIndex = 0
+        streamLoadedSuccessfully = false
+        handler.removeCallbacks(failoverTimeoutRunnable)
 
         setupServerBadge()
         loadCurrentStream()
@@ -707,6 +733,24 @@ class PlayerActivity : ComponentActivity() {
                 progressBar.visibility = View.GONE
                 injectCleanPlayerStyle(view)
                 startAutoUnmuteSequence()
+                // Mark success slightly delayed to allow player to initialize
+                handler.postDelayed({ markStreamSuccess() }, 3000)
+            }
+
+            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
+                super.onReceivedError(view, request, error)
+                if (request?.isForMainFrame == true) {
+                    // Main frame failed to load — trigger failover immediately
+                    handler.removeCallbacks(failoverTimeoutRunnable)
+                    if (currentFailoverIndex < failoverServers.size - 1) {
+                        currentFailoverIndex++
+                        val next = failoverServers[currentFailoverIndex]
+                        runOnUiThread {
+                            Toast.makeText(this@PlayerActivity, "Stream indisponível. A tentar alternativa...", Toast.LENGTH_SHORT).show()
+                            applyServerOption(next)
+                        }
+                    }
+                }
             }
         }
 
@@ -794,6 +838,14 @@ class PlayerActivity : ComponentActivity() {
 
     private fun loadCurrentStream() {
         progressBar.visibility = View.VISIBLE
+        streamLoadedSuccessfully = false
+        handler.removeCallbacks(failoverTimeoutRunnable)
+
+        // Build failover list on first load for this channel
+        if (failoverServers.isEmpty()) {
+            failoverServers = buildFailoverList()
+            currentFailoverIndex = 0
+        }
 
         val targetDirect = activeDirectUrl ?: directStreamUrl
         if (targetDirect != null) {
@@ -806,12 +858,101 @@ class PlayerActivity : ComponentActivity() {
             }
             val headers = mapOf("Referer" to referer)
             webView.loadUrl(targetDirect, headers)
+            // Start failover timeout
+            handler.postDelayed(failoverTimeoutRunnable, failoverTimeoutMs)
             return
         }
 
         val baseUrl = repository.getBaseUrl()
         val url = "$baseUrl/$currentFolder/stream-$channelId.php"
         webView.loadUrl(url)
+        // Start failover timeout for WebView streams too
+        handler.postDelayed(failoverTimeoutRunnable, failoverTimeoutMs)
+    }
+
+    private fun buildFailoverList(): List<ServerOption> {
+        val currentChannel = repository.getChannels(TabFilter.PORTUGAL).firstOrNull { it.id == channelId }
+            ?: repository.getChannels(TabFilter.ALL).firstOrNull { it.id == channelId }
+
+        val options = mutableListOf<ServerOption>()
+
+        if (currentChannel == null) {
+            if (!directStreamUrl.isNullOrBlank()) {
+                options.add(ServerOption("Servidor 1", isDirect = true, directUrl = directStreamUrl))
+            }
+            if (!backupDirectUrl.isNullOrBlank()) {
+                options.add(ServerOption("Servidor 2", isDirect = true, directUrl = backupDirectUrl))
+            }
+            if (!backupDirectUrl2.isNullOrBlank()) {
+                options.add(ServerOption("Servidor 3", isDirect = true, directUrl = backupDirectUrl2))
+            }
+            return options
+        }
+
+        // 1. DaddyLive (highest priority if channel has numeric ID)
+        val hasDaddyLive = (currentChannel?.id?.toIntOrNull() != null) || (channelId.toIntOrNull() != null)
+        if (hasDaddyLive) {
+            options.add(ServerOption("DaddyLive", isDirect = false, folder = "stream"))
+        }
+
+        // 2. NTV/EpicSports backup
+        val ntvUrl = currentChannel?.backupStreamUrl
+        if (ntvUrl != null && (ntvUrl.contains("epicsports") || ntvUrl.contains("ntv.st"))) {
+            options.add(ServerOption("NTV", isDirect = true, directUrl = ntvUrl))
+        }
+
+        // 3. TimStreams backup
+        val timstUrl = if (ntvUrl != null && ntvUrl.contains("exmxbxe")) ntvUrl
+            else currentChannel?.backupStreamUrl2?.takeIf { it.contains("exmxbxe") }
+        if (timstUrl != null) {
+            options.add(ServerOption("TimStreams", isDirect = true, directUrl = timstUrl))
+        }
+
+        // 4. M3UPT / Official direct stream
+        val officialUrl = currentChannel?.backupStreamUrl2?.takeIf {
+            it.contains("rtp.pt") || it.contains("impresa.pt") || it.contains("github.com") ||
+            it.contains("cloudfront") || it.contains("fastly") || it.contains("livextend")
+        } ?: currentChannel?.backupStreamUrl?.takeIf {
+            it.contains("rtp.pt") || it.contains("impresa.pt") || it.contains("github.com") ||
+            it.contains("cloudfront") || it.contains("fastly") || it.contains("livextend")
+        }
+        if (officialUrl != null && options.none { it.directUrl == officialUrl }) {
+            options.add(ServerOption("Oficial", isDirect = true, directUrl = officialUrl))
+        }
+
+        // 5. Non-NTV backup (if backupStreamUrl is not NTV)
+        if (ntvUrl != null && !ntvUrl.contains("epicsports") && !ntvUrl.contains("ntv.st") && !ntvUrl.contains("exmxbxe") && options.none { it.directUrl == ntvUrl }) {
+            options.add(ServerOption("Backup", isDirect = true, directUrl = ntvUrl))
+        }
+
+        // 6. DaddyLive mirrors as last resort
+        if (hasDaddyLive) {
+            options.add(ServerOption("Cast", isDirect = false, folder = "cast"))
+            options.add(ServerOption("Watch", isDirect = false, folder = "watch"))
+        }
+
+        return options
+    }
+
+    private fun applyServerOption(option: ServerOption) {
+        handler.removeCallbacks(failoverTimeoutRunnable)
+        streamLoadedSuccessfully = false
+        if (option.isDirect) {
+            activeDirectUrl = option.directUrl
+        } else {
+            activeDirectUrl = null
+            currentFolder = option.folder ?: "stream"
+        }
+        updateServerBadgeText()
+        loadCurrentStream()
+    }
+
+    /**
+     * Called from WebView when video starts playing (progress > 90%)
+     */
+    private fun markStreamSuccess() {
+        streamLoadedSuccessfully = true
+        handler.removeCallbacks(failoverTimeoutRunnable)
     }
 
     private fun zapNextChannel() {

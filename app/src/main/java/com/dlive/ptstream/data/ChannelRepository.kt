@@ -77,8 +77,8 @@ class ChannelRepository(private val context: Context) {
         val availablePtCats = pt.map { it.category }.distinct()
         val orderedPtCats = preferredPtCats.filter { availablePtCats.contains(it) } + availablePtCats.filter { !preferredPtCats.contains(it) }.sorted()
 
-        precomputedPtCategories = listOf("Todos") + orderedPtCats
-        precomputedAllCategories = precomputedPtCategories
+        val allCats = all.map { it.category }.distinct().filter { !preferredPtCats.contains(it) }.sorted()
+        precomputedAllCategories = listOf("Todos") + orderedPtCats + allCats
 
         channelsVersion.intValue++
     }
@@ -295,6 +295,79 @@ class ChannelRepository(private val context: Context) {
                                     isSoccer = isSoccer
                                 )
                             )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            // Also fetch from NTV (Kobra, Falcon, Raptor)
+            try {
+                val ntvConn = (URL("https://ntv.st/api/get-matches?server=kobra&type=both").openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 5000
+                    readTimeout = 5000
+                    setRequestProperty("User-Agent", "Mozilla/5.0")
+                    setRequestProperty("Referer", "https://ntv.st/")
+                }
+                if (ntvConn.responseCode == HttpURLConnection.HTTP_OK) {
+                    val ntvJson = ntvConn.inputStream.bufferedReader().use { it.readText() }
+                    val ntvRoot = JsonParser.parseString(ntvJson).asJsonObject
+                    val ntvAll = ntvRoot.getAsJsonArray("all")
+                    if (ntvAll != null) {
+                        for (item in ntvAll) {
+                            val obj = item.asJsonObject
+                            val id = obj.get("id")?.asString ?: continue
+                            val title = obj.get("title")?.asString ?: continue
+                            val category = obj.get("category")?.asString ?: "sports"
+                            val isLive = obj.get("live")?.asBoolean ?: false
+
+                            val genreName = when (category.lowercase()) {
+                                "football", "soccer" -> "⚽ Futebol"
+                                "motor-sports" -> "🏎️ Motores"
+                                "basketball" -> "🏀 Basquetebol"
+                                "tennis" -> "🎾 Ténis"
+                                "golf" -> "⛳ Golfe"
+                                "american-football" -> "🏈 Futebol Americano"
+                                else -> "🏆 Desporto"
+                            }
+
+                            val ntvStreams = listOf(
+                                EventStream("NTV Kobra", "https://ntv.st/watch/kobra/$id"),
+                                EventStream("NTV Falcon", "https://ntv.st/watch/falcon/$id"),
+                                EventStream("NTV Raptor", "https://ntv.st/watch/raptor/$id")
+                            )
+
+                            // Check if this match already exists from TimStreams by title similarity
+                            val existingIndex = eventsList.indexOfFirst {
+                                val n1 = it.name.lowercase().replace(" ", "").replace("@", "vs").replace("-", "vs")
+                                val n2 = title.lowercase().replace(" ", "").replace("@", "vs").replace("-", "vs")
+                                n1.contains(n2) || n2.contains(n1)
+                            }
+
+                            if (existingIndex >= 0) {
+                                // Add NTV streams as additional options
+                                val existing = eventsList[existingIndex]
+                                val combinedStreams = existing.streams + ntvStreams
+                                eventsList[existingIndex] = existing.copy(streams = combinedStreams)
+                            } else {
+                                val isSoccer = category.lowercase() in listOf("football", "soccer") ||
+                                        title.contains(" vs ", ignoreCase = true) && !title.contains("at", ignoreCase = true)
+
+                                eventsList.add(
+                                    LiveEvent(
+                                        id = "ntv-$id",
+                                        name = title,
+                                        logo = null,
+                                        genre = if (isSoccer) 1 else 99,
+                                        genreName = genreName,
+                                        time = if (isLive) "🔴 EM DIRETO" else "Hoje",
+                                        viewers = if (isLive) 500 else 100,
+                                        streams = ntvStreams,
+                                        isSoccer = isSoccer
+                                    )
+                                )
+                            }
                         }
                     }
                 }
