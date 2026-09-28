@@ -390,6 +390,8 @@
         android:orientation="vertical"
         android:clickable="true"
         android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:descendantFocusability="afterDescendants"
         android:elevation="16dp">
 
         <!-- Drawer Header -->
@@ -430,7 +432,7 @@
                 android:contentDescription="Fechar" />
         </LinearLayout>
 
-        <!-- Quick Tabs (PT, Favoritos, Todos) -->
+        <!-- Quick Tabs (PT, Timst, Favoritos, Todos) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -444,9 +446,23 @@
                 android:layout_height="36dp"
                 android:layout_weight="1"
                 android:text="🇵🇹 PT"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textColor="#FFFFFF"
                 android:backgroundTint="#E50914"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:padding="0dp" />
+
+            <Button
+                android:id="@+id/btnTabTimst"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="⚡ Timst"
+                android:textSize="11sp"
+                android:textColor="#9CA3AF"
+                android:backgroundTint="#202330"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
                 android:padding="0dp" />
@@ -458,7 +474,7 @@
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
                 android:text="⭐ Fav"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textColor="#9CA3AF"
                 android:backgroundTint="#202330"
                 android:insetTop="0dp"
@@ -472,7 +488,7 @@
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
                 android:text="🌐 Todos"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textColor="#9CA3AF"
                 android:backgroundTint="#202330"
                 android:insetTop="0dp"
@@ -480,7 +496,7 @@
                 android:padding="0dp" />
         </LinearLayout>
 
-        <!-- Mini Search Bar -->
+        <!-- Mini Search Bar with No Extract UI in landscape -->
         <EditText
             android:id="@+id/etDrawerSearch"
             android:layout_width="match_parent"
@@ -493,7 +509,9 @@
             android:textSize="13sp"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:imeOptions="actionDone|flagNoExtractUi"
+            android:inputType="text|textNoSuggestions" />
 
         <!-- Channels List -->
         <androidx.recyclerview.widget.RecyclerView

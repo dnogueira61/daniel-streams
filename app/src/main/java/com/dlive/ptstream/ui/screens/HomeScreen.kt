@@ -841,6 +841,11 @@ fun ChannelCard(
                         }
 
                         TagBadge(text = channel.category, color = TextSecondary)
+
+                        if (!channel.backupStreamUrl.isNullOrBlank()) {
+                            Spacer(modifier = Modifier.width(6.dp))
+                            TagBadge(text = "⚡ TimStreams", color = androidx.compose.ui.graphics.Color(0xFF3B82F6))
+                        }
                     }
                 }
             }

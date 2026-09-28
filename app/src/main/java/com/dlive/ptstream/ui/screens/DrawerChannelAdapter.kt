@@ -64,7 +64,13 @@ class DrawerChannelAdapter(
             holder.tvId.visibility = View.VISIBLE
         }
 
-        val tagText = if (channel.isPortuguese) "PT 🇵🇹 • ${channel.category}" else "${channel.country} • ${channel.category}"
+        val hasTimst = !channel.backupStreamUrl.isNullOrBlank()
+        val tagText = buildString {
+            if (channel.isPortuguese) append("PT 🇵🇹") else append(channel.country)
+            append(" • ")
+            append(channel.category)
+            if (hasTimst) append(" • ⚡ Timst")
+        }
         holder.tvCategory.text = tagText
 
         // Active playing indicator

@@ -55,6 +55,8 @@ object ChannelLogoHelper {
 
             lower.contains("cmtv") || lower.contains("cm tv") -> "${FALLITO_LOGO_BASE}cmtv.png"
 
+            lower.contains("tvcine") -> "${FALLITO_LOGO_BASE}tvcine.png"
+
             lower.contains("axn movies") || lower.contains("axn") -> "${FALLITO_LOGO_BASE}axn-movies.png"
 
             // Top Football & Sports Worldwide (UK, US, ES, etc.)

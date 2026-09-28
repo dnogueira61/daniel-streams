@@ -39,28 +39,36 @@
     "name": "Eleven Sports 1 Portugal",
     "country": "PT",
     "category": "Desporto",
-    "isPt": true
+    "isPt": true,
+    "backupStreamUrl": "https://exmxbxe.cfd/gg28wwh4-6849",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
   },
   {
     "id": "456",
     "name": "Eleven Sports 2 Portugal",
     "country": "PT",
     "category": "Desporto",
-    "isPt": true
+    "isPt": true,
+    "backupStreamUrl": "https://exmxbxe.cfd/pw0y0gzx-7614",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
   },
   {
     "id": "457",
     "name": "Eleven Sports 3 Portugal",
     "country": "PT",
     "category": "Desporto",
-    "isPt": true
+    "isPt": true,
+    "backupStreamUrl": "https://exmxbxe.cfd/ytjrtde4-6087",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
   },
   {
     "id": "458",
     "name": "Eleven Sports 4 Portugal",
     "country": "PT",
     "category": "Desporto",
-    "isPt": true
+    "isPt": true,
+    "backupStreamUrl": "https://exmxbxe.cfd/boc7cv4y-6161",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
   },
   {
     "id": "459",
@@ -109,35 +117,45 @@
     "name": "Sport TV1 Portugal",
     "country": "PT",
     "category": "Desporto",
-    "isPt": true
+    "isPt": true,
+    "backupStreamUrl": "https://exmxbxe.cfd/oqq5c86g-7521",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
   },
   {
     "id": "74",
     "name": "Sport TV2 Portugal",
     "country": "PT",
     "category": "Desporto",
-    "isPt": true
+    "isPt": true,
+    "backupStreamUrl": "https://exmxbxe.cfd/6dw9r22a-7192",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
   },
   {
     "id": "454",
     "name": "Sport TV3 Portugal",
     "country": "PT",
     "category": "Desporto",
-    "isPt": true
+    "isPt": true,
+    "backupStreamUrl": "https://exmxbxe.cfd/dbo09jwh-5404",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
   },
   {
     "id": "289",
     "name": "Sport TV4 Portugal",
     "country": "PT",
     "category": "Desporto",
-    "isPt": true
+    "isPt": true,
+    "backupStreamUrl": "https://exmxbxe.cfd/t218wwwk-3361",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
   },
   {
     "id": "290",
     "name": "Sport TV5 Portugal",
     "country": "PT",
     "category": "Desporto",
-    "isPt": true
+    "isPt": true,
+    "backupStreamUrl": "https://exmxbxe.cfd/twg31g84-6394",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
   },
   {
     "id": "291",
@@ -424,7 +442,9 @@
     "name": "Acc Network USA",
     "country": "US",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/aqwidk96-2985",
+    "logoUrl": "https://theacc.com/images/2018/11/30/ACCN_Launch.png"
   },
   {
     "id": "295",
@@ -438,7 +458,9 @@
     "name": "Ahc (American Heroes Channel)",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yebuybr2-6867",
+    "logoUrl": "https://payload.cargocollective.com/1/10/342209/9724942/AHC_15a_3_1340_c.jpg"
   },
   {
     "id": "784",
@@ -487,7 +509,9 @@
     "name": "Animal Planet",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/ywroxe20-1715",
+    "logoUrl": "https://mir-s3-cdn-cf.behance.net/project_modules/disp/f9ee57107702215.5facf9f601507.jpg"
   },
   {
     "id": "531",
@@ -704,7 +728,9 @@
     "name": "Axs TV USA",
     "country": "US",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/5evzdk49-4997",
+    "logoUrl": "https://www.hcc.net/wp-content/uploads/2012/06/AXS_TV_BlueWhite.jpg"
   },
   {
     "id": "844",
@@ -739,7 +765,9 @@
     "name": "Bbc America (Bbca)",
     "country": "UK",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/ha5xbugi-7768",
+    "logoUrl": "https://www.newscaststudio.com/wp-content/uploads/2024/11/bbc-america-logo.jpg"
   },
   {
     "id": "359",
@@ -774,266 +802,342 @@
     "name": "Bbc Two UK",
     "country": "UK",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/i1999ji2-8495",
+    "logoUrl": "https://ichef.bbci.co.uk/images/ic/1200x675/p0bvs8dg.jpg"
   },
   {
     "id": "91",
     "name": "Bein Sports 1 Arabic",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "116",
     "name": "Bein Sports 1 France",
     "country": "FR",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "712",
     "name": "Bein Sports 1 Malaysia",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "62",
     "name": "Bein Sports 1 Turkey",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "92",
     "name": "Bein Sports 2 Arabic",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "117",
     "name": "Bein Sports 2 France",
     "country": "FR",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "713",
     "name": "Bein Sports 2 Malaysia",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "63",
     "name": "Bein Sports 2 Turkey",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "93",
     "name": "Bein Sports 3 Arabic",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "118",
     "name": "Bein Sports 3 France",
     "country": "FR",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "714",
     "name": "Bein Sports 3 Malaysia",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "64",
     "name": "Bein Sports 3 Turkey",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "94",
     "name": "Bein Sports 4 Arabic",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "67",
     "name": "Bein Sports 4 Turkey",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "95",
     "name": "Bein Sports 5 Arabic",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "1010",
     "name": "Bein Sports 5 Turkey",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "96",
     "name": "Bein Sports 6 Arabic",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "97",
     "name": "Bein Sports 7 Arabic",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "98",
     "name": "Bein Sports 8 Arabic",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "99",
     "name": "Bein Sports 9 Arabic",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "491",
     "name": "Bein Sports Australia 1",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "492",
     "name": "Bein Sports Australia 2",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "493",
     "name": "Bein Sports Australia 3",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "372",
     "name": "Bein Sports En Espa単Ol",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "578",
     "name": "Bein Sports Hd Qatar",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "500",
     "name": "Bein Sports Max 10 France",
     "country": "FR",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "494",
     "name": "Bein Sports Max 4 France",
     "country": "FR",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "495",
     "name": "Bein Sports Max 5 France",
     "country": "FR",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "496",
     "name": "Bein Sports Max 6 France",
     "country": "FR",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "497",
     "name": "Bein Sports Max 7 France",
     "country": "FR",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "498",
     "name": "Bein Sports Max 8 France",
     "country": "FR",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "499",
     "name": "Bein Sports Max 9 France",
     "country": "FR",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "597",
     "name": "Bein Sports Max Ar",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "61",
     "name": "Bein Sports Mena English 1",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "90",
     "name": "Bein Sports Mena English 2",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "425",
     "name": "Bein Sports USA",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "100",
     "name": "Bein Sports Xtra 1",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
   },
   {
     "id": "306",
@@ -1089,7 +1193,9 @@
     "name": "Big Ten Network (Btn USA)",
     "country": "US",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/tkdttav3-2582",
+    "logoUrl": "https://barrettmedia.com/wp-content/uploads/2024/07/Big-Ten-Network-BTN-Logo.jpg"
   },
   {
     "id": "476",
@@ -1117,7 +1223,9 @@
     "name": "Boomerang",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/riwrf6tw-8417",
+    "logoUrl": "https://cdn.broadbandtvnews.com/wp-content/uploads/2024/08/05120702/Boomerang.jpg"
   },
   {
     "id": "737",
@@ -1131,7 +1239,9 @@
     "name": "Bravo USA",
     "country": "US",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/vexvhyqi-470",
+    "logoUrl": "https://www.bravotv.com/sites/bravo/files/2024/05/bravo-logo-2jpg.jpg"
   },
   {
     "id": "481",
@@ -1187,14 +1297,18 @@
     "name": "Canal+ Extra 1 Poland",
     "country": "FR",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/9nllxks8-4883",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/canalextra.png"
   },
   {
     "id": "984",
     "name": "Canal+ Extra 2 Poland",
     "country": "FR",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yyyiyhr1-301",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/canalextra.png"
   },
   {
     "id": "985",
@@ -1453,7 +1567,9 @@
     "name": "Cartoon Network",
     "country": "Outro",
     "category": "Infantil",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/b3sfc94n-2399",
+    "logoUrl": "https://1000logos.net/wp-content/uploads/2016/10/Cartoon-Network-logo.jpg"
   },
   {
     "id": "832",
@@ -1474,7 +1590,9 @@
     "name": "Cbs Sports Network (Cbssn)",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/9c2jwr40-3407",
+    "logoUrl": "https://www.paramountshop.com/cdn/shop/files/cbssportsnetwork-mobile-min.png"
   },
   {
     "id": "52",
@@ -1621,7 +1739,9 @@
     "name": "Comedy Central",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/vu4x7su7-8393",
+    "logoUrl": "https://wwwimage-us.pplusstatic.com/base/files/seo/og-brand-comedy-central.jpg?format=webp"
   },
   {
     "id": "696",
@@ -1775,21 +1895,27 @@
     "name": "DAZN 1 Bar De",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/3zhczzbl-9086",
+    "logoUrl": "https://image.discovery.indazn.com/ca/v2/ca/image?id=1o4eamzb4env61ddc8wv4ra06l_image-header_pRow_1720521601000&amp;amp;amp;amp;amp;amp;amp;quality=70"
   },
   {
     "id": "445",
     "name": "DAZN 1 Spain",
     "country": "ES",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/sq26inyf-2660",
+    "logoUrl": "https://image.discovery.indazn.com/ca/v2/ca/image?id=hn9vkic8rbfi1ndrym8sw2qh7_image-header_pEs_1723035920000"
   },
   {
     "id": "230",
     "name": "DAZN 1 UK",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/3zhczzbl-9086",
+    "logoUrl": "https://image.discovery.indazn.com/ca/v2/ca/image?id=1o4eamzb4env61ddc8wv4ra06l_image-header_pRow_1720521601000&amp;amp;amp;amp;amp;amp;amp;quality=70"
   },
   {
     "id": "427",
@@ -1803,7 +1929,9 @@
     "name": "DAZN 2 Spain",
     "country": "ES",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/0o3vlabk-4088",
+    "logoUrl": "https://image.discovery.indazn.com/ca/v2/ca/image?id=2ouwtae8ad7l1fxviow9bowpk_image-header_pEs_1723118632000&amp;amp;amp;amp;amp;amp;amp;amp;quality=70"
   },
   {
     "id": "447",
@@ -1824,14 +1952,18 @@
     "name": "DAZN F1 Es",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/5rvazszz-6983",
+    "logoUrl": "https://image.discovery.indazn.com/ca/v2/ca/image?id=14ln25pmjdv031ejxsmg8dczsu_image-header_pEs_1723117975000&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quality=70"
   },
   {
     "id": "538",
     "name": "DAZN Laliga",
     "country": "ES",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/fw2jrum9-448",
+    "logoUrl": "https://image.discovery.indazn.com/ca/v2/ca/image?id=1weziux6zy5mb16pev002ax1yu_image-header_pEs_1723118324000"
   },
   {
     "id": "960",
@@ -1936,14 +2068,18 @@
     "name": "Discovery Channel",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/5hibihrx-459",
+    "logoUrl": "https://i.ibb.co/k2rbB1jc/e35d6be84084fed1d756c39242f13163.webp"
   },
   {
     "id": "657",
     "name": "Discovery Family",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yzfyc1yw-8273",
+    "logoUrl": "https://i.ibb.co/wFmT9Q5t/Discovery-Family-ID-Let-s-Go-Yellow.webp"
   },
   {
     "id": "311",
@@ -1957,7 +2093,9 @@
     "name": "Discovery Turbo",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/hgf4qg78-649",
+    "logoUrl": "https://i.ibb.co/20MgSXjy/featured-Image-1767979538707.jpg"
   },
   {
     "id": "285",
@@ -1971,7 +2109,9 @@
     "name": "Disney Channel",
     "country": "Outro",
     "category": "Infantil",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/x5g9w1kl-7694",
+    "logoUrl": "https://vignette4.wikia.nocookie.net/logopedia/images/9/93/Disney_Channel_Original_2014.png/revision/latest?cb=20140705213010"
   },
   {
     "id": "652",
@@ -1985,7 +2125,9 @@
     "name": "Disney Xd",
     "country": "Outro",
     "category": "Infantil",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/6czz80kp-1933",
+    "logoUrl": "https://www.laughingplace.com/uploads/2015/10/d128457e3b3ab8c050f306aa8e23666b9b05d3cc.jpg"
   },
   {
     "id": "801",
@@ -2069,28 +2211,36 @@
     "name": "Eleven Sports 1 Poland",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/gg28wwh4-6849",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
   },
   {
     "id": "72",
     "name": "Eleven Sports 2 Poland",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/pw0y0gzx-7614",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
   },
   {
     "id": "428",
     "name": "Eleven Sports 3 Poland",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/ytjrtde4-6087",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
   },
   {
     "id": "999",
     "name": "Eleven Sports 4 Poland",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/boc7cv4y-6161",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
   },
   {
     "id": "774",
@@ -2118,14 +2268,18 @@
     "name": "Espn 2 Mx",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/33jhpzfr-936",
+    "logoUrl": "https://discgolf.ultiworld.com/wp-content/uploads/2020/10/ESPN2.png"
   },
   {
     "id": "386",
     "name": "Espn 2 Nl",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/33jhpzfr-936",
+    "logoUrl": "https://discgolf.ultiworld.com/wp-content/uploads/2020/10/ESPN2.png"
   },
   {
     "id": "927",
@@ -2167,7 +2321,9 @@
     "name": "Espn Deportes",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/6trsant7-1421",
+    "logoUrl": "https://i.ibb.co/Y7zHmbbz/i.png"
   },
   {
     "id": "387",
@@ -2181,28 +2337,36 @@
     "name": "Espn USA",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/wqbwjjhf-9771",
+    "logoUrl": "https://i.ibb.co/Lh5jHVDm/ESPNU-logo-1-jpg.webp"
   },
   {
     "id": "150",
     "name": "Espn2 Argentina",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/33jhpzfr-936",
+    "logoUrl": "https://discgolf.ultiworld.com/wp-content/uploads/2020/10/ESPN2.png"
   },
   {
     "id": "82",
     "name": "Espn2 Brasil",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/33jhpzfr-936",
+    "logoUrl": "https://discgolf.ultiworld.com/wp-content/uploads/2020/10/ESPN2.png"
   },
   {
     "id": "45",
     "name": "Espn2 USA",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/33jhpzfr-936",
+    "logoUrl": "https://discgolf.ultiworld.com/wp-content/uploads/2020/10/ESPN2.png"
   },
   {
     "id": "798",
@@ -2230,14 +2394,18 @@
     "name": "Espnews",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/mftslez4-3364",
+    "logoUrl": "https://i.ibb.co/5h4LGFHq/image.png"
   },
   {
     "id": "316",
     "name": "Espnu USA",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/wqbwjjhf-9771",
+    "logoUrl": "https://i.ibb.co/Lh5jHVDm/ESPNU-logo-1-jpg.webp"
   },
   {
     "id": "772",
@@ -2475,7 +2643,9 @@
     "name": "Fox Deportes USA",
     "country": "US",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/8p0wjr6t-3317",
+    "logoUrl": "https://foxsports-wordpress-www-prsupports-prod.s3.amazonaws.com/uploads/sites/2/2016/12/LOGO-DEPORTES-1040x585.jpg"
   },
   {
     "id": "483",
@@ -2503,35 +2673,45 @@
     "name": "Fox Sports 1 Mx",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/f4ijr4sl-187",
+    "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/2015_Fox_Sports_1_logo.svg/1280px-2015_Fox_Sports_1_logo.svg.png"
   },
   {
     "id": "39",
     "name": "Fox Sports 1 USA",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/f4ijr4sl-187",
+    "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/2015_Fox_Sports_1_logo.svg/1280px-2015_Fox_Sports_1_logo.svg.png"
   },
   {
     "id": "788",
     "name": "Fox Sports 2 Argentina",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/p5562bwm-3285",
+    "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/FS2_logo_2015.svg/1280px-FS2_logo_2015.svg.png"
   },
   {
     "id": "930",
     "name": "Fox Sports 2 Mx",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/p5562bwm-3285",
+    "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/FS2_logo_2015.svg/1280px-FS2_logo_2015.svg.png"
   },
   {
     "id": "758",
     "name": "Fox Sports 2 USA",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/p5562bwm-3285",
+    "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/FS2_logo_2015.svg/1280px-FS2_logo_2015.svg.png"
   },
   {
     "id": "789",
@@ -2559,7 +2739,9 @@
     "name": "Fox Sports 503 Au",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/t1ilns5i-746",
+    "logoUrl": "https://i.ibb.co/xS4MkGSL/image.webp"
   },
   {
     "id": "822",
@@ -2573,21 +2755,27 @@
     "name": "Fox Sports 505 Au",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/p0jkpm12-1140",
+    "logoUrl": "https://i.ibb.co/prKZGNLt/image.webp"
   },
   {
     "id": "824",
     "name": "Fox Sports 506 Au",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/9hg9rzzh-2937",
+    "logoUrl": "https://i.ibb.co/Swks4Lmj/image.webp"
   },
   {
     "id": "825",
     "name": "Fox Sports 507 Au",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/s1npqmod-9335",
+    "logoUrl": "https://i.ibb.co/7d6VgDVL/image.webp"
   },
   {
     "id": "787",
@@ -2657,7 +2845,9 @@
     "name": "Freeform",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/cex5ctvv-7743",
+    "logoUrl": "https://d2z00kf51ll94q.cloudfront.net//archive/2023/large/ADC102_BCD021B_0.jpg"
   },
   {
     "id": "279",
@@ -2748,7 +2938,9 @@
     "name": "Golf Channel USA",
     "country": "US",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/p8wos5q1-1333",
+    "logoUrl": "https://corporate.comcast.com/media/img/1000w/2020/01/corporate_golf-channel-16x9-social.jpg"
   },
   {
     "id": "699",
@@ -2783,7 +2975,9 @@
     "name": "Hbo Comedy USA",
     "country": "US",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/g8rltva2-1155",
+    "logoUrl": "https://www.tvinsider.com/wp-content/uploads/2022/03/hbo-comedy.png"
   },
   {
     "id": "691",
@@ -2797,7 +2991,9 @@
     "name": "Hbo Latino USA",
     "country": "US",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/ym6y4zya-9910",
+    "logoUrl": "https://i.ibb.co/TMzmbVYq/maxresdefault.jpg"
   },
   {
     "id": "569",
@@ -2853,7 +3049,9 @@
     "name": "Hgtv",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/okj3w6e7-7294",
+    "logoUrl": "https://i.ibb.co/gbtDnLhS/hgtv-jpg.jpg"
   },
   {
     "id": "322",
@@ -3266,7 +3464,9 @@
     "name": "Mlb Network USA",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/kbrqp0d5-1689",
+    "logoUrl": "https://img.mlbstatic.com/mlb-images/image/private/t_16x9/t_w2208/mlb/xtkynqe5wgtzaddnsus2.jpg"
   },
   {
     "id": "778",
@@ -3287,28 +3487,36 @@
     "name": "Movistar Deportes 2 Spain",
     "country": "ES",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/gzli3jta-570",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/movistardeportes.png"
   },
   {
     "id": "526",
     "name": "Movistar Deportes 3 Spain",
     "country": "ES",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/gzli3jta-570",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/movistardeportes.png"
   },
   {
     "id": "527",
     "name": "Movistar Deportes 4 Spain",
     "country": "ES",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/gzli3jta-570",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/movistardeportes.png"
   },
   {
     "id": "436",
     "name": "Movistar Deportes Spain",
     "country": "ES",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/gzli3jta-570",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/movistardeportes.png"
   },
   {
     "id": "528",
@@ -3322,7 +3530,9 @@
     "name": "Movistar Laliga",
     "country": "ES",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/vowrwhdn-2491",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/movistarlaliga.png"
   },
   {
     "id": "435",
@@ -3420,14 +3630,18 @@
     "name": "Nba TV USA",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/8tl2ksef-2775",
+    "logoUrl": "https://static.cdn.turner.com/styles/header_image_1500x500_cropped/s3/nba-tv-16x9-1.jpg?itok=6H8mrlyR"
   },
   {
     "id": "753",
     "name": "Nbc Sports Bay Area",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/soipf80d-8441",
+    "logoUrl": "https://cdn.mos.cms.futurecdn.net/d7jWexxhtezRZ6ryLHyKmd.jpeg"
   },
   {
     "id": "754",
@@ -3448,7 +3662,9 @@
     "name": "Nbc Sports Philadelphia",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/03uxmg2p-8674",
+    "logoUrl": "https://media.nbcsportsphiladelphia.com/2023/04/Philly-Landmark.png?resize=1200%2C675&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quality=85&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;strip=all"
   },
   {
     "id": "53",
@@ -3511,7 +3727,9 @@
     "name": "Nfl Network",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/a40czx8e-4022",
+    "logoUrl": "https://i.ibb.co/ZRsTndvV/tfki7njrm3y8jycbtkrx.jpg"
   },
   {
     "id": "667",
@@ -3525,7 +3743,9 @@
     "name": "Nhl Network USA",
     "country": "US",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/kelcwql2-1938",
+    "logoUrl": "https://media.d3.nhle.com/image/private/t_ratio16_9-size50/prd/lhum6z3hyaga9ahnjow0.png"
   },
   {
     "id": "330",
@@ -3539,7 +3759,9 @@
     "name": "Nick Jr",
     "country": "Outro",
     "category": "Infantil",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/mkq4q2a4-9321",
+    "logoUrl": "https://i.ibb.co/xS6CMxZD/nick-jr-logo-2023-4.jpg"
   },
   {
     "id": "666",
@@ -3553,7 +3775,9 @@
     "name": "Nicktoons",
     "country": "Outro",
     "category": "Infantil",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yrqvb007-1124",
+    "logoUrl": "https://i.ibb.co/XfX32tyx/nicktoons-logo-2023-rebrand-2.png"
   },
   {
     "id": "835",
@@ -3917,14 +4141,18 @@
     "name": "Polsat Sport 2 Poland",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/njs5pc6k-5347",
+    "logoUrl": "https://staticeu.sweet.tv/images/cache/v2/channel_banner/COId/3810-polsat-sport-2-hd.png"
   },
   {
     "id": "129",
     "name": "Polsat Sport 3 Poland",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/r1ehwgde-9139",
+    "logoUrl": "https://staticeu.sweet.tv/images/cache/v2/channel_banner/COMd/3811-polsat-sport-3-hd.png"
   },
   {
     "id": "993",
@@ -3959,7 +4187,9 @@
     "name": "Polsat Sport Fight Hd Poland",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/mkr6nvqt-4662",
+    "logoUrl": "https://staticeu.sweet.tv/images/cache/v2/channel_banner/COUd/3813-polsat-sport-fight-hd.png"
   },
   {
     "id": "998",
@@ -4274,7 +4504,9 @@
     "name": "Sec Network USA",
     "country": "US",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/2p9ptshb-3537",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/images/2NRKBDE2CLIGI5XHHHHMY2BCAQ.jpg"
   },
   {
     "id": "811",
@@ -4302,49 +4534,63 @@
     "name": "Showtime 2 USA (Sho2) USA",
     "country": "US",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/lbf8b9qx-5795",
+    "logoUrl": "https://i.ibb.co/v7vcNY4/Showtime-Logo.webp"
   },
   {
     "id": "794",
     "name": "Showtime Extreme USA",
     "country": "US",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/lbf8b9qx-5795",
+    "logoUrl": "https://i.ibb.co/v7vcNY4/Showtime-Logo.webp"
   },
   {
     "id": "795",
     "name": "Showtime Family Zone (Sho Family Zone) USA",
     "country": "US",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/lbf8b9qx-5795",
+    "logoUrl": "https://i.ibb.co/v7vcNY4/Showtime-Logo.webp"
   },
   {
     "id": "796",
     "name": "Showtime Next (Sho Next) USA",
     "country": "US",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/lbf8b9qx-5795",
+    "logoUrl": "https://i.ibb.co/v7vcNY4/Showtime-Logo.webp"
   },
   {
     "id": "793",
     "name": "Showtime Showcase USA",
     "country": "US",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/lbf8b9qx-5795",
+    "logoUrl": "https://i.ibb.co/v7vcNY4/Showtime-Logo.webp"
   },
   {
     "id": "333",
     "name": "Showtime USA",
     "country": "US",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/lbf8b9qx-5795",
+    "logoUrl": "https://i.ibb.co/v7vcNY4/Showtime-Logo.webp"
   },
   {
     "id": "797",
     "name": "Showtime Women USA",
     "country": "US",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/lbf8b9qx-5795",
+    "logoUrl": "https://i.ibb.co/v7vcNY4/Showtime-Logo.webp"
   },
   {
     "id": "732",
@@ -4484,7 +4730,9 @@
     "name": "Sky Cinema Premiere UK",
     "country": "UK",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/hx8nkn5h-2645",
+    "logoUrl": "https://s3.glbimg.com/v1/AUTH_36abb2af534644878388f516c38b89ac/prod/home-share-1b75cdaa.png"
   },
   {
     "id": "864",
@@ -4582,70 +4830,90 @@
     "name": "Sky Sport 1 Nz",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/8num3afh-8204",
+    "logoUrl": "https://i.ibb.co/v4NvkZst/Untitled-design.png"
   },
   {
     "id": "589",
     "name": "Sky Sport 2 Nz",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/sl9un97j-4474",
+    "logoUrl": "https://i.ibb.co/v4NvkZst/Untitled-design.png"
   },
   {
     "id": "869",
     "name": "Sky Sport 24 Italy",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/1k3ckb2m-8796",
+    "logoUrl": "https://mir-s3-cdn-cf.behance.net/project_modules/max_1200_webp/dfa89629775883.5602ff6b0aacf.jpg"
   },
   {
     "id": "590",
     "name": "Sky Sport 3 Nz",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/ldfbs8gf-7885",
+    "logoUrl": "https://i.ibb.co/v4NvkZst/Untitled-design.png"
   },
   {
     "id": "591",
     "name": "Sky Sport 4 Nz",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/h0ryosf9-1736",
+    "logoUrl": "https://i.ibb.co/v4NvkZst/Untitled-design.png"
   },
   {
     "id": "592",
     "name": "Sky Sport 5 Nz",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/32f9u4no-5828",
+    "logoUrl": "https://i.ibb.co/v4NvkZst/Untitled-design.png"
   },
   {
     "id": "593",
     "name": "Sky Sport 6 Nz",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/wghuk9nx-1967",
+    "logoUrl": "https://i.ibb.co/v4NvkZst/Untitled-design.png"
   },
   {
     "id": "594",
     "name": "Sky Sport 7 Nz",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/dohvga1l-2284",
+    "logoUrl": "https://i.ibb.co/v4NvkZst/Untitled-design.png"
   },
   {
     "id": "595",
     "name": "Sky Sport 8 Nz",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/z6r4qhiz-9938",
+    "logoUrl": "https://i.ibb.co/v4NvkZst/Untitled-design.png"
   },
   {
     "id": "596",
     "name": "Sky Sport 9 Nz",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/kb1ngcei-9972",
+    "logoUrl": "https://i.ibb.co/v4NvkZst/Untitled-design.png"
   },
   {
     "id": "462",
@@ -4673,35 +4941,45 @@
     "name": "Sky Sport Bundesliga 1 Hd",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/bsudwrf4-653",
+    "logoUrl": "https://www.sportsvideo.org/wp-content/uploads/2024/12/Sky-Sports-Bundesliega-featured.png"
   },
   {
     "id": "946",
     "name": "Sky Sport Bundesliga 2",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/bsudwrf4-653",
+    "logoUrl": "https://www.sportsvideo.org/wp-content/uploads/2024/12/Sky-Sports-Bundesliega-featured.png"
   },
   {
     "id": "947",
     "name": "Sky Sport Bundesliga 3",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/bsudwrf4-653",
+    "logoUrl": "https://www.sportsvideo.org/wp-content/uploads/2024/12/Sky-Sports-Bundesliega-featured.png"
   },
   {
     "id": "948",
     "name": "Sky Sport Bundesliga 4",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/bsudwrf4-653",
+    "logoUrl": "https://www.sportsvideo.org/wp-content/uploads/2024/12/Sky-Sports-Bundesliega-featured.png"
   },
   {
     "id": "949",
     "name": "Sky Sport Bundesliga 5",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/bsudwrf4-653",
+    "logoUrl": "https://www.sportsvideo.org/wp-content/uploads/2024/12/Sky-Sports-Bundesliega-featured.png"
   },
   {
     "id": "870",
@@ -4743,7 +5021,9 @@
     "name": "Sky Sport Select Nz",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/b6ca3188-8449",
+    "logoUrl": "https://i.ibb.co/v4NvkZst/Untitled-design.png"
   },
   {
     "id": "576",
@@ -4764,7 +5044,9 @@
     "name": "Sky Sport Uno Italy",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/pqd6qx47-8073",
+    "logoUrl": "https://i.imgur.com/dnoy7mK.png"
   },
   {
     "id": "240",
@@ -4785,112 +5067,144 @@
     "name": "Sky Sports Action UK",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/3ym6q5iy-878",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/skysportsaction.png"
   },
   {
     "id": "65",
     "name": "Sky Sports Cricket",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/qfx4038p-95",
+    "logoUrl": "https://e0.365dm.com/17/07/2048x1152/skysports-sky-sports-cricket-podcast-sky-cricket-podcast_4004801.jpg"
   },
   {
     "id": "274",
     "name": "Sky Sports F1 De",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/f596f98r-6977",
+    "logoUrl": "https://e0.365dm.com/21/03/1600x900/skysports-f1-2021-graphic_5299452.png"
   },
   {
     "id": "60",
     "name": "Sky Sports F1 UK",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/f596f98r-6977",
+    "logoUrl": "https://e0.365dm.com/21/03/1600x900/skysports-f1-2021-graphic_5299452.png"
   },
   {
     "id": "35",
     "name": "Sky Sports Football UK",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/a80q8j3i-2187",
+    "logoUrl": "https://images.squarespace-cdn.com/content/v1/6380a5b12f7b6f632e16ce77/46d62da8-e650-4d2b-a5bc-48a5648edb8e/Beth_Mead.jpg"
   },
   {
     "id": "785",
     "name": "Sky Sports Golf De",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/0bydvmgs-4755",
+    "logoUrl": "https://e0.365dm.com/23/05/1600x900/skysports-golf-sky-sports-golf_6158933.jpg"
   },
   {
     "id": "574",
     "name": "Sky Sports Golf Italy",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/0bydvmgs-4755",
+    "logoUrl": "https://e0.365dm.com/23/05/1600x900/skysports-golf-sky-sports-golf_6158933.jpg"
   },
   {
     "id": "70",
     "name": "Sky Sports Golf UK",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/0bydvmgs-4755",
+    "logoUrl": "https://e0.365dm.com/23/05/1600x900/skysports-golf-sky-sports-golf_6158933.jpg"
   },
   {
     "id": "38",
     "name": "Sky Sports Main Event",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/n58ajgfx-472",
+    "logoUrl": "https://e0.365dm.com/17/07/1600x900/skysports-all-new-rebrand-f1-premier-league-golf-cricket_4001810.jpg"
   },
   {
     "id": "449",
     "name": "Sky Sports Mix UK",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/kt8jus5e-7693",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/Sky_Sports_Mix_Generic_ID_2017.webp"
   },
   {
     "id": "366",
     "name": "Sky Sports News UK",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/sawtuw4t-1803",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/image.jpg"
   },
   {
     "id": "130",
     "name": "Sky Sports Premier League",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/kzd3hrqz-4314",
+    "logoUrl": "https://e0.365dm.com/25/06/2048x1152/skysports-premier-league-fixtures_6937276.jpg"
   },
   {
     "id": "554",
     "name": "Sky Sports Racing UK",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/2jlx4p7r-552",
+    "logoUrl": "https://e0.365dm.com/23/07/2048x1152/skysports-racing-league-sky-sports-racing_6230990.jpg"
   },
   {
     "id": "884",
     "name": "Sky Sports Tennis De",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/kkbb5x8i-1991",
+    "logoUrl": "https://e0.365dm.com/24/01/2048x1152/skysports-sky-sports-tennis_6437709.jpg"
   },
   {
     "id": "46",
     "name": "Sky Sports Tennis UK",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/kkbb5x8i-1991",
+    "logoUrl": "https://e0.365dm.com/24/01/2048x1152/skysports-sky-sports-tennis_6437709.jpg"
   },
   {
     "id": "36",
     "name": "Sky Sports+ Plus",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/jwrj2d6p-8874",
+    "logoUrl": "https://e0.365dm.com/24/07/2048x1152/skysports-ssplus-sky-sports-plus_6644064.jpg"
   },
   {
     "id": "881",
@@ -5086,7 +5400,9 @@
     "name": "Sportdigital Fussball",
     "country": "Outro",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/9bn5lr9r-5959",
+    "logoUrl": "https://image.discovery.indazn.com/ca/v2/ca/image?id=712wbfqz8apl1k09rf681eqxd_image-header_pDach_1661948855000&amp;amp;amp;amp;quality=70"
   },
   {
     "id": "640",
@@ -5261,98 +5577,126 @@
     "name": "Starz",
     "country": "Outro",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yfxb31me-8913",
+    "logoUrl": "https://careers.starz.com/wp-content/uploads/2025/01/STARZ-LOGO-IMAGE.png"
   },
   {
     "id": "970",
     "name": "Starz Cinema",
     "country": "Outro",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/7kshly84-4550",
+    "logoUrl": "https://careers.starz.com/wp-content/uploads/2025/01/STARZ-LOGO-IMAGE.png"
   },
   {
     "id": "971",
     "name": "Starz Comedy",
     "country": "Outro",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/ps7hzjaz-6830",
+    "logoUrl": "https://careers.starz.com/wp-content/uploads/2025/01/STARZ-LOGO-IMAGE.png"
   },
   {
     "id": "972",
     "name": "Starz Edge",
     "country": "Outro",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yfxb31me-8913",
+    "logoUrl": "https://careers.starz.com/wp-content/uploads/2025/01/STARZ-LOGO-IMAGE.png"
   },
   {
     "id": "975",
     "name": "Starz Encore",
     "country": "Outro",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yfxb31me-8913",
+    "logoUrl": "https://careers.starz.com/wp-content/uploads/2025/01/STARZ-LOGO-IMAGE.png"
   },
   {
     "id": "976",
     "name": "Starz Encore Action",
     "country": "Outro",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yfxb31me-8913",
+    "logoUrl": "https://careers.starz.com/wp-content/uploads/2025/01/STARZ-LOGO-IMAGE.png"
   },
   {
     "id": "977",
     "name": "Starz Encore Black",
     "country": "Outro",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yfxb31me-8913",
+    "logoUrl": "https://careers.starz.com/wp-content/uploads/2025/01/STARZ-LOGO-IMAGE.png"
   },
   {
     "id": "978",
     "name": "Starz Encore Classic",
     "country": "Outro",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yfxb31me-8913",
+    "logoUrl": "https://careers.starz.com/wp-content/uploads/2025/01/STARZ-LOGO-IMAGE.png"
   },
   {
     "id": "979",
     "name": "Starz Encore Family",
     "country": "Outro",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yfxb31me-8913",
+    "logoUrl": "https://careers.starz.com/wp-content/uploads/2025/01/STARZ-LOGO-IMAGE.png"
   },
   {
     "id": "980",
     "name": "Starz Encore Suspense",
     "country": "Outro",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yfxb31me-8913",
+    "logoUrl": "https://careers.starz.com/wp-content/uploads/2025/01/STARZ-LOGO-IMAGE.png"
   },
   {
     "id": "981",
     "name": "Starz Encore Westerns",
     "country": "Outro",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yfxb31me-8913",
+    "logoUrl": "https://careers.starz.com/wp-content/uploads/2025/01/STARZ-LOGO-IMAGE.png"
   },
   {
     "id": "973",
     "name": "Starz In Black",
     "country": "Outro",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yfxb31me-8913",
+    "logoUrl": "https://careers.starz.com/wp-content/uploads/2025/01/STARZ-LOGO-IMAGE.png"
   },
   {
     "id": "974",
     "name": "Starz Kids & Family",
     "country": "Outro",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yfxb31me-8913",
+    "logoUrl": "https://careers.starz.com/wp-content/uploads/2025/01/STARZ-LOGO-IMAGE.png"
   },
   {
     "id": "284",
     "name": "Starzplay Criclife 1 Hd",
     "country": "Outro",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yfxb31me-8913",
+    "logoUrl": "https://careers.starz.com/wp-content/uploads/2025/01/STARZ-LOGO-IMAGE.png"
   },
   {
     "id": "658",
@@ -5779,7 +6123,9 @@
     "name": "Telemundo",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yfsb3z4h-6180",
+    "logoUrl": "https://media-cldnry.s-nbcnews.com/image/upload/newscms/2020_20/3352176/telemundo-social-default.png"
   },
   {
     "id": "741",
@@ -5793,7 +6139,9 @@
     "name": "Tennis Channel",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/80nrh660-13",
+    "logoUrl": "https://s10019.cdn.ncms.io/wp-content/uploads/2026/05/tenn2.jpg.jpeg"
   },
   {
     "id": "709",
@@ -5821,7 +6169,9 @@
     "name": "The Food Network",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/cnomxno0-1987",
+    "logoUrl": "https://i.ibb.co/5WcnZbYf/food-network-jpg.jpg"
   },
   {
     "id": "320",
@@ -5835,7 +6185,9 @@
     "name": "The Weather Channel",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/izgv9di1-4429",
+    "logoUrl": "https://i.ibb.co/bRJqL6WK/LWRBPBUMCVFA3-G5-Q4-ZH3-XJYDNY.avif"
   },
   {
     "id": "337",
@@ -5877,28 +6229,36 @@
     "name": "Tnt Sports 1 UK",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/e0lyrkhr-1002",
+    "logoUrl": "https://cdn.mos.cms.futurecdn.net/y3oPitXYAwGJnyTHFYo5qB.jpeg"
   },
   {
     "id": "32",
     "name": "Tnt Sports 2 UK",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/it7aytqh-1540",
+    "logoUrl": "https://cdn.mos.cms.futurecdn.net/y3oPitXYAwGJnyTHFYo5qB.jpeg"
   },
   {
     "id": "33",
     "name": "Tnt Sports 3 UK",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/bjarzxf9-1713",
+    "logoUrl": "https://cdn.mos.cms.futurecdn.net/y3oPitXYAwGJnyTHFYo5qB.jpeg"
   },
   {
     "id": "34",
     "name": "Tnt Sports 4 UK",
     "country": "UK",
     "category": "Desporto",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/3u2rfhmp-8468",
+    "logoUrl": "https://cdn.mos.cms.futurecdn.net/y3oPitXYAwGJnyTHFYo5qB.jpeg"
   },
   {
     "id": "388",
@@ -5940,14 +6300,18 @@
     "name": "Trutv USA",
     "country": "US",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/qpwihhq2-6590",
+    "logoUrl": "https://i.ibb.co/DfGcnjXY/Header-tru-TV.webp"
   },
   {
     "id": "111",
     "name": "Tsn1",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/ieodbgj5-4982",
+    "logoUrl": "https://www.bellmedia.ca/lede/wp-content/uploads/2024/09/18581592_10155403529061055_8240563011649656197_n.jpg"
   },
   {
     "id": "112",
@@ -6003,7 +6367,9 @@
     "name": "USA Network",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/nloc37sc-2693",
+    "logoUrl": "https://variety.com/wp-content/uploads/2013/10/usa-network-logo1.jpg"
   },
   {
     "id": "133",
@@ -6038,7 +6404,9 @@
     "name": "V Film Premiere",
     "country": "BR",
     "category": "Filmes",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/hx8nkn5h-2645",
+    "logoUrl": "https://s3.glbimg.com/v1/AUTH_36abb2af534644878388f516c38b89ac/prod/home-share-1b75cdaa.png"
   },
   {
     "id": "272",
@@ -6178,7 +6546,9 @@
     "name": "Willow Cricket",
     "country": "Outro",
     "category": "Geral",
-    "isPt": false
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/spd8gpoh-6586",
+    "logoUrl": "https://mgpindia.com/wp-content/uploads/2021/10/willow-logo.jpg"
   },
   {
     "id": "392",
@@ -6298,5 +6668,1184 @@
     "country": "Outro",
     "category": "Geral",
     "isPt": false
+  },
+  {
+    "id": "timst-abc",
+    "name": "ABC (TimStreams)",
+    "country": "US",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/nhmzkzez-3028",
+    "logoUrl": "https://cdn.abcotvs.com/dip/images/11479454_011822-cc-abc-generic-thumb-img.jpg"
+  },
+  {
+    "id": "timst-acc-network",
+    "name": "ACC Network (TimStreams)",
+    "country": "US",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/aqwidk96-2985",
+    "logoUrl": "https://theacc.com/images/2018/11/30/ACCN_Launch.png"
+  },
+  {
+    "id": "timst-ae-network",
+    "name": "AE (TimStreams)",
+    "country": "US",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/mpmo2rq6-2243",
+    "logoUrl": "https://www.aetv.com/assets/images/aetv/generic-thumb.jpg"
+  },
+  {
+    "id": "timst-amc",
+    "name": "AMC (TimStreams)",
+    "country": "US",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/q4o68v8x-1092",
+    "logoUrl": "https://tvseriesfinale.com/wp-content/uploads/2014/08/amc02.jpg"
+  },
+  {
+    "id": "timst-american-heroes-channel",
+    "name": "American Heroes Channel (TimStreams)",
+    "country": "US",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yebuybr2-6867",
+    "logoUrl": "https://payload.cargocollective.com/1/10/342209/9724942/AHC_15a_3_1340_c.jpg"
+  },
+  {
+    "id": "timst-axs-tv",
+    "name": "AXS TV (TimStreams)",
+    "country": "US",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/5evzdk49-4997",
+    "logoUrl": "https://www.hcc.net/wp-content/uploads/2012/06/AXS_TV_BlueWhite.jpg"
+  },
+  {
+    "id": "timst-bbc-america",
+    "name": "BBC America (TimStreams)",
+    "country": "US",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/ha5xbugi-7768",
+    "logoUrl": "https://www.newscaststudio.com/wp-content/uploads/2024/11/bbc-america-logo.jpg"
+  },
+  {
+    "id": "timst-bbc-one-london",
+    "name": "BBC One London (TimStreams)",
+    "country": "GB",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/evqaao47-8923",
+    "logoUrl": "https://ichef.bbci.co.uk/images/ic/1200x675/p0dkt7rv.jpg"
+  },
+  {
+    "id": "timst-bbc-two",
+    "name": "BBC Two (TimStreams)",
+    "country": "GB",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/i1999ji2-8495",
+    "logoUrl": "https://ichef.bbci.co.uk/images/ic/1200x675/p0bvs8dg.jpg"
+  },
+  {
+    "id": "timst-bein-sports",
+    "name": "beIN Sports (TimStreams)",
+    "country": "US",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/u36ftfcy-7101",
+    "logoUrl": "https://assets-us-01.kc-usercontent.com/31dbcbc6-da4c-0033-328a-d7621d0fa726/1318873e-8501-4f79-bb69-182d741cf9ad/beIN%20SPORTS%20Portada.jpg?ver=03-06-2025?w=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;q=75"
+  },
+  {
+    "id": "timst-bein-sports-francais-1",
+    "name": "beIN Sports Francais 1 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/gbw09ann-983",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/beinsports.png"
+  },
+  {
+    "id": "timst-bein-sports-francais-2",
+    "name": "beIN Sports Francais 2 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/ahl77cgo-3597",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/beinsports.png"
+  },
+  {
+    "id": "timst-bein-sports-francais-3",
+    "name": "beIN Sports Francais 3 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/fcxpeb2i-9275",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/beinsports.png"
+  },
+  {
+    "id": "timst-big-ten-network",
+    "name": "Big Ten Network (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/tkdttav3-2582",
+    "logoUrl": "https://barrettmedia.com/wp-content/uploads/2024/07/Big-Ten-Network-BTN-Logo.jpg"
+  },
+  {
+    "id": "timst-bravo",
+    "name": "Bravo (TimStreams)",
+    "country": "US",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/vexvhyqi-470",
+    "logoUrl": "https://www.bravotv.com/sites/bravo/files/2024/05/bravo-logo-2jpg.jpg"
+  },
+  {
+    "id": "timst-canal-extra-1",
+    "name": "CANAL+ Extra 1 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/9nllxks8-4883",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/canalextra.png"
+  },
+  {
+    "id": "timst-canal-extra-2",
+    "name": "CANAL+ Extra 2 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/yyyiyhr1-301",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/canalextra.png"
+  },
+  {
+    "id": "timst-canal-sport-pl",
+    "name": "CANAL+ Sport PL (TimStreams)",
+    "country": "PL",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/jr4cynbo-9272",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/canansport.png"
+  },
+  {
+    "id": "timst-canal-sport-2-pl",
+    "name": "CANAL+ Sport 2 PL (TimStreams)",
+    "country": "PL",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/vz0b8dai-3533",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/canansport.png"
+  },
+  {
+    "id": "timst-canal-sport-3-pl",
+    "name": "CANAL+ Sport 3 PL (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/f9q2whgc-7787",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/canansport.png"
+  },
+  {
+    "id": "timst-canal-sport-4-pl",
+    "name": "CANAL+ Sport 4 PL (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/rcbsp9o1-5913",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/canansport.png"
+  },
+  {
+    "id": "timst-canal-sport-5-pl",
+    "name": "CANAL+ Sport 5 PL (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/ayehdrp1-4306",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/canansport.png"
+  },
+  {
+    "id": "timst-canal-sport-6-pl",
+    "name": "CANAL+ Sport 6 PL (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/qrmke5x4-2028",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/canansport.png"
+  },
+  {
+    "id": "timst-cbeebies",
+    "name": "CBeebies (TimStreams)",
+    "country": "OUTRO",
+    "category": "Infantil",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/vf8mdbdl-8610",
+    "logoUrl": "https://static.files.bbci.co.uk/core/website/assets/static/childrens-web/images/metadata/cbeebies-poster-1024x576.8eb27aa32e.png"
+  },
+  {
+    "id": "timst-cbs",
+    "name": "CBS (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/ngmu9mth-4214",
+    "logoUrl": "https://wwwimage-tve.cbsstatic.com/base/files/seo/cbs_seo_1200x627_1.jpg"
+  },
+  {
+    "id": "timst-cbs-sports-network",
+    "name": "CBS Sports Network (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/9c2jwr40-3407",
+    "logoUrl": "https://www.paramountshop.com/cdn/shop/files/cbssportsnetwork-mobile-min.png"
+  },
+  {
+    "id": "timst-cnbc",
+    "name": "CNBC (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/575o95wh-4336",
+    "logoUrl": "https://cdn.versantmedia.com/versantmedia/styles/newsroom/s3/2025-11/cnbc%281600x900%29.png"
+  },
+  {
+    "id": "timst-cw",
+    "name": "CW (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/8x015102-6452",
+    "logoUrl": "https://www.wavy.com/wp-content/uploads/sites/3/2024/08/cw-logo-white-on-blue-wavy-background.jpg?w=1280"
+  },
+  {
+    "id": "timst-dazn-1-germany",
+    "name": "DAZN 1 Germany (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/3dk8rxui-6212",
+    "logoUrl": "https://image.discovery.indazn.com/ca/v2/ca/image?id=12dpnhddhmpm71228raanhyxs2_image-header_pDach_1723627450000&amp;amp;amp;amp;amp;amp;amp;amp;quality=70"
+  },
+  {
+    "id": "timst-dazn-2-germany",
+    "name": "DAZN 2 Germany (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/tnifspj6-852",
+    "logoUrl": "https://image.discovery.indazn.com/ca/v2/ca/image?id=1ni1lpwjtnxmr1xklfoptrt2mz_image-header_pDach_1723628653000"
+  },
+  {
+    "id": "timst-dazn-1-italia",
+    "name": "DAZN 1 Italia (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/gmoqoz7b-4945",
+    "logoUrl": "https://image.discovery.indazn.com/ca/v2/ca/image?id=pterrit4f2xu1pa2r6x87y5e9_image-header_pIt_1724315365000&amp;amp;amp;amp;amp;amp;amp;amp;quality=70"
+  },
+  {
+    "id": "timst-dazn-1-portugal",
+    "name": "DAZN 1 Portugal (TimStreams)",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://exmxbxe.cfd/3zhczzbl-9086",
+    "logoUrl": "https://image.discovery.indazn.com/ca/v2/ca/image?id=1o4eamzb4env61ddc8wv4ra06l_image-header_pRow_1720521601000&amp;amp;amp;amp;amp;amp;amp;quality=70"
+  },
+  {
+    "id": "timst-dazn-1-usa",
+    "name": "DAZN 1 USA (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/jyqzet0b-2901",
+    "logoUrl": "https://image.discovery.indazn.com/ca/v2/ca/image?id=1owzb99m9mnzy15hjxolpukwul_image-header_pUs_1771501796000&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quality=70"
+  },
+  {
+    "id": "timst-dazn-f1",
+    "name": "DAZN F1 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/5rvazszz-6983",
+    "logoUrl": "https://image.discovery.indazn.com/ca/v2/ca/image?id=14ln25pmjdv031ejxsmg8dczsu_image-header_pEs_1723117975000&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quality=70"
+  },
+  {
+    "id": "timst-disney-junior",
+    "name": "Disney Junior (TimStreams)",
+    "country": "OUTRO",
+    "category": "Infantil",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/wjt6p7p4-3093",
+    "logoUrl": "https://thewaltdisneycompany.com/app/uploads/2021/02/021221_Disney-Junior-10th-Anniversary-00.jpg"
+  },
+  {
+    "id": "timst-eleven-sports-1",
+    "name": "Eleven Sports 1 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/gg28wwh4-6849",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
+  },
+  {
+    "id": "timst-eleven-sports-2",
+    "name": "Eleven Sports 2 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/pw0y0gzx-7614",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
+  },
+  {
+    "id": "timst-eleven-sports-3",
+    "name": "Eleven Sports 3 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/ytjrtde4-6087",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
+  },
+  {
+    "id": "timst-eleven-sports-4",
+    "name": "Eleven Sports 4 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/boc7cv4y-6161",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/100659.png"
+  },
+  {
+    "id": "timst-espn",
+    "name": "ESPN (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/o9bl8cai-7223",
+    "logoUrl": "https://a1.espncdn.com/combiner/i?img=%2Fi%2Fespn%2Fespn_logos%2Fespn_red.png"
+  },
+  {
+    "id": "timst-espn2",
+    "name": "ESPN2 (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/33jhpzfr-936",
+    "logoUrl": "https://discgolf.ultiworld.com/wp-content/uploads/2020/10/ESPN2.png"
+  },
+  {
+    "id": "timst-espnu",
+    "name": "ESPNU (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/wqbwjjhf-9771",
+    "logoUrl": "https://i.ibb.co/Lh5jHVDm/ESPNU-logo-1-jpg.webp"
+  },
+  {
+    "id": "timst-food-network",
+    "name": "Food Network (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/cnomxno0-1987",
+    "logoUrl": "https://i.ibb.co/5WcnZbYf/food-network-jpg.jpg"
+  },
+  {
+    "id": "timst-fox",
+    "name": "Fox (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/bhg7rkug-6924",
+    "logoUrl": "https://i.ibb.co/8JdwqP4/foxusa.png"
+  },
+  {
+    "id": "timst-fox-deportes",
+    "name": "Fox Deportes (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/8p0wjr6t-3317",
+    "logoUrl": "https://foxsports-wordpress-www-prsupports-prod.s3.amazonaws.com/uploads/sites/2/2016/12/LOGO-DEPORTES-1040x585.jpg"
+  },
+  {
+    "id": "timst-fox-sports-1",
+    "name": "Fox Sports 1 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/f4ijr4sl-187",
+    "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/2015_Fox_Sports_1_logo.svg/1280px-2015_Fox_Sports_1_logo.svg.png"
+  },
+  {
+    "id": "timst-fox-sports-2",
+    "name": "Fox Sports 2 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/p5562bwm-3285",
+    "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/FS2_logo_2015.svg/1280px-FS2_logo_2015.svg.png"
+  },
+  {
+    "id": "timst-fox-sports-501-cricket",
+    "name": "Fox Sports 501 (Cricket) (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/imifneoj-1417",
+    "logoUrl": "https://i.ibb.co/Y4bTS1p7/image.webp"
+  },
+  {
+    "id": "timst-fox-sports-502-league",
+    "name": "Fox Sports 502 (League) (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/caxq9d5g-1854",
+    "logoUrl": "https://i.ibb.co/tppZhDrb/image.webp"
+  },
+  {
+    "id": "timst-fox-sports-503",
+    "name": "Fox Sports 503 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/t1ilns5i-746",
+    "logoUrl": "https://i.ibb.co/xS4MkGSL/image.webp"
+  },
+  {
+    "id": "timst-fox-sports-504-footy",
+    "name": "Fox Sports 504 (Footy) (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/m5ys2t2z-7410",
+    "logoUrl": "https://i.ibb.co/SXvQLc0M/image.webp"
+  },
+  {
+    "id": "timst-fox-sports-505",
+    "name": "Fox Sports 505 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/p0jkpm12-1140",
+    "logoUrl": "https://i.ibb.co/prKZGNLt/image.webp"
+  },
+  {
+    "id": "timst-fox-sports-506",
+    "name": "Fox Sports 506 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/9hg9rzzh-2937",
+    "logoUrl": "https://i.ibb.co/Swks4Lmj/image.webp"
+  },
+  {
+    "id": "timst-fox-sports-507",
+    "name": "Fox Sports 507 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/s1npqmod-9335",
+    "logoUrl": "https://i.ibb.co/7d6VgDVL/image.webp"
+  },
+  {
+    "id": "timst-fx",
+    "name": "FX (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/fn3pa1gb-93",
+    "logoUrl": "https://static0.srcdn.com/wordpress/wp-content/uploads/2026/01/gold-fx-channel-logo-1.jpg"
+  },
+  {
+    "id": "timst-fxm",
+    "name": "FXM (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/af5nt902-6744",
+    "logoUrl": "https://www.awn.com/sites/default/files/styles/original/public/image/featured/50716-buster-creates-brand-id-new-fxm-programming-block_0.jpg"
+  },
+  {
+    "id": "timst-fxx",
+    "name": "FXX (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/8lysgd83-4863",
+    "logoUrl": "https://thestreamable.com/media/pages/channels/fxx/b6fc72ce3d-1756344305/fxx-banner-1536x864-crop.png"
+  },
+  {
+    "id": "timst-go3-sport-1",
+    "name": "Go3 Sport 1 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/2tsl2cbn-6969",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/go3sport.png"
+  },
+  {
+    "id": "timst-go3-sport-2",
+    "name": "Go3 Sport 2 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/gu0zawp0-8172",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/go3sport.png"
+  },
+  {
+    "id": "timst-go3-sport-3",
+    "name": "Go3 Sport 3 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/gu0zawp0-5456",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/go3sport.png"
+  },
+  {
+    "id": "timst-golf-channel",
+    "name": "GOLF Channel (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/p8wos5q1-1333",
+    "logoUrl": "https://corporate.comcast.com/media/img/1000w/2020/01/corporate_golf-channel-16x9-social.jpg"
+  },
+  {
+    "id": "timst-hbo",
+    "name": "HBO (TimStreams)",
+    "country": "OUTRO",
+    "category": "Filmes",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/ot03jqpb-4126",
+    "logoUrl": "https://static.hbo.com/2021-11/hbo-static-1920.jpg"
+  },
+  {
+    "id": "timst-hbo-comedy",
+    "name": "HBO Comedy (TimStreams)",
+    "country": "OUTRO",
+    "category": "Filmes",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/g8rltva2-1155",
+    "logoUrl": "https://www.tvinsider.com/wp-content/uploads/2022/03/hbo-comedy.png"
+  },
+  {
+    "id": "timst-hbo-drama",
+    "name": "HBO Drama (TimStreams)",
+    "country": "OUTRO",
+    "category": "Filmes",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/30owqrck-7840",
+    "logoUrl": "https://i.ibb.co/Qv2Mz3ZB/https-archive-images-prod-global-a201836-reutersmedia-net-2016-10-30-LYNXMPEC9-T08-O.avif"
+  },
+  {
+    "id": "timst-hbo-latino",
+    "name": "HBO Latino (TimStreams)",
+    "country": "OUTRO",
+    "category": "Filmes",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/ym6y4zya-9910",
+    "logoUrl": "https://i.ibb.co/TMzmbVYq/maxresdefault.jpg"
+  },
+  {
+    "id": "timst-hbo-movies",
+    "name": "HBO Movies (TimStreams)",
+    "country": "OUTRO",
+    "category": "Filmes",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/uionhys2-461",
+    "logoUrl": "https://i.ibb.co/Qv2Mz3ZB/https-archive-images-prod-global-a201836-reutersmedia-net-2016-10-30-LYNXMPEC9-T08-O.avif"
+  },
+  {
+    "id": "timst-mlb-network",
+    "name": "MLB Network (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/kbrqp0d5-1689",
+    "logoUrl": "https://img.mlbstatic.com/mlb-images/image/private/t_16x9/t_w2208/mlb/xtkynqe5wgtzaddnsus2.jpg"
+  },
+  {
+    "id": "timst-motogp-channel",
+    "name": "MotoGP Channel (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/sv7a4sfc-9210",
+    "logoUrl": "https://sportbikesincmag.com/wp-content/uploads/2024/11/New-MotoGP-Logo-sportbikesincmag.com-4.jpg"
+  },
+  {
+    "id": "timst-movistar-deportes",
+    "name": "Movistar Deportes (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/gzli3jta-570",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/movistardeportes.png"
+  },
+  {
+    "id": "timst-movistar-deportes-2",
+    "name": "Movistar Deportes 2 (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/1gv2rhxc-4292",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/movistardeportes.png"
+  },
+  {
+    "id": "timst-movistar-deportes-3",
+    "name": "Movistar Deportes 3 (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/wtnngz3p-4867",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/movistardeportes.png"
+  },
+  {
+    "id": "timst-movistar-plus",
+    "name": "Movistar Plus (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/b6a3cjbx-9022",
+    "logoUrl": "https://imagenes.hobbyconsolas.com/uploads/imagenes/2026/05/11/6a01f2422d3b19-96205427.jpeg"
+  },
+  {
+    "id": "timst-mtv",
+    "name": "MTV (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/m7dxbt6s-6381",
+    "logoUrl": "https://static0.colliderimages.com/wordpress/wp-content/uploads/2025/12/mtv-logo-1.jpg"
+  },
+  {
+    "id": "timst-nba-tv",
+    "name": "NBA TV (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/8tl2ksef-2775",
+    "logoUrl": "https://static.cdn.turner.com/styles/header_image_1500x500_cropped/s3/nba-tv-16x9-1.jpg?itok=6H8mrlyR"
+  },
+  {
+    "id": "timst-nbc",
+    "name": "NBC (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/bdl7my34-1862",
+    "logoUrl": "https://cdn.mos.cms.futurecdn.net/zP42nmS7MRj2kvBqNEs8CE.jpg"
+  },
+  {
+    "id": "timst-nhl-network",
+    "name": "NHL Network (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/kelcwql2-1938",
+    "logoUrl": "https://media.d3.nhle.com/image/private/t_ratio16_9-size50/prd/lhum6z3hyaga9ahnjow0.png"
+  },
+  {
+    "id": "timst-nick-jr",
+    "name": "Nick Jr. (TimStreams)",
+    "country": "OUTRO",
+    "category": "Infantil",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/mkq4q2a4-9321",
+    "logoUrl": "https://i.ibb.co/xS6CMxZD/nick-jr-logo-2023-4.jpg"
+  },
+  {
+    "id": "timst-nickelodeon",
+    "name": "Nickelodeon (TimStreams)",
+    "country": "OUTRO",
+    "category": "Infantil",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/81giyo7o-5495",
+    "logoUrl": "https://i.ibb.co/xSM8bDYh/roger-nickelodeon-graphic-design-format-webp-width-2880-8-Yj-L2u3-KSI20j-HDQ.webp"
+  },
+  {
+    "id": "timst-polsat-sport-1",
+    "name": "Polsat Sport 1 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/pi5dqsjd-8964",
+    "logoUrl": "https://staticeu.sweet.tv/images/cache/v2/channel_banner/COEd/3809-polsat-sport-1-hd.png"
+  },
+  {
+    "id": "timst-polsat-sport-2",
+    "name": "Polsat Sport 2 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/njs5pc6k-5347",
+    "logoUrl": "https://staticeu.sweet.tv/images/cache/v2/channel_banner/COId/3810-polsat-sport-2-hd.png"
+  },
+  {
+    "id": "timst-polsat-sport-3",
+    "name": "Polsat Sport 3 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/r1ehwgde-9139",
+    "logoUrl": "https://staticeu.sweet.tv/images/cache/v2/channel_banner/COMd/3811-polsat-sport-3-hd.png"
+  },
+  {
+    "id": "timst-polsat-sport-fight",
+    "name": "Polsat Sport Fight (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/mkr6nvqt-4662",
+    "logoUrl": "https://staticeu.sweet.tv/images/cache/v2/channel_banner/COUd/3813-polsat-sport-fight-hd.png"
+  },
+  {
+    "id": "timst-premier-sports-1-ie",
+    "name": "Premier Sports 1 IE (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/w3g66pt8-4833",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/premiersports.png"
+  },
+  {
+    "id": "timst-premier-sports-2-ie",
+    "name": "Premier Sports 2 IE (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/xneh5qi7-3730",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/premiersports.png"
+  },
+  {
+    "id": "timst-premiere",
+    "name": "Premiere (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/hx8nkn5h-2645",
+    "logoUrl": "https://s3.glbimg.com/v1/AUTH_36abb2af534644878388f516c38b89ac/prod/home-share-1b75cdaa.png"
+  },
+  {
+    "id": "timst-racer-network",
+    "name": "RACER Network (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/c08i94j7-8999",
+    "logoUrl": "https://cdn-cs-images.racer.com/v3/assets/blte77f57883ea46be1/bltb30b537c79808b35/680f2c517c8c98109d720e49/Racer_Network_1920x1080_Presser_V1.jpg"
+  },
+  {
+    "id": "timst-sec-network",
+    "name": "SEC Network (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/2p9ptshb-3537",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/images/2NRKBDE2CLIGI5XHHHHMY2BCAQ.jpg"
+  },
+  {
+    "id": "timst-showtime",
+    "name": "Showtime (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/lbf8b9qx-5795",
+    "logoUrl": "https://i.ibb.co/v7vcNY4/Showtime-Logo.webp"
+  },
+  {
+    "id": "timst-showtime-2",
+    "name": "Showtime 2 (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/dutm6aqf-1631",
+    "logoUrl": "https://i.ibb.co/8gCRbv0s/Showtime-2-svg.webp"
+  },
+  {
+    "id": "timst-showtime-extreme",
+    "name": "Showtime Extreme (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/5capzra0-4025",
+    "logoUrl": "https://i.ibb.co/1t5fNwpQ/Showtime-Closing-2013.webp"
+  },
+  {
+    "id": "timst-showtime-family-zone",
+    "name": "Showtime Family Zone (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/tqpk78xi-3172",
+    "logoUrl": "https://i.ibb.co/1t5fNwpQ/Showtime-Closing-2013.webp"
+  },
+  {
+    "id": "timst-showtime-next",
+    "name": "Showtime Next (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/1n90vg6y-224",
+    "logoUrl": "https://i.ibb.co/1t5fNwpQ/Showtime-Closing-2013.webp"
+  },
+  {
+    "id": "timst-showtime-women",
+    "name": "Showtime Women (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/g4nghv2r-2516",
+    "logoUrl": "https://i.ibb.co/1t5fNwpQ/Showtime-Closing-2013.webp"
+  },
+  {
+    "id": "timst-sky-sport-bundesliga",
+    "name": "Sky Sport Bundesliga (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/bsudwrf4-653",
+    "logoUrl": "https://www.sportsvideo.org/wp-content/uploads/2024/12/Sky-Sports-Bundesliega-featured.png"
+  },
+  {
+    "id": "timst-sky-sports-plus",
+    "name": "Sky Sports+ (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/jwrj2d6p-8874",
+    "logoUrl": "https://e0.365dm.com/24/07/2048x1152/skysports-ssplus-sky-sports-plus_6644064.jpg"
+  },
+  {
+    "id": "timst-sky-sports-action",
+    "name": "Sky Sports Action (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/3ym6q5iy-878",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/skysportsaction.png"
+  },
+  {
+    "id": "timst-sky-sports-f1",
+    "name": "Sky Sports F1 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/f596f98r-6977",
+    "logoUrl": "https://e0.365dm.com/21/03/1600x900/skysports-f1-2021-graphic_5299452.png"
+  },
+  {
+    "id": "timst-sky-sports-football",
+    "name": "Sky Sports Football (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/a80q8j3i-2187",
+    "logoUrl": "https://images.squarespace-cdn.com/content/v1/6380a5b12f7b6f632e16ce77/46d62da8-e650-4d2b-a5bc-48a5648edb8e/Beth_Mead.jpg"
+  },
+  {
+    "id": "timst-sky-sports-golf",
+    "name": "Sky Sports Golf (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/0bydvmgs-4755",
+    "logoUrl": "https://e0.365dm.com/23/05/1600x900/skysports-golf-sky-sports-golf_6158933.jpg"
+  },
+  {
+    "id": "timst-sky-sports-mix",
+    "name": "Sky Sports Mix (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/kt8jus5e-7693",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/Sky_Sports_Mix_Generic_ID_2017.webp"
+  },
+  {
+    "id": "timst-sky-sports-news",
+    "name": "Sky Sports News (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/sawtuw4t-1803",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/image.jpg"
+  },
+  {
+    "id": "timst-sky-sports-racing",
+    "name": "Sky Sports Racing (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/2jlx4p7r-552",
+    "logoUrl": "https://e0.365dm.com/23/07/2048x1152/skysports-racing-league-sky-sports-racing_6230990.jpg"
+  },
+  {
+    "id": "timst-sky-sports-tennis",
+    "name": "Sky Sports Tennis (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/kkbb5x8i-1991",
+    "logoUrl": "https://e0.365dm.com/24/01/2048x1152/skysports-sky-sports-tennis_6437709.jpg"
+  },
+  {
+    "id": "timst-sony-sports-network",
+    "name": "Sony Sports Network (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/toarnao3-525",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/085457534.png"
+  },
+  {
+    "id": "timst-sony-sports-network-2",
+    "name": "Sony Sports Network 2 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/umicawgj-6598",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/085457534.png"
+  },
+  {
+    "id": "timst-sony-sports-network-3",
+    "name": "Sony Sports Network 3 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/iit0e7qs-6560",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/085457534.png"
+  },
+  {
+    "id": "timst-sony-sports-network-4",
+    "name": "Sony Sports Network 4 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/dxclfs9n-2151",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/085457534.png"
+  },
+  {
+    "id": "timst-sony-sports-network-5",
+    "name": "Sony Sports Network 5 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/oay9sxar-3985",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/085457534.png"
+  },
+  {
+    "id": "timst-sport-tv1",
+    "name": "Sport TV1 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/oqq5c86g-7521",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
+  },
+  {
+    "id": "timst-sport-tv2",
+    "name": "Sport TV2 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/6dw9r22a-7192",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
+  },
+  {
+    "id": "timst-sport-tv3",
+    "name": "Sport TV3 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/dbo09jwh-5404",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
+  },
+  {
+    "id": "timst-sport-tv4",
+    "name": "Sport TV4 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/t218wwwk-3361",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
+  },
+  {
+    "id": "timst-sport-tv5",
+    "name": "Sport TV5 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/twg31g84-6394",
+    "logoUrl": "https://cdn.jsdelivr.net/gh/willthequeencome/img-cdn/sportv-pt.png"
+  },
+  {
+    "id": "timst-starz-kids-and-family",
+    "name": "STARZ Kids and Family (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/k4cl3go0-8777",
+    "logoUrl": "https://careers.starz.com/wp-content/uploads/2025/01/STARZ-LOGO-IMAGE.png"
+  },
+  {
+    "id": "timst-syfy",
+    "name": "SYFY (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/eymmdvm3-8294",
+    "logoUrl": "https://assets.goal.com/images/v3/blt1be56273baf0440d/syfy%20logo.jpg?auto=webp&amp;amp;amp;amp;amp;amp;amp;amp;amp;format=pjpg&amp;amp;amp;amp;amp;amp;amp;amp;amp;width=3840&amp;amp;amp;amp;amp;amp;amp;amp;amp;quality=60"
+  },
+  {
+    "id": "timst-tbs",
+    "name": "TBS (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/2rqv6c3g-406",
+    "logoUrl": "https://cdn.sanity.io/images/1pn9obcz/production/a6971fbe09c85f2deeb480fc494a39219d039135-1920x1080.jpg"
+  },
+  {
+    "id": "timst-teenick",
+    "name": "Teenick (TimStreams)",
+    "country": "OUTRO",
+    "category": "Infantil",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/um03zyi2-53",
+    "logoUrl": "https://i.ibb.co/3yCJDVrW/Teen-Nick-2023.webp"
+  },
+  {
+    "id": "timst-tnt",
+    "name": "TNT (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/2szx41ik-7079",
+    "logoUrl": "https://i.ytimg.com/vi/F-AHKcxi3pY/maxresdefault.jpg"
+  },
+  {
+    "id": "timst-tnt-sports-1",
+    "name": "TNT Sports 1 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/e0lyrkhr-1002",
+    "logoUrl": "https://cdn.mos.cms.futurecdn.net/y3oPitXYAwGJnyTHFYo5qB.jpeg"
+  },
+  {
+    "id": "timst-tnt-sports-2",
+    "name": "TNT Sports 2 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/it7aytqh-1540",
+    "logoUrl": "https://cdn.mos.cms.futurecdn.net/y3oPitXYAwGJnyTHFYo5qB.jpeg"
+  },
+  {
+    "id": "timst-tnt-sports-3",
+    "name": "TNT Sports 3 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/bjarzxf9-1713",
+    "logoUrl": "https://cdn.mos.cms.futurecdn.net/y3oPitXYAwGJnyTHFYo5qB.jpeg"
+  },
+  {
+    "id": "timst-tnt-sports-4",
+    "name": "TNT Sports 4 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/3u2rfhmp-8468",
+    "logoUrl": "https://cdn.mos.cms.futurecdn.net/y3oPitXYAwGJnyTHFYo5qB.jpeg"
+  },
+  {
+    "id": "timst-trutv",
+    "name": "TruTV (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/qpwihhq2-6590",
+    "logoUrl": "https://i.ibb.co/DfGcnjXY/Header-tru-TV.webp"
+  },
+  {
+    "id": "timst-tudn",
+    "name": "TUDN (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/q2u5urq3-3910",
+    "logoUrl": "https://cdn.aptoide.com/imgs/e/e/6/ee65573e3ed2c5fcafa0191860afdf51_fgraphic.png"
+  },
+  {
+    "id": "timst-tyc-sports-internacional",
+    "name": "TYC Sports Internacional (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/gq4ysifk-1154",
+    "logoUrl": "https://assets.goal.com/images/v3/blta396e76391fffdfa/TyC_Sports_logo.jpg"
+  },
+  {
+    "id": "timst-ufc-fight-pass-24-7",
+    "name": "UFC Fight Pass 24/7 (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/c2g6ggzm-2981",
+    "logoUrl": "https://fightrecord.co.uk/wp-content/uploads/2020/12/ufc-fight-pass-lion-fight-muay-thai.jpg"
+  },
+  {
+    "id": "timst-wapa-america",
+    "name": "WAPA America (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/mi0i094s-121",
+    "logoUrl": "https://m.media-amazon.com/images/I/81AEkpHaIPL._SL1920_.png"
+  },
+  {
+    "id": "timst-wapa-deportes",
+    "name": "WAPA Deportes (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/aataox5b-8264",
+    "logoUrl": "https://i.ibb.co/pBzhsJ17/WAPA-Deportes.jpg"
+  },
+  {
+    "id": "timst-willow-cricket-2",
+    "name": "Willow Cricket 2 (TimStreams)",
+    "country": "OUTRO",
+    "category": "TimStreams",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/14quawd5-8819",
+    "logoUrl": "https://d229kpbsb5jevy.cloudfront.net/tv/1920/1080/languages/WILLOW-2.jpg"
+  },
+  {
+    "id": "timst-sky-sport-24",
+    "name": "Sky Sport 24 (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/1k3ckb2m-8796",
+    "logoUrl": "https://mir-s3-cdn-cf.behance.net/project_modules/max_1200_webp/dfa89629775883.5602ff6b0aacf.jpg"
+  },
+  {
+    "id": "timst-sky-sport-uno",
+    "name": "Sky Sport Uno (TimStreams)",
+    "country": "OUTRO",
+    "category": "Desporto",
+    "isPt": false,
+    "backupStreamUrl": "https://exmxbxe.cfd/pqd6qx47-8073",
+    "logoUrl": "https://i.imgur.com/dnoy7mK.png"
   }
 ]

@@ -35,7 +35,7 @@ Write-Host "==> 3. Git commit e push para o repositório..." -ForegroundColor Cy
 git add .
 $status = git status --porcelain
 if ($status) {
-    git commit -m "Release ${TagName}: Correção do botão Voltar e estabilidade PiP"
+    git commit -m "Release ${TagName}: ${ReleaseTitle}"
 }
 git push origin main
 

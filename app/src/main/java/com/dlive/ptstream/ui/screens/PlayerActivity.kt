@@ -38,6 +38,9 @@ import com.dlive.ptstream.MainActivity
 import com.dlive.ptstream.data.Channel
 import com.dlive.ptstream.data.ChannelRepository
 import com.dlive.ptstream.data.TabFilter
+import android.content.res.ColorStateList
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import java.io.ByteArrayInputStream
 import java.lang.ref.WeakReference
 
@@ -102,6 +105,7 @@ class PlayerActivity : ComponentActivity() {
     private lateinit var etDrawerSearch: EditText
     private lateinit var tvDrawerEmpty: TextView
     private lateinit var btnTabPt: Button
+    private lateinit var btnTabTimst: Button
     private lateinit var btnTabFav: Button
     private lateinit var btnTabAll: Button
     private lateinit var drawerAdapter: DrawerChannelAdapter
@@ -279,6 +283,7 @@ class PlayerActivity : ComponentActivity() {
         etDrawerSearch = findViewById(R.id.etDrawerSearch)
         tvDrawerEmpty = findViewById(R.id.tvDrawerEmpty)
         btnTabPt = findViewById(R.id.btnTabPt)
+        btnTabTimst = findViewById(R.id.btnTabTimst)
         btnTabFav = findViewById(R.id.btnTabFav)
         btnTabAll = findViewById(R.id.btnTabAll)
 
@@ -317,6 +322,7 @@ class PlayerActivity : ComponentActivity() {
         rvDrawerChannels.adapter = drawerAdapter
 
         btnTabPt.setOnClickListener { selectDrawerTab(TabFilter.PORTUGAL) }
+        btnTabTimst.setOnClickListener { selectDrawerTab(TabFilter.TIMSTREAMS) }
         btnTabFav.setOnClickListener { selectDrawerTab(TabFilter.FAVORITES) }
         btnTabAll.setOnClickListener { selectDrawerTab(TabFilter.ALL) }
 
@@ -328,13 +334,33 @@ class PlayerActivity : ComponentActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        refreshDrawerList()
+        etDrawerSearch.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                imm?.hideSoftInputFromWindow(etDrawerSearch.windowToken, 0)
+                etDrawerSearch.clearFocus()
+                rvDrawerChannels.requestFocus()
+                true
+            } else false
+        }
+
+        selectDrawerTab(TabFilter.PORTUGAL)
     }
 
     private fun openDrawer() {
-        refreshDrawerList()
+        // 1. Clear any prior search query and prevent keyboard pop-up in landscape
+        etDrawerSearch.setText("")
+        etDrawerSearch.clearFocus()
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        imm?.hideSoftInputFromWindow(etDrawerSearch.windowToken, 0)
+
+        // 2. Refresh drawer list with current tab
+        selectDrawerTab(currentDrawerTab)
+
+        // 3. Open drawer
         drawerLayout.openDrawer(GravityCompat.START)
 
+        // 4. Focus channel list rather than search box
         handler.postDelayed({
             val list = repository.getChannels(currentDrawerTab)
             val index = list.indexOfFirst { it.id == channelId }
@@ -342,21 +368,24 @@ class PlayerActivity : ComponentActivity() {
                 rvDrawerChannels.scrollToPosition(index)
             }
             rvDrawerChannels.requestFocus()
-        }, 200)
+        }, 150)
     }
 
     private fun selectDrawerTab(tab: TabFilter) {
         currentDrawerTab = tab
-        val activeColor = Color.parseColor("#E50914")
-        val inactiveColor = Color.parseColor("#202330")
+        val activeColor = ColorStateList.valueOf(Color.parseColor("#E50914"))
+        val inactiveColor = ColorStateList.valueOf(Color.parseColor("#202330"))
 
-        btnTabPt.setBackgroundColor(if (tab == TabFilter.PORTUGAL) activeColor else inactiveColor)
+        btnTabPt.backgroundTintList = if (tab == TabFilter.PORTUGAL) activeColor else inactiveColor
         btnTabPt.setTextColor(if (tab == TabFilter.PORTUGAL) Color.WHITE else Color.parseColor("#9CA3AF"))
 
-        btnTabFav.setBackgroundColor(if (tab == TabFilter.FAVORITES) activeColor else inactiveColor)
+        btnTabTimst.backgroundTintList = if (tab == TabFilter.TIMSTREAMS) activeColor else inactiveColor
+        btnTabTimst.setTextColor(if (tab == TabFilter.TIMSTREAMS) Color.WHITE else Color.parseColor("#9CA3AF"))
+
+        btnTabFav.backgroundTintList = if (tab == TabFilter.FAVORITES) activeColor else inactiveColor
         btnTabFav.setTextColor(if (tab == TabFilter.FAVORITES) Color.WHITE else Color.parseColor("#9CA3AF"))
 
-        btnTabAll.setBackgroundColor(if (tab == TabFilter.ALL) activeColor else inactiveColor)
+        btnTabAll.backgroundTintList = if (tab == TabFilter.ALL) activeColor else inactiveColor
         btnTabAll.setTextColor(if (tab == TabFilter.ALL) Color.WHITE else Color.parseColor("#9CA3AF"))
 
         refreshDrawerList()
@@ -369,8 +398,10 @@ class PlayerActivity : ComponentActivity() {
 
         if (list.isEmpty()) {
             tvDrawerEmpty.visibility = View.VISIBLE
+            rvDrawerChannels.visibility = View.GONE
         } else {
             tvDrawerEmpty.visibility = View.GONE
+            rvDrawerChannels.visibility = View.VISIBLE
         }
     }
 
@@ -382,9 +413,15 @@ class PlayerActivity : ComponentActivity() {
 
         channelId = newChannel.id
         channelName = newChannel.name
-        directStreamUrl = null
-        backupDirectUrl = null
-        isBackupSelected = false
+        backupDirectUrl = newChannel.backupStreamUrl
+
+        if (newChannel.id.startsWith("timst-") || newChannel.category == "TimStreams") {
+            directStreamUrl = newChannel.backupStreamUrl
+            isBackupSelected = false
+        } else {
+            directStreamUrl = null
+            isBackupSelected = false
+        }
 
         tvChannelTitle.text = channelName
         tvLandscapeTitle.text = channelName

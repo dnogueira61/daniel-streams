@@ -21,6 +21,7 @@ enum class TabFilter {
     PORTUGAL,
     LIVE_GAMES,
     FAVORITES,
+    TIMSTREAMS,
     ALL
 }
 
@@ -159,7 +160,9 @@ class ChannelRepository(private val context: Context) {
                             )
                         }.sortedWith(compareBy({ !it.isPortuguese }, { it.name }))
                         rebuildPrecomputedLists()
-                        return
+                        if (precomputedPtChannels.isNotEmpty()) {
+                            return
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -289,10 +292,13 @@ class ChannelRepository(private val context: Context) {
                         val chArray = jsonObject.getAsJsonArray("channels")
 
                         val timstMap = mutableMapOf<String, Pair<String?, String?>>() // normName -> Pair(logo, streamUrl)
+                        val uniqueTimstList = mutableListOf<Channel>()
+
                         if (chArray != null) {
                             for (el in chArray) {
                                 val chObj = el.asJsonObject
                                 val tName = chObj.get("name")?.asString ?: continue
+                                val tSlug = chObj.get("url")?.asString ?: ""
                                 val tLogo = chObj.get("logo")?.asString
                                 val streamsArr = chObj.getAsJsonArray("streams")
                                 val tStream = if (streamsArr != null && streamsArr.size() > 0) {
@@ -301,14 +307,42 @@ class ChannelRepository(private val context: Context) {
 
                                 val norm = normalizeChannelName(tName)
                                 timstMap[norm] = Pair(tLogo, tStream)
+
+                                val isDaznPt = tSlug == "dazn-1-portugal" || tName.contains("DAZN 1 Portugal", ignoreCase = true)
+                                val flag = chObj.get("flag")?.asString ?: "Outro"
+
+                                val cat = when {
+                                    listOf("sport", "dazn", "bein", "canal+", "golf").any { tName.contains(it, ignoreCase = true) } -> "Desporto"
+                                    listOf("hbo", "movie", "cinema").any { tName.contains(it, ignoreCase = true) } -> "Filmes"
+                                    listOf("disney", "cbeebies", "nick", "cartoon").any { tName.contains(it, ignoreCase = true) } -> "Infantil"
+                                    else -> "TimStreams"
+                                }
+
+                                if (tStream != null) {
+                                    uniqueTimstList.add(
+                                        Channel(
+                                            id = "timst-$tSlug",
+                                            name = if (isDaznPt) "DAZN 1 Portugal (TimStreams)" else "$tName (TimStreams)",
+                                            country = if (isDaznPt) "PT" else flag.uppercase(),
+                                            category = cat,
+                                            isPt = isDaznPt,
+                                            isFavorite = favIds.contains("timst-$tSlug"),
+                                            logoUrl = tLogo,
+                                            backupStreamUrl = tStream
+                                        )
+                                    )
+                                }
                             }
                         }
 
-                        // Enrich list
+                        // Enrich DaddyLive channels
+                        val existingIds = listToEnrich.map { it.id }.toSet()
+                        val existingNormNames = listToEnrich.map { normalizeChannelName(it.name) }.toSet()
+
                         for (ch in listToEnrich) {
                             val norm = normalizeChannelName(ch.name)
                             val matched = timstMap[norm] ?: timstMap.entries.firstOrNull {
-                                norm.contains(it.key) || it.key.contains(norm)
+                                (norm.length > 3 && it.key.contains(norm)) || (it.key.length > 3 && norm.contains(it.key))
                             }?.value
 
                             if (matched != null) {
@@ -318,6 +352,13 @@ class ChannelRepository(private val context: Context) {
                                 if (!matched.second.isNullOrBlank()) {
                                     ch.backupStreamUrl = matched.second
                                 }
+                            }
+                        }
+
+                        // Add unique TimStreams channels that don't duplicate existing DaddyLive channels
+                        for (tch in uniqueTimstList) {
+                            if (!existingIds.contains(tch.id) && (!existingNormNames.contains(normalizeChannelName(tch.name)) || tch.isPortuguese)) {
+                                listToEnrich.add(tch)
                             }
                         }
                     }
@@ -589,18 +630,32 @@ class ChannelRepository(private val context: Context) {
                 TabFilter.ALL -> precomputedAllChannels
                 TabFilter.FAVORITES -> precomputedFavChannels
                 TabFilter.LIVE_GAMES -> getTopFootballChannels()
+                TabFilter.TIMSTREAMS -> {
+                    val hidden = getHiddenChannelIds()
+                    cachedChannels.filter { !hidden.contains(it.id) && (!it.backupStreamUrl.isNullOrBlank() || it.category == "TimStreams" || it.id.startsWith("timst-")) }
+                }
             }
         }
 
         val baseList = when (tab) {
             TabFilter.PORTUGAL -> if (includeHidden) cachedChannels.filter { it.isPortuguese } else precomputedPtChannels
             TabFilter.LIVE_GAMES -> getTopFootballChannels(query)
+            TabFilter.TIMSTREAMS -> {
+                val list = cachedChannels.filter { !it.backupStreamUrl.isNullOrBlank() || it.category == "TimStreams" || it.id.startsWith("timst-") }
+                if (includeHidden) list else {
+                    val hidden = getHiddenChannelIds()
+                    list.filter { !hidden.contains(it.id) }
+                }
+            }
             TabFilter.FAVORITES -> if (includeHidden) cachedChannels.filter { it.isFavorite } else precomputedFavChannels
             TabFilter.ALL -> if (includeHidden) cachedChannels else precomputedAllChannels
         }
 
         return baseList.filter { ch ->
-            val matchesCategory = if (categoryFilter == "Todos") true else ch.category.equals(categoryFilter, ignoreCase = true)
+            val matchesCategory = if (categoryFilter == "Todos") true
+            else if (categoryFilter == "⚡ TimStreams") !ch.backupStreamUrl.isNullOrBlank() || ch.category == "TimStreams" || ch.id.startsWith("timst-")
+            else ch.category.equals(categoryFilter, ignoreCase = true)
+
             val matchesQuery = if (query.isBlank()) true else {
                 ch.name.contains(query, ignoreCase = true) ||
                         ch.id.contains(query) ||
@@ -619,14 +674,18 @@ class ChannelRepository(private val context: Context) {
     }
 
     fun getAvailableCategories(tab: TabFilter): List<String> {
-        return when (tab) {
+        val base = when (tab) {
             TabFilter.PORTUGAL -> precomputedPtCategories
             TabFilter.ALL -> precomputedAllCategories
+            TabFilter.TIMSTREAMS -> listOf("Todos", "Desporto", "Filmes", "Infantil")
             TabFilter.LIVE_GAMES -> listOf("Todos", "Futebol", "Motores", "Outros")
             TabFilter.FAVORITES -> {
                 val cats = precomputedFavChannels.map { it.category }.distinct().sorted()
                 listOf("Todos") + cats
             }
         }
+        return if (tab == TabFilter.PORTUGAL || tab == TabFilter.ALL) {
+            if (base.contains("⚡ TimStreams")) base else base + listOf("⚡ TimStreams")
+        } else base
     }
 }

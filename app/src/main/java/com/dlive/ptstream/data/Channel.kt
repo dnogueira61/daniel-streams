@@ -40,6 +40,7 @@ data class Channel(
                     lower.contains("sic") ||
                     lower.contains("tvi") ||
                     lower.contains("cmtv") ||
+                    lower.contains("tvcine") ||
                     lower.contains("eleven sports") ||
                     (lower.contains("dazn") && (lower.contains("portugal") || lower.contains("pt")))
         }
