@@ -56,6 +56,12 @@ object ChannelLogoHelper {
             lower.contains("cmtv") || lower.contains("cm tv") -> "${FALLITO_LOGO_BASE}cmtv.png"
 
             lower.contains("tvcine") -> "${FALLITO_LOGO_BASE}tvcine.png"
+            lower.contains("star channel") || lower.contains("star movies") -> "${FALLITO_LOGO_BASE}star-channel.png"
+            lower.contains("cinemax") -> "${FALLITO_LOGO_BASE}cinemax.png"
+            lower.contains("cartoon network") -> "${FALLITO_LOGO_BASE}cartoon-network.png"
+            lower.contains("disney jr") || lower.contains("disney junior") -> "${FALLITO_LOGO_BASE}disney-junior.png"
+            lower.contains("disney channel") || lower.contains("disney") -> "${FALLITO_LOGO_BASE}disney-channel.png"
+            lower.contains("mtv") -> "${FALLITO_LOGO_BASE}mtv.png"
 
             lower.contains("axn movies") || lower.contains("axn") -> "${FALLITO_LOGO_BASE}axn-movies.png"
 

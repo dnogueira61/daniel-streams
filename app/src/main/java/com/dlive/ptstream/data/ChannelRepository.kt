@@ -366,6 +366,79 @@ class ChannelRepository(private val context: Context) {
                     e.printStackTrace()
                 }
 
+                // 3. Fetch NTV Portuguese channels (TVCine, Hollywood, Cinemundo, A Bola TV, etc.)
+                try {
+                    val ntvUrl = "https://ntv.st/api/get-channels?limit=150&q=(pt)"
+                    val ntvConn = (URL(ntvUrl).openConnection() as HttpURLConnection).apply {
+                        connectTimeout = 7000
+                        readTimeout = 7000
+                        setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                        setRequestProperty("Accept", "application/json")
+                    }
+
+                    if (ntvConn.responseCode == HttpURLConnection.HTTP_OK) {
+                        val ntvJson = ntvConn.inputStream.bufferedReader().use { it.readText() }
+                        val jsonObject = JsonParser.parseString(ntvJson).asJsonObject
+                        val chArray = jsonObject.getAsJsonArray("channels")
+                        if (chArray != null) {
+                            val existingIds = listToEnrich.map { it.id }.toSet()
+
+                            for (el in chArray) {
+                                val chObj = el.asJsonObject
+                                val rawName = chObj.get("channel_name")?.asString ?: continue
+                                val cid = chObj.get("channel_id")?.asString ?: ""
+                                val streamUrl = chObj.get("channel_url")?.asString ?: continue
+                                if (streamUrl.isBlank()) continue
+
+                                val cleanName = rawName.replace("(PT)", "").replace("(pt)", "").trim()
+                                val norm = normalizeChannelName(cleanName)
+
+                                val matched = listToEnrich.firstOrNull { normalizeChannelName(it.name) == norm }
+                                if (matched != null) {
+                                    if (matched.backupStreamUrl.isNullOrBlank()) {
+                                        matched.backupStreamUrl = streamUrl
+                                    }
+                                } else {
+                                    val lower = cleanName.lowercase()
+                                    val cat = when {
+                                        listOf("sport", "dazn", "bola", "eurosport", "fight", "motor", "nba", "pfc", "toros", "fuel", "ginx").any { lower.contains(it) } -> "Desporto"
+                                        listOf("tvcine", "hollywood", "cinemundo", "axn", "amc", "star", "syfy", "nos studios", "novelas").any { lower.contains(it) } -> "Filmes"
+                                        listOf("kitchen", "casa", "food", "travel", "fashion", "dog", "e!", "reality").any { lower.contains(it) } -> "Entretenimento"
+                                        listOf("noticias", "rtp 3", "cmtv", "cnn").any { lower.contains(it) } -> "Notícias"
+                                        listOf("music", "mtv", "trace", "mezzo", "clubbing", "lusa", "afro", "iconcerts").any { lower.contains(it) } -> "Música"
+                                        else -> "Geral"
+                                    }
+                                    val ntvId = if (cid.startsWith("ntv-")) cid else "ntv-$cid"
+                                    if (!existingIds.contains(ntvId)) {
+                                        listToEnrich.add(
+                                            Channel(
+                                                id = ntvId,
+                                                name = cleanName,
+                                                country = "PT",
+                                                category = cat,
+                                                isPt = true,
+                                                isFavorite = favIds.contains(ntvId),
+                                                logoUrl = ChannelLogoHelper.getDefaultOnlineLogo(cleanName),
+                                                backupStreamUrl = streamUrl
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+                // 4. Always preserve bundled and previously cached NTV channels
+                val currentEnrichedIds = listToEnrich.map { it.id }.toSet()
+                for (ch in cachedChannels) {
+                    if (ch.id.startsWith("ntv-") && !currentEnrichedIds.contains(ch.id)) {
+                        listToEnrich.add(ch)
+                    }
+                }
+
                 if (listToEnrich.isNotEmpty()) {
                     listToEnrich.sortWith(compareBy({ !it.isPortuguese }, { it.name }))
                     val cacheFile = File(context.filesDir, CACHE_FILE_NAME)

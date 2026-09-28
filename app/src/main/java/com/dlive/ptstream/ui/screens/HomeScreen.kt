@@ -788,8 +788,18 @@ fun ChannelCard(
                             contentScale = ContentScale.Fit
                         )
                     } else {
+                        val initials = if (channel.id.startsWith("ntv-") || channel.id.startsWith("timst-") || channel.id.length > 4) {
+                            val words = channel.name.replace("(", "").replace(")", "").split(" ").filter { it.isNotBlank() }
+                            if (words.size >= 2) {
+                                (words[0].take(1) + words[1].take(1)).uppercase()
+                            } else {
+                                channel.name.take(3).uppercase()
+                            }
+                        } else {
+                            channel.id
+                        }
                         Text(
-                            text = channel.id,
+                            text = initials,
                             color = if (channel.isPortuguese) RedPrimary else TextSecondary,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
@@ -844,7 +854,10 @@ fun ChannelCard(
 
                         if (!channel.backupStreamUrl.isNullOrBlank()) {
                             Spacer(modifier = Modifier.width(6.dp))
-                            TagBadge(text = "⚡ TimStreams", color = androidx.compose.ui.graphics.Color(0xFF3B82F6))
+                            val isNtv = channel.backupStreamUrl?.contains("epicsports") == true || channel.id.startsWith("ntv-")
+                            val badgeText = if (isNtv) "⚡ NTV" else "⚡ TimStreams"
+                            val badgeColor = if (isNtv) androidx.compose.ui.graphics.Color(0xFF10B981) else androidx.compose.ui.graphics.Color(0xFF3B82F6)
+                            TagBadge(text = badgeText, color = badgeColor)
                         }
                     }
                 }

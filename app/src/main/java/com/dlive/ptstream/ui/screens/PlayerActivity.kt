@@ -415,7 +415,7 @@ class PlayerActivity : ComponentActivity() {
         channelName = newChannel.name
         backupDirectUrl = newChannel.backupStreamUrl
 
-        if (newChannel.id.startsWith("timst-") || newChannel.category == "TimStreams") {
+        if (newChannel.id.startsWith("timst-") || newChannel.id.startsWith("ntv-") || newChannel.category == "TimStreams") {
             directStreamUrl = newChannel.backupStreamUrl
             isBackupSelected = false
         } else {
@@ -450,17 +450,21 @@ class PlayerActivity : ComponentActivity() {
     }
 
     private fun updateServerBadgeText() {
+        val currentChannel = repository.getChannels(TabFilter.ALL).firstOrNull { it.id == channelId }
+        val hasBackup = currentChannel?.backupStreamUrl != null || backupDirectUrl != null
+
         val label = if (isBackupSelected) {
-            "Backup (TimST)"
+            val backupName = if (currentChannel?.backupStreamUrl?.contains("epicsports") == true || currentChannel?.backupStreamUrl?.contains("ntv.st") == true) "NTV" else "TimST"
+            "S2 ($backupName)"
         } else if (directStreamUrl != null) {
-            "TimST Principal"
+            if (directStreamUrl!!.contains("epicsports") || directStreamUrl!!.contains("ntv.st")) "NTV Direto" else "TimST Principal"
         } else {
             when (currentFolder) {
-                "stream" -> "S1 (Stream)"
-                "cast" -> "S2 (Cast)"
-                "watch" -> "S3 (Watch)"
-                "player" -> "S4 (Player)"
-                "plus" -> "S5 (Plus)"
+                "stream" -> "S1 (DLive)"
+                "cast" -> if (hasBackup) "S3 (Cast)" else "S2 (Cast)"
+                "watch" -> if (hasBackup) "S4 (Watch)" else "S3 (Watch)"
+                "player" -> if (hasBackup) "S5 (Player)" else "S4 (Player)"
+                "plus" -> if (hasBackup) "S6 (Plus)" else "S5 (Plus)"
                 else -> currentFolder.uppercase()
             }
         }
@@ -476,31 +480,52 @@ class PlayerActivity : ComponentActivity() {
         val currentSelectedIndex: Int
 
         if (directStreamUrl != null) {
-            options = if (backupDirectUrl != null) {
+            val serverName = if (directStreamUrl!!.contains("epicsports") || directStreamUrl!!.contains("ntv.st")) "NTV / EpicSports (Full HD Direto)" else "TimStreams (Full HD Direto)"
+            options = if (backupDirectUrl != null && backupDirectUrl != directStreamUrl) {
                 listOf(
-                    "Servidor 1: TimStreams Principal",
-                    "Servidor 2: TimStreams Backup"
+                    "Servidor 1: $serverName",
+                    "Servidor 2: Backup (Direto)"
                 )
             } else {
-                listOf("Servidor 1: TimStreams Principal")
+                listOf("Servidor 1: $serverName")
             }
             currentSelectedIndex = if (isBackupSelected) 1 else 0
         } else {
-            val serverList = mutableListOf(
-                "Servidor 1: Stream (Rápido • Recomendado)",
-                "Servidor 2: Cast (Muito Estável)",
-                "Servidor 3: Watch (Espelho)",
-                "Servidor 4: Player (HTML5)",
-                "Servidor 5: Plus (Alta Definição • 1080p)"
-            )
             if (hasBackup) {
-                serverList.add("Servidor Backup: TimStreams (Full HD)")
-            }
-            options = serverList
-            currentSelectedIndex = if (isBackupSelected) {
-                serverFolders.size
+                val backupTitle = if (currentChannel?.backupStreamUrl?.contains("epicsports") == true || currentChannel?.backupStreamUrl?.contains("ntv.st") == true) {
+                    "Servidor 2: NTV / EpicSports (Full HD Direto)"
+                } else {
+                    "Servidor 2: TimStreams (Full HD Direto)"
+                }
+                options = listOf(
+                    "Servidor 1: DaddyLive (Stream Web • Recomendado)",
+                    backupTitle,
+                    "Servidor 3: Cast (Muito Estável)",
+                    "Servidor 4: Watch (Espelho)",
+                    "Servidor 5: Player (HTML5)",
+                    "Servidor 6: Plus (Alta Definição • 1080p)"
+                )
+                currentSelectedIndex = if (isBackupSelected) {
+                    1
+                } else {
+                    when (currentFolder) {
+                        "stream" -> 0
+                        "cast" -> 2
+                        "watch" -> 3
+                        "player" -> 4
+                        "plus" -> 5
+                        else -> 0
+                    }
+                }
             } else {
-                serverFolders.indexOf(currentFolder).coerceAtLeast(0)
+                options = listOf(
+                    "Servidor 1: Stream (Rápido • Recomendado)",
+                    "Servidor 2: Cast (Muito Estável)",
+                    "Servidor 3: Watch (Espelho)",
+                    "Servidor 4: Player (HTML5)",
+                    "Servidor 5: Plus (Alta Definição • 1080p)"
+                )
+                currentSelectedIndex = serverFolders.indexOf(currentFolder).coerceAtLeast(0)
             }
         }
 
@@ -510,13 +535,35 @@ class PlayerActivity : ComponentActivity() {
                 dialog.dismiss()
                 if (directStreamUrl != null) {
                     isBackupSelected = (which == 1)
-                } else {
-                    if (which < serverFolders.size) {
-                        isBackupSelected = false
-                        currentFolder = serverFolders[which]
-                    } else {
-                        isBackupSelected = true
+                } else if (hasBackup) {
+                    when (which) {
+                        0 -> {
+                            isBackupSelected = false
+                            currentFolder = "stream"
+                        }
+                        1 -> {
+                            isBackupSelected = true
+                        }
+                        2 -> {
+                            isBackupSelected = false
+                            currentFolder = "cast"
+                        }
+                        3 -> {
+                            isBackupSelected = false
+                            currentFolder = "watch"
+                        }
+                        4 -> {
+                            isBackupSelected = false
+                            currentFolder = "player"
+                        }
+                        5 -> {
+                            isBackupSelected = false
+                            currentFolder = "plus"
+                        }
                     }
+                } else {
+                    isBackupSelected = false
+                    currentFolder = serverFolders.getOrElse(which) { "stream" }
                 }
                 updateServerBadgeText()
                 loadCurrentStream()
@@ -625,6 +672,8 @@ class PlayerActivity : ComponentActivity() {
                         host.contains("exmxbxe") ||
                         host.contains("timst") ||
                         host.contains("tim-streams") ||
+                        host.contains("ntv.st") ||
+                        host.contains("epicsports") ||
                         host.contains(".cfd") ||
                         url.startsWith("blob:") ||
                         url.startsWith("data:")
@@ -678,9 +727,9 @@ class PlayerActivity : ComponentActivity() {
             (function() {
                 var style = document.createElement('style');
                 style.type = 'text/css';
-                style.innerHTML = 'header, footer, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], iframe:not(#thatframe):not([id^="player"]) { display: none !important; } ' +
+                style.innerHTML = 'header, footer, nav, .site-header, .site-footer, .watch-channel-header, .watch-controls-bar, .watch-sidebar, .watch-chat, .chat-panel, #shareCodeOverlay, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], iframe:not(#thatframe):not([id^="player"]):not(#streamPlayer) { display: none !important; } ' +
                                   'html, body { margin:0 !important; padding:0 !important; background-color:#000 !important; overflow:hidden !important; width:100% !important; height:100% !important; } ' +
-                                  'iframe#thatframe, .preview-wrap, #player { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
+                                  'iframe#thatframe, .preview-wrap, #player, iframe#streamPlayer, .watch-player-wrapper, video#video { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
                                   '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], button[title*="ecrã inteiro" i], button[aria-label*="ecrã inteiro" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"] { display: none !important; pointer-events: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }';
                 document.head.appendChild(style);
 
@@ -689,7 +738,7 @@ class PlayerActivity : ComponentActivity() {
                 var children = document.body.children;
                 for (var i = 0; i < children.length; i++) {
                     var el = children[i];
-                    if (el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE' && el.id !== 'thatframe' && el.id !== 'player' && !el.classList.contains('preview-wrap') && !el.contains(document.getElementById('thatframe'))) {
+                    if (el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE' && el.id !== 'thatframe' && el.id !== 'player' && el.id !== 'streamPlayer' && !el.classList.contains('preview-wrap') && !el.classList.contains('watch-player-wrapper') && !el.contains(document.getElementById('thatframe')) && !el.contains(document.getElementById('streamPlayer'))) {
                         el.style.display = 'none';
                     }
                 }
@@ -730,15 +779,26 @@ class PlayerActivity : ComponentActivity() {
 
         if (directStreamUrl != null) {
             val targetUrl = if (isBackupSelected && backupDirectUrl != null) backupDirectUrl!! else directStreamUrl!!
-            val headers = mapOf("Referer" to "${repository.getTimstBaseUrl()}/")
+            val referer = if (targetUrl.contains("epicsports") || targetUrl.contains("ntv.st")) {
+                "https://ntv.st/"
+            } else {
+                "${repository.getTimstBaseUrl()}/"
+            }
+            val headers = mapOf("Referer" to referer)
             webView.loadUrl(targetUrl, headers)
             return
         }
 
         val currentChannel = repository.getChannels(TabFilter.ALL).firstOrNull { it.id == channelId }
         if (isBackupSelected && currentChannel?.backupStreamUrl != null) {
-            val headers = mapOf("Referer" to "${repository.getTimstBaseUrl()}/")
-            webView.loadUrl(currentChannel.backupStreamUrl!!, headers)
+            val targetUrl = currentChannel.backupStreamUrl!!
+            val referer = if (targetUrl.contains("epicsports") || targetUrl.contains("ntv.st")) {
+                "https://ntv.st/"
+            } else {
+                "${repository.getTimstBaseUrl()}/"
+            }
+            val headers = mapOf("Referer" to referer)
+            webView.loadUrl(targetUrl, headers)
             return
         }
 

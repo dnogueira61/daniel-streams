@@ -41,6 +41,10 @@ data class Channel(
                     lower.contains("tvi") ||
                     lower.contains("cmtv") ||
                     lower.contains("tvcine") ||
+                    lower.contains("hollywood") ||
+                    lower.contains("cinemundo") ||
+                    lower.contains("a bola tv") ||
+                    lower.contains("nos studios") ||
                     lower.contains("eleven sports") ||
                     (lower.contains("dazn") && (lower.contains("portugal") || lower.contains("pt")))
         }
