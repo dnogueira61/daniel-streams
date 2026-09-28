@@ -219,7 +219,7 @@ class PlayerActivity : ComponentActivity() {
             handleBackOrPip()
         }
 
-        findViewById<ImageButton>(R.id.btnOpenChannels).setOnClickListener {
+        findViewById<View>(R.id.btnOpenChannels).setOnClickListener {
             openDrawer()
         }
 
@@ -241,7 +241,7 @@ class PlayerActivity : ComponentActivity() {
             handleBackOrPip()
         }
 
-        findViewById<ImageButton>(R.id.btnLandscapeChannels).setOnClickListener {
+        findViewById<View>(R.id.btnLandscapeChannels).setOnClickListener {
             openDrawer()
         }
 
@@ -533,7 +533,8 @@ class PlayerActivity : ComponentActivity() {
                             style.id = 'dlive-clean-style';
                             style.innerHTML = 'header, footer, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], iframe:not(#thatframe):not([id^="player"]) { display: none !important; } ' +
                                               'html, body { margin:0 !important; padding:0 !important; background-color:#000 !important; overflow:hidden !important; width:100% !important; height:100% !important; } ' +
-                                              'iframe#thatframe, .preview-wrap, #player { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; }';
+                                              'iframe#thatframe, .preview-wrap, #player { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
+                                              '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], button[title*="ecrã inteiro" i], button[aria-label*="ecrã inteiro" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"] { display: none !important; pointer-events: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }';
                             document.head.appendChild(style);
                         }
                     }
@@ -642,7 +643,8 @@ class PlayerActivity : ComponentActivity() {
                 style.type = 'text/css';
                 style.innerHTML = 'header, footer, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], iframe:not(#thatframe):not([id^="player"]) { display: none !important; } ' +
                                   'html, body { margin:0 !important; padding:0 !important; background-color:#000 !important; overflow:hidden !important; width:100% !important; height:100% !important; } ' +
-                                  'iframe#thatframe, .preview-wrap, #player { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; }';
+                                  'iframe#thatframe, .preview-wrap, #player { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
+                                  '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], button[title*="ecrã inteiro" i], button[aria-label*="ecrã inteiro" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"] { display: none !important; pointer-events: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }';
                 document.head.appendChild(style);
 
                 window.open = function() { return null; };
@@ -664,6 +666,9 @@ class PlayerActivity : ComponentActivity() {
         handler.postDelayed({
             val js = """
                 (function() {
+                    var fsSel = '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"]';
+                    document.querySelectorAll(fsSel).forEach(function(b) { b.style.setProperty('display', 'none', 'important'); });
+
                     var btn = document.getElementById('unmute') || document.querySelector('.unmute-btn');
                     if (btn) { btn.click(); btn.style.display = 'none'; }
                     var iframes = document.querySelectorAll('iframe');
@@ -673,6 +678,7 @@ class PlayerActivity : ComponentActivity() {
                             if (doc) {
                                 var innerBtn = doc.getElementById('unmute') || doc.querySelector('.unmute-btn');
                                 if (innerBtn) { innerBtn.click(); innerBtn.style.display = 'none'; }
+                                doc.querySelectorAll(fsSel).forEach(function(b) { b.style.setProperty('display', 'none', 'important'); });
                             }
                         } catch(e) {}
                     }
@@ -821,10 +827,23 @@ class PlayerActivity : ComponentActivity() {
                 if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     drawerLayout.closeDrawer(GravityCompat.START)
                 }
-                val params = PictureInPictureParams.Builder()
+
+                // Immediately hide header, overlays, banner, progress before entering PiP
+                playerHeader.visibility = View.GONE
+                landscapeOverlay.visibility = View.GONE
+                osdBanner.visibility = View.GONE
+                progressBar.visibility = View.GONE
+                gestureHud.visibility = View.GONE
+
+                val builder = PictureInPictureParams.Builder()
                     .setAspectRatio(Rational(16, 9))
-                    .build()
-                val entered = enterPictureInPictureMode(params)
+
+                val visibleRect = android.graphics.Rect()
+                if (webView.getGlobalVisibleRect(visibleRect)) {
+                    builder.setSourceRectHint(visibleRect)
+                }
+
+                val entered = enterPictureInPictureMode(builder.build())
                 if (entered && bringHomeToFront) {
                     val homeIntent = Intent(this, MainActivity::class.java).apply {
                         addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -852,6 +871,11 @@ class PlayerActivity : ComponentActivity() {
 
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
+        playerHeader.visibility = View.GONE
+        landscapeOverlay.visibility = View.GONE
+        osdBanner.visibility = View.GONE
+        progressBar.visibility = View.GONE
+        gestureHud.visibility = View.GONE
         enterPipMode()
     }
 
@@ -862,6 +886,7 @@ class PlayerActivity : ComponentActivity() {
             landscapeOverlay.visibility = View.GONE
             osdBanner.visibility = View.GONE
             progressBar.visibility = View.GONE
+            gestureHud.visibility = View.GONE
             if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                 drawerLayout.closeDrawer(GravityCompat.START)
             }
