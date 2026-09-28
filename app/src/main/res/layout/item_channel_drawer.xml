@@ -83,6 +83,7 @@
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:src="@android:drawable/star_off"
         android:tint="#F59E0B"
+        android:focusable="false"
         android:contentDescription="Favorito" />
 
 </LinearLayout>

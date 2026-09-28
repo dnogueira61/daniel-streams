@@ -11,6 +11,8 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.Message
+import android.view.ViewParent
 import android.view.animation.AccelerateDecelerateInterpolator
 import coil.load
 import com.dlive.ptstream.data.ChannelLogoHelper
@@ -331,12 +333,25 @@ class PlayerActivity : ComponentActivity() {
             openDrawer()
         }
 
+        findViewById<View>(R.id.btnLandscapeUnmute).setOnClickListener {
+            performSafeUnmute()
+        }
+
         findViewById<ImageButton>(R.id.btnLandscapePip).setOnClickListener {
             enterPipMode()
         }
 
-        findViewById<ImageButton>(R.id.btnLandscapeExitFullscreen).setOnClickListener {
+        val btnLandscapeExitFullscreen = findViewById<ImageButton>(R.id.btnLandscapeExitFullscreen)
+        btnLandscapeExitFullscreen.setOnClickListener {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        }
+
+        val btnFullscreen = findViewById<ImageButton>(R.id.btnFullscreen)
+        val isTv = packageManager.hasSystemFeature("android.software.leanback") ||
+                packageManager.hasSystemFeature("android.hardware.type.television")
+        if (isTv) {
+            btnLandscapeExitFullscreen.visibility = View.GONE
+            btnFullscreen.visibility = View.GONE
         }
 
         // Gesture HUD & Audio
@@ -504,10 +519,12 @@ class PlayerActivity : ComponentActivity() {
                 else -> repository.getChannels(TabFilter.PORTUGAL)
             }
             val index = list.indexOfFirst { it.id == channelId }
-            if (index >= 0) {
-                rvDrawerChannels.scrollToPosition(index)
+            val targetPos = if (index >= 0) index else 0
+            rvDrawerChannels.scrollToPosition(targetPos)
+            rvDrawerChannels.post {
+                val holder = rvDrawerChannels.findViewHolderForAdapterPosition(targetPos)
+                holder?.itemView?.requestFocus() ?: rvDrawerChannels.requestFocus()
             }
-            rvDrawerChannels.requestFocus()
         }, 150)
     }
 
@@ -826,6 +843,16 @@ class PlayerActivity : ComponentActivity() {
         }
 
         webView.webChromeClient = object : WebChromeClient() {
+            override fun onCreateWindow(
+                view: WebView?,
+                isDialog: Boolean,
+                isUserGesture: Boolean,
+                resultMsg: Message?
+            ): Boolean {
+                // Bloqueia qualquer popup / publicidade que tente abrir ao clicar no player
+                return false
+            }
+
             override fun onProgressChanged(view: WebView?, newProgress: Int) {
                 if (newProgress < 100) {
                     progressBar.visibility = View.VISIBLE
@@ -851,7 +878,14 @@ class PlayerActivity : ComponentActivity() {
                 customViewContainer.visibility = View.GONE
                 webView.visibility = View.VISIBLE
                 customViewCallback?.onCustomViewHidden()
-                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                val isTv = packageManager.hasSystemFeature("android.software.leanback") ||
+                        packageManager.hasSystemFeature("android.hardware.type.television")
+                if (!isTv) {
+                    val currentOrientation = resources.configuration.orientation
+                    if (currentOrientation != Configuration.ORIENTATION_LANDSCAPE) {
+                        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                    }
+                }
             }
         }
     }
@@ -1054,6 +1088,60 @@ class PlayerActivity : ComponentActivity() {
             })();
         """.trimIndent()
         view?.evaluateJavascript(watcherJs, null)
+    }
+
+    private fun performSafeUnmute() {
+        val safeUnmuteJs = """
+            (function() {
+                var unmuted = false;
+                function unmuteDom(root) {
+                    if (!root) return;
+                    try {
+                        root.querySelectorAll('video, audio').forEach(function(v) {
+                            try {
+                                v.muted = false;
+                                v.defaultMuted = false;
+                                v.volume = 1.0;
+                                unmuted = true;
+                            } catch(e) {}
+                        });
+                    } catch(e) {}
+                }
+
+                unmuteDom(document);
+                var iframes = document.querySelectorAll('iframe');
+                for (var i = 0; i < iframes.length; i++) {
+                    try {
+                        var doc = iframes[i].contentDocument || iframes[i].contentWindow.document;
+                        if (doc) unmuteDom(doc);
+                    } catch(e) {}
+                }
+
+                try {
+                    if (window.jwplayer && typeof window.jwplayer === 'function') {
+                        var jw = window.jwplayer();
+                        if (jw && typeof jw.setMute === 'function') {
+                            jw.setMute(false);
+                            jw.setVolume(100);
+                            unmuted = true;
+                        }
+                    }
+                } catch(e) {}
+
+                try {
+                    var btns = document.querySelectorAll('[aria-label*="unmute" i], [title*="unmute" i], .jw-icon-volume, .vjs-mute-control, .plyr__control[data-plyr="mute"]');
+                    btns.forEach(function(b) {
+                        try { b.click(); unmuted = true; } catch(e) {}
+                    });
+                } catch(e) {}
+
+                return unmuted;
+            })();
+        """.trimIndent()
+
+        webView.evaluateJavascript(safeUnmuteJs) {
+            Toast.makeText(this, "🔊 Áudio ativado", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun loadCurrentStream() {
@@ -1284,8 +1372,15 @@ class PlayerActivity : ComponentActivity() {
                 }
                 KeyEvent.KEYCODE_DPAD_RIGHT -> {
                     if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                        drawerLayout.closeDrawer(GravityCompat.START)
-                        return true
+                        val focused = currentFocus
+                        val drawer = findViewById<View>(R.id.channelDrawer)
+                        val nextFocus = focused?.focusSearch(View.FOCUS_RIGHT)
+                        if (nextFocus != null && drawer != null && isDescendantOf(nextFocus, drawer)) {
+                            return super.dispatchKeyEvent(event)
+                        } else {
+                            drawerLayout.closeDrawer(GravityCompat.START)
+                            return true
+                        }
                     }
                 }
                 KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER -> {
@@ -1305,6 +1400,15 @@ class PlayerActivity : ComponentActivity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         return super.onKeyDown(keyCode, event)
+    }
+
+    private fun isDescendantOf(child: View, parent: View): Boolean {
+        var current: ViewParent? = child.parent
+        while (current != null) {
+            if (current === parent) return true
+            current = current.parent
+        }
+        return false
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -1736,9 +1840,10 @@ class PlayerActivity : ComponentActivity() {
                 val screenWidth = resources.displayMetrics.widthPixels
                 val minSwipeDist = 110f
 
+                val isEdgeBackZone = touchStartX < screenWidth * 0.12f || touchStartX > screenWidth * 0.88f
                 val isCenterZone = touchStartX >= screenWidth * 0.20f && touchStartX <= screenWidth * 0.80f
 
-                if (absX > minSwipeDist && absX > absY * 1.2f) {
+                if (!isEdgeBackZone && absX > minSwipeDist && absX > absY * 1.2f) {
                     // Gestos horizontais:
                     if (deltaX < 0) {
                         // Deslizar para a esquerda: Canal Seguinte
@@ -1759,8 +1864,25 @@ class PlayerActivity : ComponentActivity() {
                     }
                     return true
                 } else if (absX < 25f && absY < 25f) {
-                    // Toque simples: alterna overlay
-                    toggleControlsOverlay()
+                    val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+                    val wasOverlayVisible = if (isLandscape) {
+                        landscapeOverlay.visibility == View.VISIBLE
+                    } else {
+                        playerHeader.visibility == View.VISIBLE
+                    }
+
+                    if (wasOverlayVisible) {
+                        val touchY = ev.y
+                        val overlayHeight = if (isLandscape) landscapeOverlay.height.toFloat() else playerHeader.height.toFloat()
+                        if (touchY > overlayHeight && overlayHeight > 0) {
+                            toggleControlsOverlay()
+                            return true
+                        }
+                        return super.dispatchTouchEvent(ev)
+                    } else {
+                        toggleControlsOverlay()
+                        return true
+                    }
                 }
             }
         }
