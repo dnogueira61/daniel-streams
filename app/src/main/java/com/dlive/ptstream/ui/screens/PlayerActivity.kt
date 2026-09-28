@@ -1336,9 +1336,11 @@ class PlayerActivity : ComponentActivity() {
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (isLandscape) {
             landscapeOverlay.visibility = View.VISIBLE
-            findViewById<View>(R.id.btnLandscapeChannels)?.requestFocus()
+            findViewById<View>(R.id.btnLandscapeServer)?.post {
+                findViewById<View>(R.id.btnLandscapeServer)?.requestFocus()
+            }
             handler.removeCallbacks(overlayHideRunnable)
-            handler.postDelayed(overlayHideRunnable, 5000)
+            handler.postDelayed(overlayHideRunnable, 7000)
         } else {
             playerHeader.visibility = View.VISIBLE
         }
@@ -1366,27 +1368,40 @@ class PlayerActivity : ComponentActivity() {
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (event.action == KeyEvent.ACTION_DOWN) {
+            val isOverlayVisible = landscapeOverlay.visibility == View.VISIBLE || playerHeader.visibility == View.VISIBLE
+            val isDrawerOpen = drawerLayout.isDrawerOpen(GravityCompat.START)
+
             when (event.keyCode) {
-                KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_CHANNEL_UP -> {
-                    if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                        zapPreviousChannel()
-                        return true
-                    }
+                // 1. Tecla de Áudio/Som dedicada no comando (AUDIO, MUTE, PLAY/PAUSE, etc.)
+                KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK,
+                KeyEvent.KEYCODE_VOLUME_MUTE,
+                KeyEvent.KEYCODE_MUTE,
+                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                KeyEvent.KEYCODE_PROG_YELLOW -> {
+                    performSafeUnmute()
+                    return true
                 }
-                KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_CHANNEL_DOWN -> {
-                    if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                        zapNextChannel()
-                        return true
-                    }
+
+                // 2. Tecla Definições (engrenagem no comando)
+                KeyEvent.KEYCODE_SETTINGS -> {
+                    showSettingsDialog()
+                    return true
                 }
-                KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_MENU -> {
-                    if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                        openDrawer()
-                        return true
+
+                // 3. Tecla TV / Guia no comando
+                KeyEvent.KEYCODE_TV,
+                KeyEvent.KEYCODE_GUIDE -> {
+                    if (isDrawerOpen) {
+                        drawerLayout.closeDrawer(GravityCompat.START)
+                    } else {
+                        showEpgDialog()
                     }
+                    return true
                 }
+
+                // 4. Seta Direita (DPAD_RIGHT)
                 KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                    if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    if (isDrawerOpen) {
                         val focused = currentFocus
                         val drawer = findViewById<View>(R.id.channelDrawer)
                         val nextFocus = focused?.focusSearch(View.FOCUS_RIGHT)
@@ -1396,15 +1411,99 @@ class PlayerActivity : ComponentActivity() {
                             drawerLayout.closeDrawer(GravityCompat.START)
                             return true
                         }
-                    }
-                }
-                KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER -> {
-                    if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                        toggleControlsOverlay()
+                    } else if (isOverlayVisible) {
+                        // Barra de controlos visível: D-Pad percorre os botões para a direita
+                        return super.dispatchKeyEvent(event)
+                    } else {
+                        // Ecrã normal de TV: Seta Direita abre o EPG!
+                        showEpgDialog()
                         return true
                     }
                 }
+
+                // 5. Seta Esquerda (DPAD_LEFT)
+                KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_MENU -> {
+                    if (isDrawerOpen) {
+                        return super.dispatchKeyEvent(event)
+                    } else if (isOverlayVisible) {
+                        // Barra de controlos visível: D-Pad percorre os botões para a esquerda
+                        return super.dispatchKeyEvent(event)
+                    } else {
+                        // Ecrã normal de TV: Seta Esquerda abre o Guia de Canais
+                        openDrawer()
+                        return true
+                    }
+                }
+
+                // 6. Seta Cima (DPAD_UP)
+                KeyEvent.KEYCODE_DPAD_UP -> {
+                    if (isDrawerOpen) {
+                        return super.dispatchKeyEvent(event)
+                    } else if (isOverlayVisible) {
+                        // Barra visível: mantém o foco nos botões da barra e não muda de canal
+                        val serverBtn = findViewById<View>(R.id.btnLandscapeServer)
+                        if (currentFocus == null || !isDescendantOf(currentFocus!!, landscapeOverlay)) {
+                            serverBtn?.requestFocus()
+                        }
+                        return true
+                    } else {
+                        // Ecrã normal: muda para canal anterior
+                        zapPreviousChannel()
+                        return true
+                    }
+                }
+
+                KeyEvent.KEYCODE_CHANNEL_UP -> {
+                    zapPreviousChannel()
+                    return true
+                }
+
+                // 7. Seta Baixo (DPAD_DOWN)
+                KeyEvent.KEYCODE_DPAD_DOWN -> {
+                    if (isDrawerOpen) {
+                        return super.dispatchKeyEvent(event)
+                    } else if (isOverlayVisible) {
+                        // Barra visível: seta para baixo fecha a barra e volta ao vídeo
+                        hideControlsOverlay()
+                        return true
+                    } else {
+                        // Ecrã normal: muda para canal seguinte
+                        zapNextChannel()
+                        return true
+                    }
+                }
+
+                KeyEvent.KEYCODE_CHANNEL_DOWN -> {
+                    zapNextChannel()
+                    return true
+                }
+
+                // 8. Tecla OK (DPAD_CENTER / ENTER)
+                KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                    if (isDrawerOpen) {
+                        return super.dispatchKeyEvent(event)
+                    } else if (isOverlayVisible) {
+                        val focused = currentFocus
+                        if (focused != null && isDescendantOf(focused, landscapeOverlay)) {
+                            focused.performClick()
+                            return true
+                        } else {
+                            findViewById<View>(R.id.btnLandscapeServer)?.requestFocus()
+                            return true
+                        }
+                    } else {
+                        // Mostra a barra de controlos e foca imediatamente no botão de servidor [S1 ▾]
+                        showControlsOverlay()
+                        return true
+                    }
+                }
+
+                // 9. Tecla Voltar (BACK)
                 KeyEvent.KEYCODE_BACK -> {
+                    if (isOverlayVisible) {
+                        hideControlsOverlay()
+                        return true
+                    }
                     handleBackOrPip()
                     return true
                 }

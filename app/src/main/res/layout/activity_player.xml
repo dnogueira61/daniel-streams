@@ -182,19 +182,20 @@
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@android:drawable/ic_menu_revert"
                 android:tint="#FFFFFF"
+                android:focusable="true"
                 android:contentDescription="Voltar" />
 
             <!-- Channels Drawer Button in Landscape -->
             <LinearLayout
                 android:id="@+id/btnLandscapeChannels"
                 android:layout_width="wrap_content"
-                android:layout_height="32dp"
+                android:layout_height="36dp"
                 android:layout_marginStart="6dp"
                 android:background="@drawable/bg_channels_pill"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:paddingStart="10dp"
-                android:paddingEnd="12dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="14dp"
                 android:clickable="true"
                 android:focusable="true">
 
@@ -232,11 +233,11 @@
             <LinearLayout
                 android:id="@+id/btnLandscapeServer"
                 android:layout_width="wrap_content"
-                android:layout_height="30dp"
+                android:layout_height="36dp"
                 android:background="@drawable/bg_server_badge"
                 android:gravity="center"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:layout_marginEnd="6dp">
@@ -247,7 +248,7 @@
                     android:layout_height="wrap_content"
                     android:text="S1 ▾"
                     android:textColor="#FFFFFF"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -289,6 +290,7 @@
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_pip"
                 android:tint="#FFFFFF"
+                android:focusable="true"
                 android:contentDescription="PiP" />
 
             <ImageButton
@@ -299,6 +301,7 @@
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_fullscreen_exit"
                 android:tint="#FFFFFF"
+                android:focusable="true"
                 android:contentDescription="Sair de Fullscreen" />
         </LinearLayout>
 
