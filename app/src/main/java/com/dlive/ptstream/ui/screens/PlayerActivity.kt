@@ -18,6 +18,7 @@ import android.view.View
 import android.webkit.*
 import android.widget.*
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.core.view.GravityCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -139,6 +140,12 @@ class PlayerActivity : ComponentActivity() {
         activeInstance = WeakReference(this)
         setContentView(R.layout.activity_player)
 
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                handleBackOrPip()
+            }
+        })
+
         repository = ChannelRepository(this)
         currentFolder = repository.getDefaultServer()
 
@@ -221,7 +228,7 @@ class PlayerActivity : ComponentActivity() {
         }
 
         findViewById<ImageButton>(R.id.btnPip).setOnClickListener {
-            enterPipMode()
+            enterPipMode(bringHomeToFront = true)
         }
 
         // Landscape / Fullscreen toggle with sensor support
@@ -239,7 +246,7 @@ class PlayerActivity : ComponentActivity() {
         }
 
         findViewById<ImageButton>(R.id.btnLandscapePip).setOnClickListener {
-            enterPipMode()
+            enterPipMode(bringHomeToFront = true)
         }
 
         findViewById<ImageButton>(R.id.btnLandscapeExitFullscreen).setOnClickListener {
@@ -823,18 +830,20 @@ class PlayerActivity : ComponentActivity() {
                         addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     }
                     startActivity(homeIntent)
+                } else if (!entered && bringHomeToFront) {
+                    cleanupAndFinish()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
                 if (bringHomeToFront) {
-                    finish()
+                    cleanupAndFinish()
                 } else {
                     Toast.makeText(this, "Não foi possível ativar PiP", Toast.LENGTH_SHORT).show()
                 }
             }
         } else {
             if (bringHomeToFront) {
-                finish()
+                cleanupAndFinish()
             } else {
                 Toast.makeText(this, "PiP requer Android 8.0+", Toast.LENGTH_SHORT).show()
             }
@@ -873,11 +882,7 @@ class PlayerActivity : ComponentActivity() {
             return
         }
 
-        if (repository.isAutoPipOnBack() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            enterPipMode(bringHomeToFront = true)
-        } else {
-            finish()
-        }
+        cleanupAndFinish()
     }
 
     private fun showSettingsDialog() {
@@ -1125,6 +1130,12 @@ class PlayerActivity : ComponentActivity() {
             webView.loadUrl("about:blank")
         } catch (_: Exception) {}
         finish()
+        try {
+            val homeIntent = Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
+            startActivity(homeIntent)
+        } catch (_: Exception) {}
     }
 
     override fun onDestroy() {
