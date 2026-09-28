@@ -33,7 +33,10 @@ if (-not $token) {
 
 Write-Host "==> 3. Git commit e push para o repositório..." -ForegroundColor Cyan
 git add .
-git commit -m "Release ${TagName}: TV remote support, tablet rotation and tab optimization"
+$status = git status --porcelain
+if ($status) {
+    git commit -m "Release ${TagName}: Correção do botão Voltar e estabilidade PiP"
+}
 git push origin main
 
 Write-Host "==> 4. A criar Release no GitHub ($TagName)..." -ForegroundColor Cyan
@@ -63,7 +66,8 @@ try {
     # Ignore 404
 }
 
-$release = Invoke-RestMethod -Uri "https://api.github.com/repos/dnogueira61/daniel-streams/releases" -Headers $headers -Method Post -Body $body -ContentType "application/json"
+$bodyBytes = [System.Text.Encoding]::UTF8.GetBytes($body)
+$release = Invoke-RestMethod -Uri "https://api.github.com/repos/dnogueira61/daniel-streams/releases" -Headers $headers -Method Post -Body $bodyBytes -ContentType "application/json; charset=utf-8"
 $releaseId = $release.id
 Write-Host "Release criada com ID: $releaseId" -ForegroundColor Green
 
