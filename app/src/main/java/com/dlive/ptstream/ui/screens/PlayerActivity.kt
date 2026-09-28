@@ -856,8 +856,41 @@ class PlayerActivity : ComponentActivity() {
                 targetDirect.contains("epicsports") || targetDirect.contains("ntv.st") -> "https://ntv.st/"
                 else -> "${repository.getTimstBaseUrl()}/"
             }
-            val headers = mapOf("Referer" to referer)
-            webView.loadUrl(targetDirect, headers)
+            if (targetDirect.contains(".m3u8")) {
+                val hlsHtml = """
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            * { margin:0; padding:0; background:#000; overflow:hidden; }
+                            video { width:100vw; height:100vh; object-fit:contain; }
+                        </style>
+                        <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+                    </head>
+                    <body>
+                        <video id="v" autoplay controls playsinline></video>
+                        <script>
+                            var video = document.getElementById('v');
+                            var src = '$targetDirect';
+                            if (Hls.isSupported()) {
+                                var hls = new Hls({ enableWorker: true });
+                                hls.loadSource(src);
+                                hls.attachMedia(video);
+                                hls.on(Hls.Events.MANIFEST_PARSED, function() { video.play().catch(function(){}); });
+                            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                                video.src = src;
+                                video.play().catch(function(){});
+                            }
+                        </script>
+                    </body>
+                    </html>
+                """.trimIndent()
+                webView.loadDataWithBaseURL(referer, hlsHtml, "text/html", "UTF-8", null)
+            } else {
+                val headers = mapOf("Referer" to referer)
+                webView.loadUrl(targetDirect, headers)
+            }
             // Start failover timeout
             handler.postDelayed(failoverTimeoutRunnable, failoverTimeoutMs)
             return

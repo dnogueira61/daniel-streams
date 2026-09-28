@@ -63,6 +63,15 @@
     "backupStreamUrl2": "https://github.com/LITUATUI/M3UPT/raw/main/M3U/CNN_Portugal.m3u8"
   },
   {
+    "id": "euronews-pt",
+    "name": "Euronews PT",
+    "country": "PT",
+    "category": "Generalistas",
+    "isPt": true,
+    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43577",
+    "backupStreamUrl2": null
+  },
+  {
     "id": "artv-pt",
     "name": "ARTV",
     "country": "PT",
@@ -70,69 +79,6 @@
     "isPt": true,
     "backupStreamUrl": "https://playout175.livextend.cloud/livenlin4/_definst_/2liveartvpub2/playlist.m3u8",
     "backupStreamUrl2": null
-  },
-  {
-    "id": "790",
-    "name": "CMTV",
-    "country": "PT",
-    "category": "Generalistas",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43609",
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "540",
-    "name": "Canal 11",
-    "country": "PT",
-    "category": "Generalistas",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43607",
-    "backupStreamUrl2": "https://dy4isoelz3s0x.cloudfront.net/0_hd.m3u8"
-  },
-  {
-    "id": "718",
-    "name": "Porto Canal",
-    "country": "PT",
-    "category": "Generalistas",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43627",
-    "backupStreamUrl2": "https://pull-live-156-1.global.ssl.fastly.net/pc5865dc25400thmb-ea6bf03b14fa318f7133/pc1-jhrgyuoqe5865db-68tkgb14fa318f7133f03.smil/playlist.m3u8"
-  },
-  {
-    "id": "vplus-pt",
-    "name": "V+ TVI",
-    "country": "PT",
-    "category": "Generalistas",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=5392",
-    "backupStreamUrl2": "https://github.com/LITUATUI/M3UPT/raw/main/M3U/Vmais_TVI.m3u8"
-  },
-  {
-    "id": "rtpmem-pt",
-    "name": "RTP Memória",
-    "country": "PT",
-    "category": "Generalistas",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4286",
-    "backupStreamUrl2": "https://streaming-live.rtp.pt/liverepeater/rtpmem.smil/playlist.m3u8"
-  },
-  {
-    "id": "rtpacores-pt",
-    "name": "RTP Açores",
-    "country": "PT",
-    "category": "Generalistas",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4284",
-    "backupStreamUrl2": "https://streaming-live.rtp.pt/liverepeater/rtpacoresHD.smil/playlist.m3u8"
-  },
-  {
-    "id": "rtpmadeira-pt",
-    "name": "RTP Madeira",
-    "country": "PT",
-    "category": "Generalistas",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4285",
-    "backupStreamUrl2": "https://streaming-live.rtp.pt/liverepeater/rtpmadeira.smil/playlist.m3u8"
   },
   {
     "id": "49",
