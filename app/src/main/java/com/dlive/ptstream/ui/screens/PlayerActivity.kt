@@ -458,6 +458,7 @@ class PlayerActivity : ComponentActivity() {
         drawerAdapter = DrawerChannelAdapter(
             channels = emptyList(),
             activeChannelId = channelId,
+            epgRepository = repository.epgRepository,
             onChannelSelected = { selected ->
                 switchChannel(selected)
             },

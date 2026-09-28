@@ -12,10 +12,12 @@ import coil.load
 import com.dlive.ptstream.R
 import com.dlive.ptstream.data.Channel
 import com.dlive.ptstream.data.ChannelLogoHelper
+import com.dlive.ptstream.data.EpgRepository
 
 class DrawerChannelAdapter(
     private var channels: List<Channel>,
     private var activeChannelId: String,
+    private val epgRepository: EpgRepository? = null,
     private val onChannelSelected: (Channel) -> Unit,
     private val onFavoriteToggled: (Channel) -> Unit,
     private val onHideChannel: ((Channel) -> Unit)? = null
@@ -64,14 +66,21 @@ class DrawerChannelAdapter(
             holder.tvId.visibility = View.VISIBLE
         }
 
-        val hasTimst = !channel.backupStreamUrl.isNullOrBlank()
-        val tagText = buildString {
-            if (channel.isPortuguese) append("PT 🇵🇹") else append(channel.country)
-            append(" • ")
-            append(channel.category)
-            if (hasTimst) append(" • ⚡ Timst")
+        val epgProgram = epgRepository?.getCurrentProgram(channel.name)
+        val subtitleText = if (epgProgram != null && epgProgram.title.isNotBlank()) {
+            val start = epgProgram.timeRange.substringBefore(" -")
+            "🔴 $start • ${epgProgram.title}"
+        } else {
+            val hasTimst = !channel.backupStreamUrl.isNullOrBlank()
+            buildString {
+                if (channel.isPortuguese) append("PT 🇵🇹") else append(channel.country)
+                append(" • ")
+                append(channel.category)
+                if (hasTimst) append(" • ⚡ Timst")
+            }
         }
-        holder.tvCategory.text = tagText
+        holder.tvCategory.text = subtitleText
+        holder.tvCategory.setTextColor(if (epgProgram != null) Color.parseColor("#38BDF8") else Color.parseColor("#9CA3AF"))
 
         // Active playing indicator
         if (isCurrent) {
