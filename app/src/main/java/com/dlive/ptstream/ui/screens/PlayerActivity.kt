@@ -33,6 +33,7 @@ import android.content.Intent
 import android.media.AudioManager
 import kotlin.math.roundToInt
 import com.dlive.ptstream.R
+import com.dlive.ptstream.MainActivity
 import com.dlive.ptstream.data.Channel
 import com.dlive.ptstream.data.ChannelRepository
 import com.dlive.ptstream.data.TabFilter
@@ -219,9 +220,9 @@ class PlayerActivity : ComponentActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         }
 
-        // Landscape overlay buttons - force portrait orientation on exit
+        // Landscape overlay buttons
         findViewById<ImageButton>(R.id.btnLandscapeBack).setOnClickListener {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            handleBackOrPip()
         }
 
         findViewById<ImageButton>(R.id.btnLandscapeChannels).setOnClickListener {
@@ -761,7 +762,7 @@ class PlayerActivity : ComponentActivity() {
         }
     }
 
-    fun enterPipMode() {
+    fun enterPipMode(bringHomeToFront: Boolean = false) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
                 if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
@@ -770,13 +771,27 @@ class PlayerActivity : ComponentActivity() {
                 val params = PictureInPictureParams.Builder()
                     .setAspectRatio(Rational(16, 9))
                     .build()
-                enterPictureInPictureMode(params)
+                val entered = enterPictureInPictureMode(params)
+                if (entered && bringHomeToFront) {
+                    val homeIntent = Intent(this, MainActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    }
+                    startActivity(homeIntent)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
-                Toast.makeText(this, "Não foi possível ativar PiP", Toast.LENGTH_SHORT).show()
+                if (bringHomeToFront) {
+                    finish()
+                } else {
+                    Toast.makeText(this, "Não foi possível ativar PiP", Toast.LENGTH_SHORT).show()
+                }
             }
         } else {
-            Toast.makeText(this, "PiP requer Android 8.0+", Toast.LENGTH_SHORT).show()
+            if (bringHomeToFront) {
+                finish()
+            } else {
+                Toast.makeText(this, "PiP requer Android 8.0+", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -812,14 +827,8 @@ class PlayerActivity : ComponentActivity() {
             return
         }
 
-        // Return to portrait if currently in landscape
-        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            return
-        }
-
         if (repository.isAutoPipOnBack() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            enterPipMode()
+            enterPipMode(bringHomeToFront = true)
         } else {
             finish()
         }
