@@ -667,6 +667,50 @@ class PlayerActivity : ComponentActivity() {
                         }
                     }
 
+                    function performUnmute() {
+                        var media = document.querySelectorAll('video, audio');
+                        for (var i = 0; i < media.length; i++) {
+                            try {
+                                var m = media[i];
+                                if (m.muted) m.muted = false;
+                                if (m.defaultMuted) m.defaultMuted = false;
+                                m.volume = 1.0;
+                                if (m.paused) m.play().catch(function(){});
+                            } catch(e) {}
+                        }
+
+                        var btnSelectors = [
+                            '#unmuteBtn', '#unmute', '.unmute-btn', '.unmute',
+                            '[id*="unmute" i]', '[class*="unmute" i]',
+                            'button[aria-label*="unmute" i]', 'button[title*="unmute" i]',
+                            '.jw-icon-volume', '.jw-icon-volume-off', '.vjs-mute-control'
+                        ];
+                        for (var s = 0; s < btnSelectors.length; s++) {
+                            var btns = document.querySelectorAll(btnSelectors[s]);
+                            for (var b = 0; b < btns.length; b++) {
+                                try {
+                                    btns[b].click();
+                                } catch(e) {}
+                            }
+                        }
+
+                        try {
+                            if (window.jwplayer && typeof window.jwplayer === 'function') {
+                                var jw = window.jwplayer();
+                                if (jw && typeof jw.setMute === 'function') {
+                                    jw.setMute(false);
+                                    jw.setVolume(100);
+                                }
+                            }
+                        } catch(e) {}
+                    }
+
+                    var unmuteInterval = setInterval(performUnmute, 350);
+                    setTimeout(function() { clearInterval(unmuteInterval); }, 12000);
+
+                    window.addEventListener('click', performUnmute, true);
+                    window.addEventListener('touchstart', performUnmute, true);
+
                     if (document.readyState === 'loading') {
                         document.addEventListener('DOMContentLoaded', cleanPlayer);
                     } else {
@@ -811,29 +855,66 @@ class PlayerActivity : ComponentActivity() {
 
     private fun startAutoUnmuteSequence() {
         if (!repository.isAutoUnmuteEnabled()) return
-        handler.postDelayed({
-            val js = """
-                (function() {
-                    var fsSel = '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"]';
-                    document.querySelectorAll(fsSel).forEach(function(b) { b.style.setProperty('display', 'none', 'important'); });
+        val unmuteJs = """
+            (function() {
+                var fsSel = '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"]';
+                document.querySelectorAll(fsSel).forEach(function(b) { b.style.setProperty('display', 'none', 'important'); });
 
-                    var btn = document.getElementById('unmute') || document.querySelector('.unmute-btn');
-                    if (btn) { btn.click(); btn.style.display = 'none'; }
-                    var iframes = document.querySelectorAll('iframe');
-                    for (var i = 0; i < iframes.length; i++) {
-                        try {
-                            var doc = iframes[i].contentDocument || iframes[i].contentWindow.document;
-                            if (doc) {
-                                var innerBtn = doc.getElementById('unmute') || doc.querySelector('.unmute-btn');
-                                if (innerBtn) { innerBtn.click(); innerBtn.style.display = 'none'; }
-                                doc.querySelectorAll(fsSel).forEach(function(b) { b.style.setProperty('display', 'none', 'important'); });
-                            }
-                        } catch(e) {}
+                function unmuteDom(root) {
+                    if (!root) return;
+                    try {
+                        root.querySelectorAll('video, audio').forEach(function(v) {
+                            try {
+                                v.muted = false;
+                                v.defaultMuted = false;
+                                v.volume = 1.0;
+                                if (v.paused) v.play().catch(function(){});
+                            } catch(e) {}
+                        });
+                        var btnSelectors = [
+                            '#unmuteBtn', '#unmute', '.unmute-btn', '.unmute',
+                            '[id*="unmute" i]', '[class*="unmute" i]',
+                            'button[aria-label*="unmute" i]', 'button[title*="unmute" i]',
+                            '.jw-icon-volume', '.jw-icon-volume-off', '.vjs-mute-control'
+                        ];
+                        btnSelectors.forEach(function(sel) {
+                            root.querySelectorAll(sel).forEach(function(b) {
+                                try { b.click(); } catch(e) {}
+                            });
+                        });
+                    } catch(e) {}
+                }
+
+                unmuteDom(document);
+
+                var iframes = document.querySelectorAll('iframe');
+                for (var i = 0; i < iframes.length; i++) {
+                    try {
+                        var doc = iframes[i].contentDocument || iframes[i].contentWindow.document;
+                        if (doc) unmuteDom(doc);
+                    } catch(e) {}
+                }
+
+                try {
+                    if (window.jwplayer && typeof window.jwplayer === 'function') {
+                        var jw = window.jwplayer();
+                        if (jw && typeof jw.setMute === 'function') {
+                            jw.setMute(false);
+                            jw.setVolume(100);
+                        }
                     }
-                })();
-            """.trimIndent()
-            webView.evaluateJavascript(js, null)
-        }, 2200)
+                } catch(e) {}
+            })();
+        """.trimIndent()
+
+        val delays = listOf(500L, 1200L, 2500L, 4500L)
+        for (d in delays) {
+            handler.postDelayed({
+                try {
+                    webView.evaluateJavascript(unmuteJs, null)
+                } catch (e: Exception) {}
+            }, d)
+        }
     }
 
     private fun loadCurrentStream() {
@@ -1182,6 +1263,11 @@ class PlayerActivity : ComponentActivity() {
 
         if (customView != null) {
             webView.webChromeClient?.onHideCustomView()
+            return
+        }
+
+        if (repository.isAutoPipOnBack() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            enterPipMode(bringHomeToFront = true)
             return
         }
 
