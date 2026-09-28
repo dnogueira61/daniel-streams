@@ -1,5 +1,8 @@
 package com.dlive.ptstream.ui.screens
 
+import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.PictureInPictureParams
@@ -8,6 +11,9 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.view.animation.AccelerateDecelerateInterpolator
+import coil.load
+import com.dlive.ptstream.data.ChannelLogoHelper
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
@@ -110,13 +116,22 @@ class PlayerActivity : ComponentActivity() {
     private lateinit var etDrawerSearch: EditText
     private lateinit var tvDrawerEmpty: TextView
     private lateinit var btnTabPt: Button
-    private lateinit var btnTabTimst: Button
+    private lateinit var btnTabSports: Button
+    private lateinit var btnTabMovies: Button
     private lateinit var btnTabFav: Button
     private lateinit var btnTabAll: Button
     private lateinit var drawerAdapter: DrawerChannelAdapter
 
+    // Connecting Overlay (Breathing Logo)
+    private lateinit var connectingOverlay: FrameLayout
+    private lateinit var ivConnectingLogo: ImageView
+    private lateinit var tvConnectingChannel: TextView
+    private lateinit var tvConnectingStatus: TextView
+    private var breathingAnimator: ObjectAnimator? = null
+
     private lateinit var repository: ChannelRepository
     private var currentDrawerTab = TabFilter.PORTUGAL
+    private var currentDrawerCategory: String = "Todos"
 
     private var customViewCallback: WebChromeClient.CustomViewCallback? = null
     private var customView: View? = null
@@ -224,6 +239,10 @@ class PlayerActivity : ComponentActivity() {
         customViewContainer.isFocusable = false
         customViewContainer.isFocusableInTouchMode = false
         progressBar = findViewById(R.id.progressBar)
+        connectingOverlay = findViewById(R.id.connectingOverlay)
+        ivConnectingLogo = findViewById(R.id.ivConnectingLogo)
+        tvConnectingChannel = findViewById(R.id.tvConnectingChannel)
+        tvConnectingStatus = findViewById(R.id.tvConnectingStatus)
         tvChannelTitle = findViewById(R.id.tvChannelTitle)
         btnServerSelect = findViewById(R.id.btnServerSelect)
         tvServerBadge = findViewById(R.id.tvServerBadge)
@@ -253,7 +272,7 @@ class PlayerActivity : ComponentActivity() {
 
         // Portrait Header buttons
         findViewById<ImageButton>(R.id.btnBack).setOnClickListener {
-            handleBackOrPip()
+            cleanupAndFinish()
         }
 
         findViewById<View>(R.id.btnOpenChannels).setOnClickListener {
@@ -275,7 +294,7 @@ class PlayerActivity : ComponentActivity() {
 
         // Landscape overlay buttons
         findViewById<ImageButton>(R.id.btnLandscapeBack).setOnClickListener {
-            handleBackOrPip()
+            cleanupAndFinish()
         }
 
         findViewById<View>(R.id.btnLandscapeChannels).setOnClickListener {
@@ -298,6 +317,56 @@ class PlayerActivity : ComponentActivity() {
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
     }
 
+    private fun showConnectingOverlay(name: String) {
+        connectingOverlay.visibility = View.VISIBLE
+        connectingOverlay.alpha = 1f
+        tvConnectingChannel.text = name
+        tvConnectingStatus.text = "A ligar à transmissão..."
+
+        val localLogo = ChannelLogoHelper.getLocalLogoRes(name)
+        val onlineLogo = ChannelLogoHelper.getLogoUrl(name)
+        if (localLogo != null) {
+            ivConnectingLogo.setImageResource(localLogo)
+        } else if (onlineLogo != null) {
+            ivConnectingLogo.load(onlineLogo) {
+                crossfade(true)
+                error(R.drawable.ic_app_logo)
+            }
+        } else {
+            ivConnectingLogo.setImageResource(R.drawable.ic_app_logo)
+        }
+
+        startBreathingAnimation()
+    }
+
+    private fun startBreathingAnimation() {
+        breathingAnimator?.cancel()
+        val scaleX = PropertyValuesHolder.ofFloat(View.SCALE_X, 0.94f, 1.08f)
+        val scaleY = PropertyValuesHolder.ofFloat(View.SCALE_Y, 0.94f, 1.08f)
+        val alpha = PropertyValuesHolder.ofFloat(View.ALPHA, 0.78f, 1.0f)
+        breathingAnimator = ObjectAnimator.ofPropertyValuesHolder(ivConnectingLogo, scaleX, scaleY, alpha).apply {
+            duration = 1100
+            repeatMode = ValueAnimator.REVERSE
+            repeatCount = ValueAnimator.INFINITE
+            interpolator = AccelerateDecelerateInterpolator()
+            start()
+        }
+    }
+
+    private fun hideConnectingOverlay() {
+        if (connectingOverlay.visibility == View.VISIBLE) {
+            connectingOverlay.animate()
+                .alpha(0f)
+                .setDuration(400)
+                .withEndAction {
+                    connectingOverlay.visibility = View.GONE
+                    breathingAnimator?.cancel()
+                    breathingAnimator = null
+                }
+                .start()
+        }
+    }
+
     private fun showGestureHud(isVolume: Boolean, percent: Int) {
         handler.removeCallbacks(gestureHudHideRunnable)
         gestureHud.visibility = View.VISIBLE
@@ -316,7 +385,8 @@ class PlayerActivity : ComponentActivity() {
         etDrawerSearch = findViewById(R.id.etDrawerSearch)
         tvDrawerEmpty = findViewById(R.id.tvDrawerEmpty)
         btnTabPt = findViewById(R.id.btnTabPt)
-        btnTabTimst = findViewById(R.id.btnTabTimst)
+        btnTabSports = findViewById(R.id.btnTabSports)
+        btnTabMovies = findViewById(R.id.btnTabMovies)
         btnTabFav = findViewById(R.id.btnTabFav)
         btnTabAll = findViewById(R.id.btnTabAll)
 
@@ -354,13 +424,11 @@ class PlayerActivity : ComponentActivity() {
         )
         rvDrawerChannels.adapter = drawerAdapter
 
-        btnTabPt.text = "Canais"
-        btnTabTimst.visibility = View.GONE
-        btnTabAll.visibility = View.VISIBLE
-        btnTabAll.text = "Mundo"
-        btnTabPt.setOnClickListener { selectDrawerTab(TabFilter.PORTUGAL) }
-        btnTabAll.setOnClickListener { selectDrawerTab(TabFilter.ALL) }
-        btnTabFav.setOnClickListener { selectDrawerTab(TabFilter.FAVORITES) }
+        btnTabPt.setOnClickListener { selectDrawerCategory("Todos", TabFilter.PORTUGAL) }
+        btnTabSports.setOnClickListener { selectDrawerCategory("Desporto", TabFilter.PORTUGAL) }
+        btnTabMovies.setOnClickListener { selectDrawerCategory("Filmes & Séries", TabFilter.PORTUGAL) }
+        btnTabFav.setOnClickListener { selectDrawerCategory("Favoritos", TabFilter.FAVORITES) }
+        btnTabAll.setOnClickListener { selectDrawerCategory("Mundo", TabFilter.ALL) }
 
         etDrawerSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -380,7 +448,7 @@ class PlayerActivity : ComponentActivity() {
             } else false
         }
 
-        selectDrawerTab(TabFilter.PORTUGAL)
+        selectDrawerCategory("Todos", TabFilter.PORTUGAL)
     }
 
     private fun openDrawer() {
@@ -391,14 +459,20 @@ class PlayerActivity : ComponentActivity() {
         imm?.hideSoftInputFromWindow(etDrawerSearch.windowToken, 0)
 
         // 2. Refresh drawer list with current tab
-        selectDrawerTab(currentDrawerTab)
+        selectDrawerCategory(currentDrawerCategory, currentDrawerTab)
 
         // 3. Open drawer
         drawerLayout.openDrawer(GravityCompat.START)
 
         // 4. Focus channel list rather than search box
         handler.postDelayed({
-            val list = repository.getChannels(currentDrawerTab)
+            val list = when {
+                currentDrawerTab == TabFilter.ALL -> repository.getChannels(TabFilter.ALL)
+                currentDrawerTab == TabFilter.FAVORITES -> repository.getChannels(TabFilter.FAVORITES)
+                currentDrawerCategory == "Desporto" -> repository.getChannels(TabFilter.PORTUGAL, "", "Desporto")
+                currentDrawerCategory == "Filmes & Séries" -> repository.getChannels(TabFilter.PORTUGAL, "", "Filmes & Séries")
+                else -> repository.getChannels(TabFilter.PORTUGAL)
+            }
             val index = list.indexOfFirst { it.id == channelId }
             if (index >= 0) {
                 rvDrawerChannels.scrollToPosition(index)
@@ -407,16 +481,20 @@ class PlayerActivity : ComponentActivity() {
         }, 150)
     }
 
-    private fun selectDrawerTab(tab: TabFilter) {
+    private fun selectDrawerCategory(cat: String, tab: TabFilter) {
+        currentDrawerCategory = cat
         currentDrawerTab = tab
         val activeColor = ColorStateList.valueOf(Color.parseColor("#E50914"))
         val inactiveColor = ColorStateList.valueOf(Color.parseColor("#202330"))
 
-        btnTabPt.backgroundTintList = if (tab == TabFilter.PORTUGAL) activeColor else inactiveColor
-        btnTabPt.setTextColor(if (tab == TabFilter.PORTUGAL) Color.WHITE else Color.parseColor("#9CA3AF"))
+        btnTabPt.backgroundTintList = if (cat == "Todos" && tab == TabFilter.PORTUGAL) activeColor else inactiveColor
+        btnTabPt.setTextColor(if (cat == "Todos" && tab == TabFilter.PORTUGAL) Color.WHITE else Color.parseColor("#9CA3AF"))
 
-        btnTabTimst.backgroundTintList = if (tab == TabFilter.TIMSTREAMS) activeColor else inactiveColor
-        btnTabTimst.setTextColor(if (tab == TabFilter.TIMSTREAMS) Color.WHITE else Color.parseColor("#9CA3AF"))
+        btnTabSports.backgroundTintList = if (cat == "Desporto") activeColor else inactiveColor
+        btnTabSports.setTextColor(if (cat == "Desporto") Color.WHITE else Color.parseColor("#9CA3AF"))
+
+        btnTabMovies.backgroundTintList = if (cat == "Filmes & Séries") activeColor else inactiveColor
+        btnTabMovies.setTextColor(if (cat == "Filmes & Séries") Color.WHITE else Color.parseColor("#9CA3AF"))
 
         btnTabFav.backgroundTintList = if (tab == TabFilter.FAVORITES) activeColor else inactiveColor
         btnTabFav.setTextColor(if (tab == TabFilter.FAVORITES) Color.WHITE else Color.parseColor("#9CA3AF"))
@@ -429,7 +507,13 @@ class PlayerActivity : ComponentActivity() {
 
     private fun refreshDrawerList() {
         val query = etDrawerSearch.text.toString().trim()
-        val list = repository.getChannels(currentDrawerTab, query)
+        val list = when {
+            currentDrawerTab == TabFilter.ALL -> repository.getChannels(TabFilter.ALL, query)
+            currentDrawerTab == TabFilter.FAVORITES -> repository.getChannels(TabFilter.FAVORITES, query)
+            currentDrawerCategory == "Desporto" -> repository.getChannels(TabFilter.PORTUGAL, query, "Desporto")
+            currentDrawerCategory == "Filmes & Séries" -> repository.getChannels(TabFilter.PORTUGAL, query, "Filmes & Séries")
+            else -> repository.getChannels(TabFilter.PORTUGAL, query)
+        }
         drawerAdapter.updateChannels(list, channelId)
 
         if (list.isEmpty()) {
@@ -606,50 +690,6 @@ class PlayerActivity : ComponentActivity() {
                         }
                     }
 
-                    function performUnmute() {
-                        var media = document.querySelectorAll('video, audio');
-                        for (var i = 0; i < media.length; i++) {
-                            try {
-                                var m = media[i];
-                                if (m.muted) m.muted = false;
-                                if (m.defaultMuted) m.defaultMuted = false;
-                                m.volume = 1.0;
-                                if (m.paused) m.play().catch(function(){});
-                            } catch(e) {}
-                        }
-
-                        var btnSelectors = [
-                            '#unmuteBtn', '#unmute', '.unmute-btn', '.unmute',
-                            '[id*="unmute" i]', '[class*="unmute" i]',
-                            'button[aria-label*="unmute" i]', 'button[title*="unmute" i]',
-                            '.jw-icon-volume', '.jw-icon-volume-off', '.vjs-mute-control'
-                        ];
-                        for (var s = 0; s < btnSelectors.length; s++) {
-                            var btns = document.querySelectorAll(btnSelectors[s]);
-                            for (var b = 0; b < btns.length; b++) {
-                                try {
-                                    btns[b].click();
-                                } catch(e) {}
-                            }
-                        }
-
-                        try {
-                            if (window.jwplayer && typeof window.jwplayer === 'function') {
-                                var jw = window.jwplayer();
-                                if (jw && typeof jw.setMute === 'function') {
-                                    jw.setMute(false);
-                                    jw.setVolume(100);
-                                }
-                            }
-                        } catch(e) {}
-                    }
-
-                    var unmuteInterval = setInterval(performUnmute, 350);
-                    setTimeout(function() { clearInterval(unmuteInterval); }, 12000);
-
-                    window.addEventListener('click', performUnmute, true);
-                    window.addEventListener('touchstart', performUnmute, true);
-
                     if (document.readyState === 'loading') {
                         document.addEventListener('DOMContentLoaded', cleanPlayer);
                     } else {
@@ -716,8 +756,10 @@ class PlayerActivity : ComponentActivity() {
                 progressBar.visibility = View.GONE
                 injectCleanPlayerStyle(view)
                 startAutoUnmuteSequence()
-                // Mark success slightly delayed to allow player to initialize
-                handler.postDelayed({ markStreamSuccess() }, 3000)
+                handler.postDelayed({
+                    hideConnectingOverlay()
+                    markStreamSuccess()
+                }, 1800)
             }
 
             override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
@@ -746,6 +788,7 @@ class PlayerActivity : ComponentActivity() {
             }
 
             override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
+                hideConnectingOverlay()
                 customView = view
                 customViewCallback = callback
                 customViewContainer.addView(view)
@@ -792,7 +835,7 @@ class PlayerActivity : ComponentActivity() {
 
     private fun startAutoUnmuteSequence() {
         if (!repository.isAutoUnmuteEnabled()) return
-        val unmuteJs = """
+        val safeUnmuteJs = """
             (function() {
                 var fsSel = '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"]';
                 document.querySelectorAll(fsSel).forEach(function(b) { b.style.setProperty('display', 'none', 'important'); });
@@ -802,22 +845,10 @@ class PlayerActivity : ComponentActivity() {
                     try {
                         root.querySelectorAll('video, audio').forEach(function(v) {
                             try {
-                                v.muted = false;
-                                v.defaultMuted = false;
+                                if (v.muted) v.muted = false;
+                                if (v.defaultMuted) v.defaultMuted = false;
                                 v.volume = 1.0;
-                                if (v.paused) v.play().catch(function(){});
                             } catch(e) {}
-                        });
-                        var btnSelectors = [
-                            '#unmuteBtn', '#unmute', '.unmute-btn', '.unmute',
-                            '[id*="unmute" i]', '[class*="unmute" i]',
-                            'button[aria-label*="unmute" i]', 'button[title*="unmute" i]',
-                            '.jw-icon-volume', '.jw-icon-volume-off', '.vjs-mute-control'
-                        ];
-                        btnSelectors.forEach(function(sel) {
-                            root.querySelectorAll(sel).forEach(function(b) {
-                                try { b.click(); } catch(e) {}
-                            });
                         });
                     } catch(e) {}
                 }
@@ -835,7 +866,7 @@ class PlayerActivity : ComponentActivity() {
                 try {
                     if (window.jwplayer && typeof window.jwplayer === 'function') {
                         var jw = window.jwplayer();
-                        if (jw && typeof jw.setMute === 'function') {
+                        if (jw && typeof jw.getMute === 'function' && jw.getMute()) {
                             jw.setMute(false);
                             jw.setVolume(100);
                         }
@@ -844,17 +875,18 @@ class PlayerActivity : ComponentActivity() {
             })();
         """.trimIndent()
 
-        val delays = listOf(500L, 1200L, 2500L, 4500L)
+        val delays = listOf(800L, 2000L)
         for (d in delays) {
             handler.postDelayed({
                 try {
-                    webView.evaluateJavascript(unmuteJs, null)
+                    webView.evaluateJavascript(safeUnmuteJs, null)
                 } catch (e: Exception) {}
             }, d)
         }
     }
 
     private fun loadCurrentStream() {
+        showConnectingOverlay(channelName)
         progressBar.visibility = View.VISIBLE
         streamLoadedSuccessfully = false
         handler.removeCallbacks(failoverTimeoutRunnable)
@@ -1010,6 +1042,7 @@ class PlayerActivity : ComponentActivity() {
     private fun markStreamSuccess() {
         streamLoadedSuccessfully = true
         handler.removeCallbacks(failoverTimeoutRunnable)
+        hideConnectingOverlay()
     }
 
     private fun zapNextChannel() {
@@ -1079,10 +1112,6 @@ class PlayerActivity : ComponentActivity() {
                     }
                 }
                 KeyEvent.KEYCODE_BACK -> {
-                    if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                        drawerLayout.closeDrawer(GravityCompat.START)
-                        return true
-                    }
                     handleBackOrPip()
                     return true
                 }
@@ -1136,14 +1165,12 @@ class PlayerActivity : ComponentActivity() {
                 osdBanner.visibility = View.GONE
                 progressBar.visibility = View.GONE
                 gestureHud.visibility = View.GONE
+                hideConnectingOverlay()
+                connectingOverlay.visibility = View.GONE
+                breathingAnimator?.cancel()
 
                 val builder = PictureInPictureParams.Builder()
                     .setAspectRatio(Rational(16, 9))
-
-                val visibleRect = android.graphics.Rect()
-                if (webView.getGlobalVisibleRect(visibleRect)) {
-                    builder.setSourceRectHint(visibleRect)
-                }
 
                 enterPictureInPictureMode(builder.build())
             } catch (e: Exception) {
@@ -1173,6 +1200,9 @@ class PlayerActivity : ComponentActivity() {
             osdBanner.visibility = View.GONE
             progressBar.visibility = View.GONE
             gestureHud.visibility = View.GONE
+            hideConnectingOverlay()
+            connectingOverlay.visibility = View.GONE
+            breathingAnimator?.cancel()
             if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                 drawerLayout.closeDrawer(GravityCompat.START)
             }
@@ -1185,6 +1215,7 @@ class PlayerActivity : ComponentActivity() {
     private fun handleBackOrPip() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)
+            cleanupAndFinish()
             return
         }
 
@@ -1193,7 +1224,7 @@ class PlayerActivity : ComponentActivity() {
             return
         }
 
-        cleanupAndFinish()
+        openDrawer()
     }
 
     private fun showSettingsDialog() {

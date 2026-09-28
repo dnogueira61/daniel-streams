@@ -120,7 +120,7 @@ class ChannelRepository(private val context: Context) {
     fun isAutoPipOnBack(): Boolean = prefs.getBoolean(PREF_AUTO_PIP_ON_BACK, true)
     fun setAutoPipOnBack(enabled: Boolean) = prefs.edit().putBoolean(PREF_AUTO_PIP_ON_BACK, enabled).apply()
 
-    fun isAutoUnmuteEnabled(): Boolean = prefs.getBoolean(PREF_AUTO_UNMUTE, true)
+    fun isAutoUnmuteEnabled(): Boolean = prefs.getBoolean(PREF_AUTO_UNMUTE, false)
     fun setAutoUnmuteEnabled(enabled: Boolean) = prefs.edit().putBoolean(PREF_AUTO_UNMUTE, enabled).apply()
 
     fun getDefaultServer(): String = prefs.getString(PREF_DEFAULT_SERVER, "stream") ?: "stream"

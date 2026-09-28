@@ -323,14 +323,58 @@
             android:visibility="gone"
             android:elevation="15dp" />
 
-        <!-- Loading Spinner -->
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:visibility="visible"
-            android:indeterminateTint="#E50914" />
+        <!-- Channel Connecting Overlay with Breathing Logo -->
+        <FrameLayout
+            android:id="@+id/connectingOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/playerHeader"
+            android:background="#0B0F12"
+            android:elevation="14dp"
+            android:clickable="true"
+            android:focusable="false"
+            android:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/ivConnectingLogo"
+                    android:layout_width="140dp"
+                    android:layout_height="90dp"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="Logo" />
+
+                <TextView
+                    android:id="@+id/tvConnectingChannel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvConnectingStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="A ligar à transmissão..."
+                    android:textColor="#38BDF8"
+                    android:textSize="13sp" />
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginTop="16dp"
+                    android:indeterminateTint="#38BDF8" />
+            </LinearLayout>
+        </FrameLayout>
 
         <!-- Fullscreen Landscape Gesture HUD (Volume / Brightness) -->
         <LinearLayout
@@ -432,69 +476,92 @@
                 android:contentDescription="Fechar" />
         </LinearLayout>
 
-        <!-- Quick Tabs (PT, Timst, Favoritos, Todos) -->
-        <LinearLayout
+        <!-- Quick Tabs (Todos, Desporto, Filmes, Favoritos, Mundo) -->
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="8dp"
+            android:scrollbars="none"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
             android:background="#10FFFFFF">
 
-            <Button
-                android:id="@+id/btnTabPt"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:text="🇵🇹 PT"
-                android:textSize="11sp"
-                android:textColor="#FFFFFF"
-                android:backgroundTint="#E50914"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:padding="0dp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btnTabTimst"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:layout_marginStart="4dp"
-                android:text="⚡ Timst"
-                android:textSize="11sp"
-                android:textColor="#9CA3AF"
-                android:backgroundTint="#202330"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:padding="0dp" />
+                <Button
+                    android:id="@+id/btnTabPt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:text="🇵🇹 Todos"
+                    android:textSize="11sp"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#E50914"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp" />
 
-            <Button
-                android:id="@+id/btnTabFav"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:layout_marginStart="4dp"
-                android:text="⭐ Fav"
-                android:textSize="11sp"
-                android:textColor="#9CA3AF"
-                android:backgroundTint="#202330"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:padding="0dp" />
+                <Button
+                    android:id="@+id/btnTabSports"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="4dp"
+                    android:text="⚽ Desporto"
+                    android:textSize="11sp"
+                    android:textColor="#9CA3AF"
+                    android:backgroundTint="#202330"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp" />
 
-            <Button
-                android:id="@+id/btnTabAll"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:layout_marginStart="4dp"
-                android:text="🌐 Todos"
-                android:textSize="11sp"
-                android:textColor="#9CA3AF"
-                android:backgroundTint="#202330"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:padding="0dp" />
-        </LinearLayout>
+                <Button
+                    android:id="@+id/btnTabMovies"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="4dp"
+                    android:text="🎬 Filmes"
+                    android:textSize="11sp"
+                    android:textColor="#9CA3AF"
+                    android:backgroundTint="#202330"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp" />
+
+                <Button
+                    android:id="@+id/btnTabFav"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="4dp"
+                    android:text="⭐ Favoritos"
+                    android:textSize="11sp"
+                    android:textColor="#9CA3AF"
+                    android:backgroundTint="#202330"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp" />
+
+                <Button
+                    android:id="@+id/btnTabAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="4dp"
+                    android:text="🌐 Mundo"
+                    android:textSize="11sp"
+                    android:textColor="#9CA3AF"
+                    android:backgroundTint="#202330"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp" />
+            </LinearLayout>
+        </HorizontalScrollView>
 
         <!-- Mini Search Bar with No Extract UI in landscape -->
         <EditText
