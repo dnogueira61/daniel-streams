@@ -119,6 +119,8 @@ class DrawerChannelAdapter(
 
     override fun getItemCount(): Int = channels.size
 
+    fun getChannels(): List<Channel> = channels
+
     fun updateChannels(newChannels: List<Channel>, newActiveId: String) {
         this.channels = newChannels
         this.activeChannelId = newActiveId

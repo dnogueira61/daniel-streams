@@ -504,7 +504,30 @@ class PlayerActivity : ComponentActivity() {
             } else false
         }
 
+        drawerLayout.addDrawerListener(object : androidx.drawerlayout.widget.DrawerLayout.SimpleDrawerListener() {
+            override fun onDrawerOpened(drawerView: View) {
+                scrollToActiveChannel()
+            }
+        })
+
         selectDrawerCategory("Todos", TabFilter.PORTUGAL)
+    }
+
+    private fun scrollToActiveChannel() {
+        val list = drawerAdapter.getChannels()
+        val index = list.indexOfFirst {
+            it.id == channelId || it.name.equals(channelName, ignoreCase = true)
+        }
+        if (index >= 0) {
+            val lm = rvDrawerChannels.layoutManager as? LinearLayoutManager
+            val offset = (resources.displayMetrics.density * 80).toInt()
+            lm?.scrollToPositionWithOffset(index, offset)
+            rvDrawerChannels.post {
+                lm?.scrollToPositionWithOffset(index, offset)
+                val holder = rvDrawerChannels.findViewHolderForAdapterPosition(index)
+                holder?.itemView?.requestFocus() ?: rvDrawerChannels.requestFocus()
+            }
+        }
     }
 
     private fun openDrawer() {
@@ -514,29 +537,46 @@ class PlayerActivity : ComponentActivity() {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
         imm?.hideSoftInputFromWindow(etDrawerSearch.windowToken, 0)
 
-        // 2. Refresh drawer list with current tab
+        // 2. Identify active channel in repository
+        val currentChannel = repository.getChannels(TabFilter.ALL).firstOrNull {
+            it.id == channelId || it.name.equals(channelName, ignoreCase = true)
+        }
+
+        // 3. Ensure the active channel is in the visible drawer tab/category
+        if (currentChannel != null) {
+            if (currentChannel.isPortuguese) {
+                if (currentDrawerTab != TabFilter.PORTUGAL && currentDrawerTab != TabFilter.FAVORITES) {
+                    currentDrawerTab = TabFilter.PORTUGAL
+                    currentDrawerCategory = "Todos"
+                } else if (currentDrawerTab == TabFilter.PORTUGAL && currentDrawerCategory != "Todos") {
+                    val inCurrentCat = repository.getChannels(TabFilter.PORTUGAL, "", currentDrawerCategory)
+                        .any { it.id == currentChannel.id || it.name.equals(currentChannel.name, ignoreCase = true) }
+                    if (!inCurrentCat) {
+                        currentDrawerCategory = "Todos"
+                    }
+                }
+            } else {
+                if (currentDrawerTab != TabFilter.ALL) {
+                    currentDrawerTab = TabFilter.ALL
+                    currentDrawerCategory = "Mundo"
+                }
+            }
+        }
+
+        // 4. Update tab buttons and reload adapter
         selectDrawerCategory(currentDrawerCategory, currentDrawerTab)
 
-        // 3. Open drawer
+        // 5. Open drawer
         drawerLayout.openDrawer(GravityCompat.START)
 
-        // 4. Focus channel list rather than search box
+        // 6. Scroll immediately and post-animation to guarantee correct channel position
+        scrollToActiveChannel()
         handler.postDelayed({
-            val list = when {
-                currentDrawerTab == TabFilter.ALL -> repository.getChannels(TabFilter.ALL)
-                currentDrawerTab == TabFilter.FAVORITES -> repository.getChannels(TabFilter.FAVORITES)
-                currentDrawerCategory == "Desporto" -> repository.getChannels(TabFilter.PORTUGAL, "", "Desporto")
-                currentDrawerCategory == "Filmes & Séries" -> repository.getChannels(TabFilter.PORTUGAL, "", "Filmes & Séries")
-                else -> repository.getChannels(TabFilter.PORTUGAL)
-            }
-            val index = list.indexOfFirst { it.id == channelId }
-            val targetPos = if (index >= 0) index else 0
-            rvDrawerChannels.scrollToPosition(targetPos)
-            rvDrawerChannels.post {
-                val holder = rvDrawerChannels.findViewHolderForAdapterPosition(targetPos)
-                holder?.itemView?.requestFocus() ?: rvDrawerChannels.requestFocus()
-            }
+            scrollToActiveChannel()
         }, 150)
+        handler.postDelayed({
+            scrollToActiveChannel()
+        }, 320)
     }
 
     private fun selectDrawerCategory(cat: String, tab: TabFilter) {
