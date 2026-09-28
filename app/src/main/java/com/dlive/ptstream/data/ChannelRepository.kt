@@ -36,6 +36,9 @@ class ChannelRepository(private val context: Context) {
     private val PREF_DEFAULT_SERVER = "pref_default_server"
     private val PREF_AUTO_RESUME_LAST_CHANNEL = "pref_auto_resume_last_channel"
     private val PREF_LAST_WATCHED_CHANNEL_ID = "pref_last_watched_channel_id"
+    private val PREF_THEME_MODE = "pref_theme_mode"
+    private val PREF_ACCENT_COLOR = "pref_accent_color"
+    private val PREF_DEFAULT_TAB = "pref_default_tab"
     private val CACHE_FILE_NAME = "channels_cache.json"
 
     private var cachedChannels: List<Channel> = emptyList()
@@ -143,6 +146,15 @@ class ChannelRepository(private val context: Context) {
         val clean = if (newUrl.endsWith("/")) newUrl.dropLast(1) else newUrl
         prefs.edit().putString(PREF_TIMST_BASE_URL, clean).apply()
     }
+
+    fun getThemeMode(): String = prefs.getString(PREF_THEME_MODE, "DARK") ?: "DARK"
+    fun setThemeMode(mode: String) = prefs.edit().putString(PREF_THEME_MODE, mode).apply()
+
+    fun getAccentColor(): String = prefs.getString(PREF_ACCENT_COLOR, "RED") ?: "RED"
+    fun setAccentColor(color: String) = prefs.edit().putString(PREF_ACCENT_COLOR, color).apply()
+
+    fun getDefaultTab(): String = prefs.getString(PREF_DEFAULT_TAB, "PORTUGAL") ?: "PORTUGAL"
+    fun setDefaultTab(tab: String) = prefs.edit().putString(PREF_DEFAULT_TAB, tab).apply()
 
     val epgRepository = EpgRepository(context)
 

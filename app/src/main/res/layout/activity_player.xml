@@ -168,12 +168,15 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:layout_alignParentTop="true"
-            android:background="#CC0A0A0E"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="14dp"
+            android:background="@drawable/bg_glassmorphism_bar"
             android:gravity="center_vertical"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:visibility="gone"
-            android:elevation="12dp">
+            android:elevation="14dp">
 
             <ImageButton
                 android:id="@+id/btnLandscapeBack"

@@ -10,6 +10,7 @@ import com.dlive.ptstream.ui.screens.PlayerActivity
 import com.dlive.ptstream.ui.theme.DLivePTStreamTheme
 
 import androidx.lifecycle.lifecycleScope
+import androidx.compose.runtime.*
 
 class MainActivity : ComponentActivity() {
 
@@ -40,23 +41,39 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            DLivePTStreamTheme {
+            var themeMode by androidx.compose.runtime.remember {
+                androidx.compose.runtime.mutableStateOf(channelRepository.getThemeMode())
+            }
+            var accentColor by androidx.compose.runtime.remember {
+                androidx.compose.runtime.mutableStateOf(channelRepository.getAccentColor())
+            }
+
+            DLivePTStreamTheme(themeMode = themeMode, accentColor = accentColor) {
                 HomeScreen(
                     repository = channelRepository,
-                    onChannelClick = { channel ->
-                        launchPlayer(channel)
+                    onThemeChange = { mode, accent ->
+                        themeMode = mode
+                        accentColor = accent
+                    },
+                    onChannelClick = { channel, directUrl ->
+                        launchPlayer(channel, directUrl)
                     }
                 )
             }
         }
     }
 
-    private fun launchPlayer(channel: com.dlive.ptstream.data.Channel) {
+    private fun launchPlayer(channel: com.dlive.ptstream.data.Channel, directUrl: String? = null) {
         PlayerActivity.closeActivePip()
         val intent = Intent(this, PlayerActivity::class.java).apply {
             putExtra("EXTRA_CHANNEL_ID", channel.id)
             putExtra("EXTRA_CHANNEL_NAME", channel.name)
-            if (channel.id.toIntOrNull() == null) {
+            if (!directUrl.isNullOrBlank()) {
+                putExtra("EXTRA_DIRECT_STREAM_URL", directUrl)
+                if (channel.backupStreamUrl != null && channel.backupStreamUrl != directUrl) {
+                    putExtra("EXTRA_BACKUP_STREAM_URL", channel.backupStreamUrl)
+                }
+            } else if (channel.id.toIntOrNull() == null) {
                 putExtra("EXTRA_DIRECT_STREAM_URL", channel.backupStreamUrl)
                 if (channel.backupStreamUrl2 != null) {
                     putExtra("EXTRA_BACKUP_STREAM_URL", channel.backupStreamUrl2)

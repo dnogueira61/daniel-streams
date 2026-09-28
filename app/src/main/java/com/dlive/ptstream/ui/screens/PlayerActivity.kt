@@ -1340,7 +1340,7 @@ class PlayerActivity : ComponentActivity() {
                 findViewById<View>(R.id.btnLandscapeServer)?.requestFocus()
             }
             handler.removeCallbacks(overlayHideRunnable)
-            handler.postDelayed(overlayHideRunnable, 7000)
+            handler.postDelayed(overlayHideRunnable, 4000)
         } else {
             playerHeader.visibility = View.VISIBLE
         }

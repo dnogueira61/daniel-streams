@@ -51,7 +51,8 @@ import java.io.File
 @Composable
 fun HomeScreen(
     repository: ChannelRepository,
-    onChannelClick: (Channel) -> Unit
+    onChannelClick: (Channel, String?) -> Unit,
+    onThemeChange: (String, String) -> Unit = { _, _ -> }
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -59,13 +60,25 @@ fun HomeScreen(
     val configuration = LocalConfiguration.current
     val isTabletOrLandscape = configuration.screenWidthDp >= 600
 
-    var selectedTab by remember { mutableStateOf(TabFilter.PORTUGAL) }
+    val defaultTabPref = remember { repository.getDefaultTab() }
+    val initialTab = remember {
+        when (defaultTabPref.uppercase()) {
+            "LIVE_GAMES" -> TabFilter.LIVE_GAMES
+            "FAVORITES" -> TabFilter.FAVORITES
+            "ALL" -> TabFilter.ALL
+            else -> TabFilter.PORTUGAL
+        }
+    }
+    var selectedTab by remember { mutableStateOf(initialTab) }
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf("Todos") }
     var gamesSubFilter by remember { mutableStateOf("Todos") }
     var refreshKey by remember { mutableStateOf(0) }
     var showSettingsDialog by remember { mutableStateOf(false) }
+
+    var focusedOrSelectedChannel by remember { mutableStateOf<Channel?>(null) }
+    var selectedChannelForSheet by remember { mutableStateOf<Channel?>(null) }
 
     // Live Matches State
     var liveEvents by remember { mutableStateOf<List<LiveEvent>>(emptyList()) }
@@ -131,12 +144,14 @@ fun HomeScreen(
 
     var categoryDropdownOpen by remember { mutableStateOf(false) }
 
+    val theme = LocalCustomColors.current
+
     Scaffold(
         topBar = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF0F121E))
+                    .background(theme.surface)
             ) {
                 // Top App Bar (NOS TV style)
                 Row(
@@ -331,7 +346,7 @@ fun HomeScreen(
         },
         bottomBar = {
             NavigationBar(
-                containerColor = Color(0xFF10131E),
+                containerColor = theme.surface,
                 contentColor = Color.White,
                 tonalElevation = 8.dp
             ) {
@@ -350,9 +365,9 @@ fun HomeScreen(
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF38BDF8),
-                        selectedTextColor = Color(0xFF38BDF8),
-                        indicatorColor = Color(0x2238BDF8),
+                        selectedIconColor = theme.primary,
+                        selectedTextColor = theme.primary,
+                        indicatorColor = theme.primary.copy(alpha = 0.2f),
                         unselectedIconColor = TextSecondary,
                         unselectedTextColor = TextSecondary
                     )
@@ -371,9 +386,9 @@ fun HomeScreen(
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF38BDF8),
-                        selectedTextColor = Color(0xFF38BDF8),
-                        indicatorColor = Color(0x2238BDF8),
+                        selectedIconColor = theme.primary,
+                        selectedTextColor = theme.primary,
+                        indicatorColor = theme.primary.copy(alpha = 0.2f),
                         unselectedIconColor = TextSecondary,
                         unselectedTextColor = TextSecondary
                     )
@@ -393,9 +408,9 @@ fun HomeScreen(
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF38BDF8),
-                        selectedTextColor = Color(0xFF38BDF8),
-                        indicatorColor = Color(0x2238BDF8),
+                        selectedIconColor = theme.primary,
+                        selectedTextColor = theme.primary,
+                        indicatorColor = theme.primary.copy(alpha = 0.2f),
                         unselectedIconColor = TextSecondary,
                         unselectedTextColor = TextSecondary
                     )
@@ -415,9 +430,9 @@ fun HomeScreen(
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF38BDF8),
-                        selectedTextColor = Color(0xFF38BDF8),
-                        indicatorColor = Color(0x2238BDF8),
+                        selectedIconColor = theme.primary,
+                        selectedTextColor = theme.primary,
+                        indicatorColor = theme.primary.copy(alpha = 0.2f),
                         unselectedIconColor = TextSecondary,
                         unselectedTextColor = TextSecondary
                     )
@@ -428,16 +443,16 @@ fun HomeScreen(
                     icon = { Icon(Icons.Default.Settings, contentDescription = "Definições") },
                     label = { Text("Definições", fontSize = 12.sp) },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF38BDF8),
-                        selectedTextColor = Color(0xFF38BDF8),
-                        indicatorColor = Color(0x2238BDF8),
+                        selectedIconColor = theme.primary,
+                        selectedTextColor = theme.primary,
+                        indicatorColor = theme.primary.copy(alpha = 0.2f),
                         unselectedIconColor = TextSecondary,
                         unselectedTextColor = TextSecondary
                     )
                 )
             }
         },
-        containerColor = BackgroundDark
+        containerColor = theme.background
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -593,7 +608,7 @@ fun HomeScreen(
                                     ChannelCard(
                                         channel = channel,
                                         epgProgram = repository.epgRepository.getCurrentProgram(channel.name),
-                                        onPlayClick = { onChannelClick(channel) },
+                                        onPlayClick = { onChannelClick(channel, null) },
                                         onToggleFavorite = {
                                             repository.toggleFavorite(channel.id)
                                             refreshKey++
@@ -613,46 +628,63 @@ fun HomeScreen(
                 if (channels.isEmpty()) {
                     EmptyStateView(tab = selectedTab, query = searchQuery)
                 } else if (isTabletOrLandscape) {
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 340.dp),
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    val activeChannel = focusedOrSelectedChannel ?: channels.firstOrNull()
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        if (searchQuery.isBlank() && selectedCategory == "Todos" && selectedTab == TabFilter.PORTUGAL) {
-                            if (favChannels.isNotEmpty()) {
-                                item(span = { GridItemSpan(maxLineSpan) }) {
-                                    FavoritesQuickBar(
-                                        favorites = favChannels,
-                                        onChannelClick = onChannelClick
-                                    )
+                        // Coluna da Esquerda: Lista de Canais (40% da largura)
+                        Box(modifier = Modifier.weight(0.40f).fillMaxHeight()) {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(bottom = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                if (searchQuery.isBlank() && selectedCategory == "Todos" && selectedTab == TabFilter.PORTUGAL) {
+                                    if (favChannels.isNotEmpty()) {
+                                        item {
+                                            FavoritesQuickBar(
+                                                favorites = favChannels,
+                                                onChannelClick = { onChannelClick(it, null) }
+                                            )
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                        }
+                                    }
                                 }
-                            }
-                            item(span = { GridItemSpan(maxLineSpan) }) {
-                                channels.firstOrNull()?.let { featChannel ->
-                                    FeaturedLiveCard(
-                                        channel = featChannel,
-                                        epgProgram = repository.epgRepository.getCurrentProgram(featChannel.name),
-                                        onClick = { onChannelClick(featChannel) }
+                                items(channels, key = { it.id }) { channel ->
+                                    val isSelected = activeChannel?.id == channel.id
+                                    SplitChannelRow(
+                                        channel = channel,
+                                        isSelected = isSelected,
+                                        epgProgram = repository.epgRepository.getCurrentProgram(channel.name),
+                                        onFocus = { focusedOrSelectedChannel = channel },
+                                        onClick = {
+                                            focusedOrSelectedChannel = channel
+                                            onChannelClick(channel, null)
+                                        },
+                                        onPlayDirect = {
+                                            onChannelClick(channel, null)
+                                        }
                                     )
                                 }
                             }
                         }
-                        items(channels, key = { it.id }) { channel ->
-                            ChannelCard(
-                                channel = channel,
-                                epgProgram = repository.epgRepository.getCurrentProgram(channel.name),
-                                onPlayClick = { onChannelClick(channel) },
-                                onToggleFavorite = {
-                                    repository.toggleFavorite(channel.id)
-                                    refreshKey++
-                                },
-                                onHideChannel = {
-                                    repository.hideChannel(channel.id)
-                                    refreshKey++
-                                }
-                            )
+
+                        // Coluna da Direita: Painel EPG Detalhado (60% da largura)
+                        Box(modifier = Modifier.weight(0.60f).fillMaxHeight()) {
+                            if (activeChannel != null) {
+                                EpgDetailPanel(
+                                    channel = activeChannel,
+                                    epgRepository = repository.epgRepository,
+                                    onPlayClick = { directUrl -> onChannelClick(activeChannel, directUrl) },
+                                    onToggleFavorite = {
+                                        repository.toggleFavorite(activeChannel.id)
+                                        refreshKey++
+                                    }
+                                )
+                            }
                         }
                     }
                 } else {
@@ -666,7 +698,7 @@ fun HomeScreen(
                                 item {
                                     FavoritesQuickBar(
                                         favorites = favChannels,
-                                        onChannelClick = onChannelClick
+                                        onChannelClick = { onChannelClick(it, null) }
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                 }
@@ -676,7 +708,7 @@ fun HomeScreen(
                                     FeaturedLiveCard(
                                         channel = featChannel,
                                         epgProgram = repository.epgRepository.getCurrentProgram(featChannel.name),
-                                        onClick = { onChannelClick(featChannel) }
+                                        onClick = { onChannelClick(featChannel, null) }
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                 }
@@ -686,7 +718,9 @@ fun HomeScreen(
                             ChannelCard(
                                 channel = channel,
                                 epgProgram = repository.epgRepository.getCurrentProgram(channel.name),
-                                onPlayClick = { onChannelClick(channel) },
+                                onPlayClick = {
+                                    selectedChannelForSheet = channel
+                                },
                                 onToggleFavorite = {
                                     repository.toggleFavorite(channel.id)
                                     refreshKey++
@@ -703,6 +737,44 @@ fun HomeScreen(
         }
     }
 
+    if (selectedChannelForSheet != null) {
+        ModalBottomSheet(
+            onDismissRequest = { selectedChannelForSheet = null },
+            containerColor = LocalCustomColors.current.surface,
+            scrimColor = Color.Black.copy(alpha = 0.65f),
+            dragHandle = {
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = 10.dp)
+                        .width(42.dp)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(Color(0xFF384055))
+                )
+            }
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 6.dp)
+            ) {
+                EpgDetailPanel(
+                    channel = selectedChannelForSheet!!,
+                    epgRepository = repository.epgRepository,
+                    onPlayClick = { directUrl ->
+                        val ch = selectedChannelForSheet!!
+                        selectedChannelForSheet = null
+                        onChannelClick(ch, directUrl)
+                    },
+                    onToggleFavorite = {
+                        repository.toggleFavorite(selectedChannelForSheet!!.id)
+                        refreshKey++
+                    }
+                )
+            }
+        }
+    }
+
     if (showSettingsDialog) {
         SettingsDialog(
             repository = repository,
@@ -712,7 +784,8 @@ fun HomeScreen(
             onUpdateFound = { release ->
                 availableRelease = release
                 showUpdateDialog = true
-            }
+            },
+            onThemeChange = onThemeChange
         )
     }
 
@@ -1116,6 +1189,131 @@ fun FeaturedLiveCard(
 }
 
 @Composable
+fun SplitChannelRow(
+    channel: Channel,
+    isSelected: Boolean,
+    epgProgram: EpgProgram?,
+    onFocus: () -> Unit,
+    onClick: () -> Unit,
+    onPlayDirect: () -> Unit
+) {
+    val theme = LocalCustomColors.current
+    var isFocused by remember { mutableStateOf(false) }
+    val isHighlighted = isFocused || isSelected
+
+    val localLogo = ChannelLogoHelper.getLocalLogoRes(channel.name)
+    val onlineLogo = channel.logoUrl ?: ChannelLogoHelper.getLogoUrl(channel.name)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .onFocusChanged {
+                isFocused = it.isFocused
+                if (it.isFocused) onFocus()
+            }
+            .focusable()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isHighlighted) theme.surfaceVariant else theme.surface
+        ),
+        border = if (isFocused) {
+            BorderStroke(2.dp, theme.primary)
+        } else if (isSelected) {
+            BorderStroke(1.5.dp, theme.primary.copy(alpha = 0.7f))
+        } else {
+            BorderStroke(1.dp, theme.border)
+        }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Channel Logo
+            Box(
+                modifier = Modifier
+                    .size(width = 46.dp, height = 34.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(theme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                if (onlineLogo != null) {
+                    AsyncImage(
+                        model = onlineLogo,
+                        contentDescription = channel.name,
+                        modifier = Modifier.fillMaxSize().padding(3.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                } else if (localLogo != null) {
+                    Image(
+                        painter = painterResource(id = localLogo),
+                        contentDescription = channel.name,
+                        modifier = Modifier.fillMaxSize().padding(3.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                } else {
+                    Text(
+                        text = channel.name.take(3).uppercase(),
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = channel.name,
+                    color = if (isHighlighted) Color.White else theme.textPrimary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                val progText = epgProgram?.title ?: channel.category
+                Text(
+                    text = progText,
+                    color = if (epgProgram != null) theme.primary else theme.textSecondary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            if (channel.isFavorite) {
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = null,
+                    tint = Color(0xFFF59E0B),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(6.dp))
+
+            IconButton(
+                onClick = onPlayDirect,
+                modifier = Modifier.size(32.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Assistir",
+                    tint = theme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun ChannelCard(
     channel: Channel,
     epgProgram: EpgProgram? = null,
@@ -1366,13 +1564,17 @@ fun SettingsDialog(
     updateManager: UpdateManager,
     onDismiss: () -> Unit,
     onChannelsSynced: () -> Unit,
-    onUpdateFound: (ReleaseInfo) -> Unit
+    onUpdateFound: (ReleaseInfo) -> Unit,
+    onThemeChange: (String, String) -> Unit = { _, _ -> }
 ) {
     val scope = rememberCoroutineScope()
     var autoUnmute by remember { mutableStateOf(repository.isAutoUnmuteEnabled()) }
     var autoResume by remember { mutableStateOf(repository.isAutoResumeEnabled()) }
     var baseUrl by remember { mutableStateOf(repository.getBaseUrl()) }
     var timstBaseUrl by remember { mutableStateOf(repository.getTimstBaseUrl()) }
+    var themeMode by remember { mutableStateOf(repository.getThemeMode()) }
+    var accentColor by remember { mutableStateOf(repository.getAccentColor()) }
+    var defaultTab by remember { mutableStateOf(repository.getDefaultTab()) }
 
     var isSyncingChannels by remember { mutableStateOf(false) }
     var syncChannelsMsg by remember { mutableStateOf<String?>(null) }
@@ -1428,6 +1630,123 @@ fun SettingsDialog(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
+                // SEÇÃO 0: TEMA & PERSONALIZAÇÃO
+                Text("🎨 TEMA & APARÊNCIA", color = Color(0xFF38BDF8), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                        Text("Preto Puro OLED (#000000)", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Fundo 100% preto para poupança de bateria e contraste na TV.", color = TextSecondary, fontSize = 11.sp)
+                    }
+                    Switch(
+                        checked = themeMode == "OLED",
+                        onCheckedChange = { isOled ->
+                            themeMode = if (isOled) "OLED" else "DARK"
+                            repository.setThemeMode(themeMode)
+                            onThemeChange(themeMode, accentColor)
+                        },
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF38BDF8))
+                    )
+                }
+
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text("Cor de Destaque:", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        val colorChoices = listOf(
+                            Triple("RED", "Vermelho", Color(0xFFE50914)),
+                            Triple("CYAN", "Ciano", Color(0xFF00B4D8)),
+                            Triple("PURPLE", "Roxo", Color(0xFFA855F7)),
+                            Triple("GREEN", "Verde", Color(0xFF10B981))
+                        )
+                        colorChoices.forEach { (code, label, cVal) ->
+                            val isSelected = accentColor.equals(code, ignoreCase = true)
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (isSelected) cVal else cVal.copy(alpha = 0.2f))
+                                    .border(
+                                        if (isSelected) 2.dp else 1.dp,
+                                        if (isSelected) Color.White else cVal.copy(alpha = 0.5f),
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .clickable {
+                                        accentColor = code
+                                        repository.setAccentColor(code)
+                                        onThemeChange(themeMode, accentColor)
+                                    }
+                                    .padding(vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = label,
+                                    color = if (isSelected) Color.White else TextPrimary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderDark))
+
+                // SEÇÃO: INICIALIZAÇÃO
+                Text("🚀 INICIALIZAÇÃO DA APLICAÇÃO", color = Color(0xFF38BDF8), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text("Separador Inicial ao Abrir:", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    val tabs = listOf(
+                        Pair("PORTUGAL", "Portugal"),
+                        Pair("LIVE_GAMES", "Jogos"),
+                        Pair("FAVORITES", "Favoritos"),
+                        Pair("ALL", "Todos")
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        tabs.forEach { (code, label) ->
+                            val isSelected = defaultTab.equals(code, ignoreCase = true)
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (isSelected) Color(0xFF2563EB) else SurfaceVariantDark)
+                                    .border(
+                                        if (isSelected) 2.dp else 1.dp,
+                                        if (isSelected) Color(0xFF38BDF8) else BorderDark,
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .clickable {
+                                        defaultTab = code
+                                        repository.setDefaultTab(code)
+                                    }
+                                    .padding(vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = label,
+                                    color = if (isSelected) Color.White else TextSecondary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderDark))
+
                 // SEÇÃO 1: REPRODUÇÃO & PLAYER
                 Text("📺 REPRODUÇÃO & PLAYER", color = Color(0xFF38BDF8), fontSize = 12.sp, fontWeight = FontWeight.Bold)
 
