@@ -292,6 +292,13 @@ class UpdateManager(private val context: Context) {
             val cleanRemote = remoteVer.trim().removePrefix("v").removePrefix("V")
             val cleanCurrent = currentVer.trim().removePrefix("v").removePrefix("V")
 
+            if (cleanRemote == cleanCurrent) return false
+
+            // Transição especial da versão de teste 2.x para o ramo oficial 1.x
+            if (cleanCurrent.startsWith("2.") && cleanRemote.startsWith("1.")) {
+                return true
+            }
+
             val rParts = cleanRemote.split(".").mapNotNull { it.takeWhile { c -> c.isDigit() }.toIntOrNull() }
             val cParts = cleanCurrent.split(".").mapNotNull { it.takeWhile { c -> c.isDigit() }.toIntOrNull() }
 
