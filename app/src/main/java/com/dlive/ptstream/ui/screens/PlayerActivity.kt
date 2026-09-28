@@ -160,16 +160,25 @@ class PlayerActivity : ComponentActivity() {
         loadCurrentStream()
         showOsdBanner(if (directStreamUrl != null) "LIVE" else channelId, channelName, if (directStreamUrl != null) "DIRETO ⚽" else "PT 🇵🇹")
 
-        // Set initial orientation state
+        // Detect TV or landscape device (tablets / TV sticks)
+        val isTv = packageManager.hasSystemFeature("android.software.leanback") ||
+                packageManager.hasSystemFeature("android.hardware.type.television")
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        applyFullscreenMode(isLandscape)
+        if (isTv && !isLandscape) {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        }
+        applyFullscreenMode(isLandscape || isTv)
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initViews() {
         drawerLayout = findViewById(R.id.drawerLayout)
         webView = findViewById(R.id.webView)
+        webView.isFocusable = false
+        webView.isFocusableInTouchMode = false
         customViewContainer = findViewById(R.id.customViewContainer)
+        customViewContainer.isFocusable = false
+        customViewContainer.isFocusableInTouchMode = false
         progressBar = findViewById(R.id.progressBar)
         tvChannelTitle = findViewById(R.id.tvChannelTitle)
         btnServerSelect = findViewById(R.id.btnServerSelect)
@@ -215,9 +224,9 @@ class PlayerActivity : ComponentActivity() {
             enterPipMode()
         }
 
-        // Force landscape orientation, overriding portrait lock
+        // Landscape / Fullscreen toggle with sensor support
         findViewById<ImageButton>(R.id.btnFullscreen).setOnClickListener {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         }
 
         // Landscape overlay buttons
@@ -234,7 +243,7 @@ class PlayerActivity : ComponentActivity() {
         }
 
         findViewById<ImageButton>(R.id.btnLandscapeExitFullscreen).setOnClickListener {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
 
         // Gesture HUD & Audio
@@ -605,7 +614,7 @@ class PlayerActivity : ComponentActivity() {
                 customViewContainer.addView(view)
                 customViewContainer.visibility = View.VISIBLE
                 webView.visibility = View.GONE
-                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
             }
 
             override fun onHideCustomView() {
@@ -614,7 +623,7 @@ class PlayerActivity : ComponentActivity() {
                 customViewContainer.visibility = View.GONE
                 webView.visibility = View.VISIBLE
                 customViewCallback?.onCustomViewHidden()
-                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             }
         }
     }
@@ -704,33 +713,70 @@ class PlayerActivity : ComponentActivity() {
         switchChannel(list[prevIndex])
     }
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        when (keyCode) {
-            KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_CHANNEL_UP -> {
-                if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    zapPreviousChannel()
-                    return true
-                }
+    private fun toggleControlsOverlay() {
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        if (isLandscape) {
+            if (landscapeOverlay.visibility == View.VISIBLE) {
+                landscapeOverlay.visibility = View.GONE
+                handler.removeCallbacks(overlayHideRunnable)
+            } else {
+                landscapeOverlay.visibility = View.VISIBLE
+                findViewById<ImageButton>(R.id.btnLandscapeChannels)?.requestFocus()
+                handler.removeCallbacks(overlayHideRunnable)
+                handler.postDelayed(overlayHideRunnable, 5000)
             }
-            KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_CHANNEL_DOWN -> {
-                if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    zapNextChannel()
-                    return true
+        } else {
+            playerHeader.visibility = if (playerHeader.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+        }
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_CHANNEL_UP -> {
+                    if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                        zapPreviousChannel()
+                        return true
+                    }
                 }
-            }
-            KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_MENU -> {
-                if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    openDrawer()
-                    return true
+                KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_CHANNEL_DOWN -> {
+                    if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                        zapNextChannel()
+                        return true
+                    }
                 }
-            }
-            KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    drawerLayout.closeDrawer(GravityCompat.START)
+                KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_MENU -> {
+                    if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                        openDrawer()
+                        return true
+                    }
+                }
+                KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                    if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                        drawerLayout.closeDrawer(GravityCompat.START)
+                        return true
+                    }
+                }
+                KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                    if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                        toggleControlsOverlay()
+                        return true
+                    }
+                }
+                KeyEvent.KEYCODE_BACK -> {
+                    if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                        drawerLayout.closeDrawer(GravityCompat.START)
+                        return true
+                    }
+                    handleBackOrPip()
                     return true
                 }
             }
         }
+        return super.dispatchKeyEvent(event)
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         return super.onKeyDown(keyCode, event)
     }
 

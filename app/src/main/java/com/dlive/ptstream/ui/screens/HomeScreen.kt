@@ -2,13 +2,21 @@ package com.dlive.ptstream.ui.screens
 
 import android.content.Intent
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,8 +30,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +55,9 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    val configuration = LocalConfiguration.current
+    val isTabletOrLandscape = configuration.screenWidthDp >= 600
 
     var selectedTab by remember { mutableStateOf(TabFilter.PORTUGAL) }
     var searchQuery by remember { mutableStateOf("") }
@@ -74,6 +88,11 @@ fun HomeScreen(
 
     LaunchedEffect(selectedTab, refreshKey) {
         if (selectedTab == TabFilter.LIVE_GAMES) {
+            // Load existing cached events immediately if available
+            val existing = repository.getLiveEvents()
+            if (existing.isNotEmpty()) {
+                liveEvents = existing
+            }
             isLoadingEvents = true
             repository.fetchLiveMatches(scope) { events ->
                 liveEvents = events
@@ -89,13 +108,10 @@ fun HomeScreen(
     val channels = remember(selectedTab, searchQuery, selectedCategory, refreshKey) {
         if (selectedTab == TabFilter.LIVE_GAMES) emptyList()
         else {
-            val base = repository.getChannels(selectedTab, searchQuery)
             if (selectedCategory == "⭐ Favoritos") {
-                base.filter { it.isFavorite }
-            } else if (selectedCategory == "Todos") {
-                base
+                repository.getChannels(TabFilter.FAVORITES, searchQuery)
             } else {
-                base.filter { it.category.equals(selectedCategory, ignoreCase = true) }
+                repository.getChannels(selectedTab, searchQuery, selectedCategory)
             }
         }
     }
@@ -147,18 +163,32 @@ fun HomeScreen(
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = { isSearchActive = true }) {
+                            var searchFocused by remember { mutableStateOf(false) }
+                            var settingsFocused by remember { mutableStateOf(false) }
+                            IconButton(
+                                onClick = { isSearchActive = true },
+                                modifier = Modifier
+                                    .onFocusChanged { searchFocused = it.isFocused }
+                                    .focusable()
+                                    .background(if (searchFocused) Color(0x33E50914) else Color.Transparent, CircleShape)
+                            ) {
                                 Icon(
                                     imageVector = Icons.Default.Search,
                                     contentDescription = "Pesquisar",
-                                    tint = TextPrimary
+                                    tint = if (searchFocused) RedPrimary else TextPrimary
                                 )
                             }
-                            IconButton(onClick = { showSettingsDialog = true }) {
+                            IconButton(
+                                onClick = { showSettingsDialog = true },
+                                modifier = Modifier
+                                    .onFocusChanged { settingsFocused = it.isFocused }
+                                    .focusable()
+                                    .background(if (settingsFocused) Color(0x33E50914) else Color.Transparent, CircleShape)
+                            ) {
                                 Icon(
                                     imageVector = Icons.Default.Settings,
                                     contentDescription = "Definições",
-                                    tint = TextPrimary
+                                    tint = if (settingsFocused) RedPrimary else TextPrimary
                                 )
                             }
                         }
@@ -218,33 +248,43 @@ fun HomeScreen(
                         )
                     }
                 ) {
+                    var tab0Focused by remember { mutableStateOf(false) }
                     Tab(
                         selected = selectedTab == TabFilter.PORTUGAL,
                         onClick = {
                             selectedTab = TabFilter.PORTUGAL
                             selectedCategory = "Todos"
                         },
+                        modifier = Modifier
+                            .onFocusChanged { tab0Focused = it.isFocused }
+                            .focusable()
+                            .background(if (tab0Focused) Color(0x33E50914) else Color.Transparent),
                         text = {
                             Text(
                                 "🇵🇹 Portugal",
                                 fontWeight = if (selectedTab == TabFilter.PORTUGAL) FontWeight.Bold else FontWeight.Normal,
-                                color = if (selectedTab == TabFilter.PORTUGAL) TextPrimary else TextSecondary,
+                                color = if (selectedTab == TabFilter.PORTUGAL || tab0Focused) TextPrimary else TextSecondary,
                                 fontSize = 13.sp
                             )
                         }
                     )
+                    var tab1Focused by remember { mutableStateOf(false) }
                     Tab(
                         selected = selectedTab == TabFilter.LIVE_GAMES,
                         onClick = {
                             selectedTab = TabFilter.LIVE_GAMES
                             selectedCategory = "Todos"
                         },
+                        modifier = Modifier
+                            .onFocusChanged { tab1Focused = it.isFocused }
+                            .focusable()
+                            .background(if (tab1Focused) Color(0x33E50914) else Color.Transparent),
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     "⚽ Jogos em Direto",
                                     fontWeight = if (selectedTab == TabFilter.LIVE_GAMES) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (selectedTab == TabFilter.LIVE_GAMES) TextPrimary else TextSecondary,
+                                    color = if (selectedTab == TabFilter.LIVE_GAMES || tab1Focused) TextPrimary else TextSecondary,
                                     fontSize = 13.sp
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
@@ -257,17 +297,22 @@ fun HomeScreen(
                             }
                         }
                     )
+                    var tab2Focused by remember { mutableStateOf(false) }
                     Tab(
                         selected = selectedTab == TabFilter.ALL,
                         onClick = {
                             selectedTab = TabFilter.ALL
                             selectedCategory = "Todos"
                         },
+                        modifier = Modifier
+                            .onFocusChanged { tab2Focused = it.isFocused }
+                            .focusable()
+                            .background(if (tab2Focused) Color(0x33E50914) else Color.Transparent),
                         text = {
                             Text(
                                 "🌐 Todos",
                                 fontWeight = if (selectedTab == TabFilter.ALL) FontWeight.Bold else FontWeight.Normal,
-                                color = if (selectedTab == TabFilter.ALL) TextPrimary else TextSecondary,
+                                color = if (selectedTab == TabFilter.ALL || tab2Focused) TextPrimary else TextSecondary,
                                 fontSize = 13.sp
                             )
                         }
@@ -284,21 +329,26 @@ fun HomeScreen(
                     ) {
                         items(categories) { cat ->
                             val isSelected = selectedCategory == cat
+                            var chipFocused by remember { mutableStateOf(false) }
                             FilterChip(
                                 selected = isSelected,
                                 onClick = { selectedCategory = cat },
+                                modifier = Modifier
+                                    .onFocusChanged { chipFocused = it.isFocused }
+                                    .focusable(),
                                 label = { Text(cat, fontSize = 12.sp) },
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = RedPrimary,
                                     selectedLabelColor = Color.White,
-                                    containerColor = SurfaceDark,
+                                    containerColor = if (chipFocused) SurfaceVariantDark else SurfaceDark,
                                     labelColor = TextSecondary
                                 ),
                                 border = FilterChipDefaults.filterChipBorder(
                                     enabled = true,
                                     selected = isSelected,
-                                    borderColor = if (isSelected) RedPrimary else BorderDark,
-                                    selectedBorderColor = RedPrimary
+                                    borderColor = if (chipFocused) RedPrimary else if (isSelected) RedPrimary else BorderDark,
+                                    selectedBorderColor = RedPrimary,
+                                    borderWidth = if (chipFocused) 2.dp else 1.dp
                                 )
                             )
                         }
@@ -476,6 +526,29 @@ fun HomeScreen(
                 // Regular Channels List (Portugal & Todos)
                 if (channels.isEmpty()) {
                     EmptyStateView(tab = selectedTab, query = searchQuery)
+                } else if (isTabletOrLandscape) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 340.dp),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(channels, key = { it.id }) { channel ->
+                            ChannelCard(
+                                channel = channel,
+                                onPlayClick = { onChannelClick(channel) },
+                                onToggleFavorite = {
+                                    repository.toggleFavorite(channel.id)
+                                    refreshKey++
+                                },
+                                onHideChannel = {
+                                    repository.hideChannel(channel.id)
+                                    refreshKey++
+                                }
+                            )
+                        }
+                    }
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
@@ -529,13 +602,25 @@ fun LiveEventCard(
     event: LiveEvent,
     onPlayClick: () -> Unit
 ) {
+    var isFocused by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(if (isFocused) 1.025f else 1.0f, label = "event_scale")
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .scale(scale)
+            .onFocusChanged { isFocused = it.isFocused }
+            .focusable()
             .clickable { onPlayClick() },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceDark),
-        border = CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(BorderDark))
+        colors = CardDefaults.cardColors(
+            containerColor = if (isFocused) SurfaceVariantDark else SurfaceDark
+        ),
+        border = if (isFocused) {
+            BorderStroke(2.5.dp, RedPrimary)
+        } else {
+            CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(BorderDark))
+        }
     ) {
         Row(
             modifier = Modifier
@@ -640,14 +725,25 @@ fun ChannelCard(
     onHideChannel: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    var isFocused by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(if (isFocused) 1.025f else 1.0f, label = "channel_scale")
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .scale(scale)
+            .onFocusChanged { isFocused = it.isFocused }
+            .focusable()
             .clickable { onPlayClick() },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceDark),
-        border = CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(BorderDark))
+        colors = CardDefaults.cardColors(
+            containerColor = if (isFocused) SurfaceVariantDark else SurfaceDark
+        ),
+        border = if (isFocused) {
+            BorderStroke(2.5.dp, RedPrimary)
+        } else {
+            CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(BorderDark))
+        }
     ) {
         Row(
             modifier = Modifier

@@ -42,6 +42,41 @@ class ChannelRepository(private val context: Context) {
         loadChannels()
     }
 
+    @Volatile
+    private var precomputedPtChannels: List<Channel> = emptyList()
+    @Volatile
+    private var precomputedAllChannels: List<Channel> = emptyList()
+    @Volatile
+    private var precomputedFavChannels: List<Channel> = emptyList()
+    @Volatile
+    private var precomputedPtCategories: List<String> = listOf("Todos")
+    @Volatile
+    private var precomputedAllCategories: List<String> = listOf("Todos")
+
+    fun rebuildPrecomputedLists() {
+        val hiddenIds = getHiddenChannelIds()
+        val pt = ArrayList<Channel>()
+        val all = ArrayList<Channel>()
+        val fav = ArrayList<Channel>()
+
+        for (ch in cachedChannels) {
+            if (hiddenIds.contains(ch.id)) continue
+            all.add(ch)
+            if (ch.isPortuguese) pt.add(ch)
+            if (ch.isFavorite) fav.add(ch)
+        }
+
+        precomputedPtChannels = pt
+        precomputedAllChannels = all
+        precomputedFavChannels = fav
+
+        val ptCats = pt.map { it.category }.distinct().sorted()
+        val allCats = all.map { it.category }.distinct().sorted()
+
+        precomputedPtCategories = listOf("Todos") + ptCats
+        precomputedAllCategories = listOf("Todos") + allCats
+    }
+
     fun getHiddenChannelIds(): Set<String> {
         return prefs.getStringSet(PREF_HIDDEN_CHANNELS, emptySet()) ?: emptySet()
     }
@@ -50,16 +85,19 @@ class ChannelRepository(private val context: Context) {
         val hidden = getHiddenChannelIds().toMutableSet()
         hidden.add(channelId)
         prefs.edit().putStringSet(PREF_HIDDEN_CHANNELS, hidden).apply()
+        rebuildPrecomputedLists()
     }
 
     fun unhideChannel(channelId: String) {
         val hidden = getHiddenChannelIds().toMutableSet()
         hidden.remove(channelId)
         prefs.edit().putStringSet(PREF_HIDDEN_CHANNELS, hidden).apply()
+        rebuildPrecomputedLists()
     }
 
     fun unhideAllChannels() {
         prefs.edit().remove(PREF_HIDDEN_CHANNELS).apply()
+        rebuildPrecomputedLists()
     }
 
     fun isChannelHidden(channelId: String): Boolean {
@@ -116,6 +154,7 @@ class ChannelRepository(private val context: Context) {
                                 status = ch.safeStatus
                             )
                         }.sortedWith(compareBy({ !it.isPortuguese }, { it.name }))
+                        rebuildPrecomputedLists()
                         return
                     }
                 }
@@ -143,10 +182,12 @@ class ChannelRepository(private val context: Context) {
                         status = ch.safeStatus
                     )
                 }.sortedWith(compareBy({ !it.isPortuguese }, { it.name }))
+                rebuildPrecomputedLists()
             }
         } catch (e: Exception) {
             e.printStackTrace()
             cachedChannels = emptyList()
+            rebuildPrecomputedLists()
         }
     }
 
@@ -285,6 +326,7 @@ class ChannelRepository(private val context: Context) {
                     val cacheFile = File(context.filesDir, CACHE_FILE_NAME)
                     cacheFile.writeText(Gson().toJson(listToEnrich))
                     cachedChannels = listToEnrich
+                    rebuildPrecomputedLists()
                     success = true
                 }
             } catch (e: Exception) {
@@ -512,20 +554,19 @@ class ChannelRepository(private val context: Context) {
         cachedChannels = cachedChannels.map {
             if (it.id == channelId) it.copy(isFavorite = isNowFav) else it
         }
+        rebuildPrecomputedLists()
 
         return isNowFav
     }
 
     fun getTopFootballChannels(query: String = ""): List<Channel> {
-        val hiddenIds = getHiddenChannelIds()
         val footballPattern = Regex(
             "sport tv|benfica|sporting tv|porto canal|canal 11|dazn|sky sports (premier league|football|main event)|tnt sports|espn|bein sports|super sport (premier league|football)|premier sports",
             RegexOption.IGNORE_CASE
         )
 
-        return cachedChannels.filter { ch ->
-            if (hiddenIds.contains(ch.id)) return@filter false
-
+        val base = precomputedAllChannels
+        return base.filter { ch ->
             val isFootballChannel = ch.isPortuguese && (ch.category.contains("Desporto", ignoreCase = true) || footballPattern.containsMatchIn(ch.name)) ||
                     footballPattern.containsMatchIn(ch.name) ||
                     (ch.category.contains("Desporto", ignoreCase = true) && (ch.name.contains("league", ignoreCase = true) || ch.name.contains("football", ignoreCase = true) || ch.name.contains("soccer", ignoreCase = true)))
@@ -538,12 +579,20 @@ class ChannelRepository(private val context: Context) {
     }
 
     fun getChannels(tab: TabFilter, query: String = "", categoryFilter: String = "Todos", includeHidden: Boolean = false): List<Channel> {
-        val hiddenIds = if (includeHidden) emptySet() else getHiddenChannelIds()
+        if (!includeHidden && query.isBlank() && categoryFilter == "Todos") {
+            return when (tab) {
+                TabFilter.PORTUGAL -> precomputedPtChannels
+                TabFilter.ALL -> precomputedAllChannels
+                TabFilter.FAVORITES -> precomputedFavChannels
+                TabFilter.LIVE_GAMES -> getTopFootballChannels()
+            }
+        }
+
         val baseList = when (tab) {
-            TabFilter.PORTUGAL -> cachedChannels.filter { it.isPortuguese && !hiddenIds.contains(it.id) }
+            TabFilter.PORTUGAL -> if (includeHidden) cachedChannels.filter { it.isPortuguese } else precomputedPtChannels
             TabFilter.LIVE_GAMES -> getTopFootballChannels(query)
-            TabFilter.FAVORITES -> cachedChannels.filter { it.isFavorite && !hiddenIds.contains(it.id) }
-            TabFilter.ALL -> cachedChannels.filter { !hiddenIds.contains(it.id) }
+            TabFilter.FAVORITES -> if (includeHidden) cachedChannels.filter { it.isFavorite } else precomputedFavChannels
+            TabFilter.ALL -> if (includeHidden) cachedChannels else precomputedAllChannels
         }
 
         return baseList.filter { ch ->
@@ -566,14 +615,14 @@ class ChannelRepository(private val context: Context) {
     }
 
     fun getAvailableCategories(tab: TabFilter): List<String> {
-        val hiddenIds = getHiddenChannelIds()
-        val list = when (tab) {
-            TabFilter.PORTUGAL -> cachedChannels.filter { it.isPortuguese && !hiddenIds.contains(it.id) }
-            TabFilter.LIVE_GAMES -> return listOf("Todos", "Futebol", "Motores", "Outros")
-            TabFilter.FAVORITES -> cachedChannels.filter { it.isFavorite && !hiddenIds.contains(it.id) }
-            TabFilter.ALL -> cachedChannels.filter { !hiddenIds.contains(it.id) }
+        return when (tab) {
+            TabFilter.PORTUGAL -> precomputedPtCategories
+            TabFilter.ALL -> precomputedAllCategories
+            TabFilter.LIVE_GAMES -> listOf("Todos", "Futebol", "Motores", "Outros")
+            TabFilter.FAVORITES -> {
+                val cats = precomputedFavChannels.map { it.category }.distinct().sorted()
+                listOf("Todos") + cats
+            }
         }
-        val categories = list.map { it.category }.distinct().sorted()
-        return listOf("Todos") + categories
     }
 }
