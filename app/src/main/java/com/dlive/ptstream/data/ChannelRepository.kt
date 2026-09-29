@@ -75,12 +75,7 @@ class ChannelRepository(private val context: Context) {
             if (ch.isFavorite) fav.add(ch)
         }
 
-        // Reorganizar canais PT por ltimos usados no topo
-        val recentIds = getRecentChannelIds()
-        val recentMap = recentIds.mapIndexed { index, id -> id to index }.toMap()
-        val sortedPt = pt.sortedWith(compareBy { recentMap[it.id] ?: Int.MAX_VALUE })
-
-        precomputedPtChannels = sortedPt
+        precomputedPtChannels = pt
         precomputedAllChannels = all
         precomputedFavChannels = fav
 

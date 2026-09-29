@@ -372,6 +372,22 @@ class PlayerActivity : ComponentActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
+        // Explicit D-Pad focus chaining for Google TV remote navigation
+        findViewById<View>(R.id.btnLandscapeBack)?.nextFocusRightId = R.id.btnLandscapeChannels
+        findViewById<View>(R.id.btnLandscapeChannels)?.apply {
+            nextFocusLeftId = R.id.btnLandscapeBack
+            nextFocusRightId = R.id.btnLandscapeServer
+        }
+        findViewById<View>(R.id.btnLandscapeServer)?.apply {
+            nextFocusLeftId = R.id.btnLandscapeChannels
+            nextFocusRightId = R.id.btnLandscapeUnmute
+        }
+        findViewById<View>(R.id.btnLandscapeUnmute)?.apply {
+            nextFocusLeftId = R.id.btnLandscapeServer
+            nextFocusRightId = R.id.btnLandscapePip
+        }
+        findViewById<View>(R.id.btnLandscapePip)?.nextFocusLeftId = R.id.btnLandscapeUnmute
+
         val isTv = packageManager.hasSystemFeature("android.software.leanback") ||
                 packageManager.hasSystemFeature("android.hardware.type.television")
         if (isTv) {
@@ -539,9 +555,11 @@ class PlayerActivity : ComponentActivity() {
             lm?.scrollToPositionWithOffset(index, offset)
             rvDrawerChannels.post {
                 lm?.scrollToPositionWithOffset(index, offset)
-                val holder = rvDrawerChannels.findViewHolderForAdapterPosition(index)
-                holder?.itemView?.requestFocus() ?: rvDrawerChannels.requestFocus()
             }
+            rvDrawerChannels.postDelayed({
+                val holder = rvDrawerChannels.findViewHolderForAdapterPosition(index)
+                holder?.itemView?.requestFocus()
+            }, 80)
         }
     }
 
@@ -775,10 +793,9 @@ class PlayerActivity : ComponentActivity() {
         settings.userAgentString = "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36"
 
         webView.setBackgroundColor(Color.BLACK)
-        webView.isFocusable = true
-        webView.isFocusableInTouchMode = true
+        webView.isFocusable = false
+        webView.isFocusableInTouchMode = false
         webView.isClickable = true
-        webView.requestFocus()
         webView.addJavascriptInterface(FailoverBridge(), "AndroidFailover")
 
         if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
@@ -1220,7 +1237,6 @@ class PlayerActivity : ComponentActivity() {
         val w = webView.width.toFloat()
         val h = webView.height.toFloat()
         if (w > 0 && h > 0) {
-            simulateTouchOnWebView(w * 0.5f, h * 0.5f)
             simulateTouchOnWebView(w - 30f, 30f) // DaddyLive top-right unmute button coordinates
             simulateTouchOnWebView(w * 0.88f, h * 0.12f)
             simulateTouchOnWebView(w * 0.12f, h * 0.88f)
@@ -1228,6 +1244,30 @@ class PlayerActivity : ComponentActivity() {
 
         if (showToast) {
             Toast.makeText(this, "🔊 Áudio ativado", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun togglePlayPause() {
+        val js = """
+            (function() {
+                var v = document.querySelector('video');
+                if (v) {
+                    if (v.paused) {
+                        v.play().catch(function(){});
+                        return 'playing';
+                    } else {
+                        v.pause();
+                        return 'paused';
+                    }
+                }
+                return 'novideo';
+            })();
+        """.trimIndent()
+        webView.evaluateJavascript(js) { result ->
+            when (result?.replace("\"", "")) {
+                "playing" -> Toast.makeText(this@PlayerActivity, "▶️ A reproduzir", Toast.LENGTH_SHORT).show()
+                "paused" -> Toast.makeText(this@PlayerActivity, "⏸️ Em pausa", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -1380,12 +1420,6 @@ class PlayerActivity : ComponentActivity() {
             options.add(ServerOption("Servidor Alternativo (Direto)", isDirect = true, directUrl = ntvUrl))
         }
 
-        // 6. DaddyLive mirrors as last resort
-        if (hasDaddyLive) {
-            options.add(ServerOption("Servidor Reserva 1 (DaddyLive Cast)", isDirect = false, folder = "cast"))
-            options.add(ServerOption("Servidor Reserva 2 (DaddyLive Watch)", isDirect = false, folder = "watch"))
-        }
-
         return options
     }
 
@@ -1472,38 +1506,53 @@ class PlayerActivity : ComponentActivity() {
             val isDrawerOpen = drawerLayout.isDrawerOpen(GravityCompat.START)
 
             when (event.keyCode) {
-                // 1. Teclas de Som / Áudio dedicada no comando (AUDIO, MUTE, PLAY, cores, INFO)
+                // 1. Áudio / Som dedicado no comando (Audio Track, Language, etc.)
                 KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK,
-                KeyEvent.KEYCODE_VOLUME_MUTE,
-                KeyEvent.KEYCODE_MUTE,
-                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
-                KeyEvent.KEYCODE_MEDIA_PLAY,
-                KeyEvent.KEYCODE_PROG_YELLOW,
-                KeyEvent.KEYCODE_PROG_RED,
-                KeyEvent.KEYCODE_PROG_GREEN,
-                KeyEvent.KEYCODE_PROG_BLUE,
-                KeyEvent.KEYCODE_CAPTIONS,
-                KeyEvent.KEYCODE_INFO,
-                KeyEvent.KEYCODE_HELP -> {
+                KeyEvent.KEYCODE_LANGUAGE_SWITCH,
+                KeyEvent.KEYCODE_TV_AUDIO_DESCRIPTION,
+                KeyEvent.KEYCODE_PROG_YELLOW -> {
                     performSafeUnmute(showToast = true)
                     return true
                 }
 
-                // Volume Up: além de aumentar o volume do sistema, assegura que o player web fica unmuted
+                // Volume Up: assegura unmute da stream e deixa o sistema aumentar o volume do hardware
                 KeyEvent.KEYCODE_VOLUME_UP -> {
                     performSafeUnmute(showToast = false)
                     return super.dispatchKeyEvent(event)
                 }
 
-                // 2. Tecla Definições (engrenagem no comando)
+                // Volume Mute: deixa o sistema fazer mute de hardware e não engole a tecla
+                KeyEvent.KEYCODE_VOLUME_MUTE, KeyEvent.KEYCODE_MUTE -> {
+                    return super.dispatchKeyEvent(event)
+                }
+
+                // Play / Pause
+                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                KeyEvent.KEYCODE_MEDIA_PLAY,
+                KeyEvent.KEYCODE_MEDIA_PAUSE,
+                KeyEvent.KEYCODE_HEADSETHOOK -> {
+                    togglePlayPause()
+                    return true
+                }
+
+                // Info / OSD
+                KeyEvent.KEYCODE_INFO,
+                KeyEvent.KEYCODE_WINDOW,
+                KeyEvent.KEYCODE_CAPTIONS -> {
+                    showOsdBanner(if (directStreamUrl != null) "LIVE" else channelId, channelName, if (directStreamUrl != null) "DIRETO ⚽" else "PT 🇵🇹")
+                    return true
+                }
+
+                // Tecla Definições (engrenagem no comando)
                 KeyEvent.KEYCODE_SETTINGS -> {
                     showSettingsDialog()
                     return true
                 }
 
-                // 3. Tecla TV / Guia no comando
+                // Tecla TV / Guia no comando (ou botão verde/azul)
                 KeyEvent.KEYCODE_TV,
-                KeyEvent.KEYCODE_GUIDE -> {
+                KeyEvent.KEYCODE_GUIDE,
+                KeyEvent.KEYCODE_PROG_BLUE -> {
                     if (isDrawerOpen) {
                         drawerLayout.closeDrawer(GravityCompat.START)
                     } else {
@@ -1512,7 +1561,23 @@ class PlayerActivity : ComponentActivity() {
                     return true
                 }
 
-                // 4. Seta Direita (DPAD_RIGHT)
+                // Botão Verde: Atalho de Servidores
+                KeyEvent.KEYCODE_PROG_GREEN -> {
+                    showServerSelectionDialog()
+                    return true
+                }
+
+                // Botão Vermelho: Atalho Guia/Gaveta de Canais
+                KeyEvent.KEYCODE_PROG_RED -> {
+                    if (isDrawerOpen) {
+                        drawerLayout.closeDrawer(GravityCompat.START)
+                    } else {
+                        openDrawer()
+                    }
+                    return true
+                }
+
+                // Seta Direita (DPAD_RIGHT)
                 KeyEvent.KEYCODE_DPAD_RIGHT -> {
                     if (isDrawerOpen) {
                         val focused = currentFocus
@@ -1533,7 +1598,7 @@ class PlayerActivity : ComponentActivity() {
                     }
                 }
 
-                // 5. Seta Esquerda (DPAD_LEFT)
+                // Seta Esquerda (DPAD_LEFT)
                 KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_MENU -> {
                     if (isDrawerOpen) {
                         return super.dispatchKeyEvent(event)
@@ -1546,7 +1611,7 @@ class PlayerActivity : ComponentActivity() {
                     }
                 }
 
-                // 6. Seta Cima (DPAD_UP)
+                // Seta Cima (DPAD_UP)
                 KeyEvent.KEYCODE_DPAD_UP -> {
                     if (isDrawerOpen) {
                         return super.dispatchKeyEvent(event)
@@ -1568,7 +1633,7 @@ class PlayerActivity : ComponentActivity() {
                     return true
                 }
 
-                // 7. Seta Baixo (DPAD_DOWN)
+                // Seta Baixo (DPAD_DOWN)
                 KeyEvent.KEYCODE_DPAD_DOWN -> {
                     if (isDrawerOpen) {
                         return super.dispatchKeyEvent(event)
@@ -1587,7 +1652,7 @@ class PlayerActivity : ComponentActivity() {
                     return true
                 }
 
-                // 8. Tecla OK (DPAD_CENTER / ENTER)
+                // Tecla OK (DPAD_CENTER / ENTER)
                 KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER -> {
                     if (isDrawerOpen) {
                         return super.dispatchKeyEvent(event)
@@ -1607,10 +1672,14 @@ class PlayerActivity : ComponentActivity() {
                     }
                 }
 
-                // 9. Tecla Voltar (BACK)
+                // Tecla Voltar (BACK)
                 KeyEvent.KEYCODE_BACK -> {
                     if (isOverlayVisible) {
                         hideControlsOverlay()
+                        return true
+                    }
+                    if (isDrawerOpen) {
+                        drawerLayout.closeDrawer(GravityCompat.START)
                         return true
                     }
                     handleBackOrPip()
@@ -1725,7 +1794,6 @@ class PlayerActivity : ComponentActivity() {
     private fun handleBackOrPip() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)
-            cleanupAndFinish()
             return
         }
 
@@ -1734,7 +1802,18 @@ class PlayerActivity : ComponentActivity() {
             return
         }
 
-        openDrawer()
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val isOverlayVisible = if (isLandscape) landscapeOverlay.visibility == View.VISIBLE else playerHeader.visibility == View.VISIBLE
+        if (isOverlayVisible) {
+            hideControlsOverlay()
+            return
+        }
+
+        if (repository.isAutoPipOnBack() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            enterPipMode()
+        } else {
+            cleanupAndFinish()
+        }
     }
 
     private fun showSettingsDialog() {
