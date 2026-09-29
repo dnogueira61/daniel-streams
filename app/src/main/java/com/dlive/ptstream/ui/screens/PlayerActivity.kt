@@ -53,8 +53,11 @@ import com.dlive.ptstream.data.TabFilter
 import android.content.res.ColorStateList
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.app.Dialog
 import java.io.ByteArrayInputStream
 import java.lang.ref.WeakReference
+import java.net.HttpURLConnection
+import java.net.URL
 
 class PlayerActivity : ComponentActivity() {
 
@@ -151,11 +154,22 @@ class PlayerActivity : ComponentActivity() {
     private var currentFolder: String = "stream"
 
     private val handler = Handler(Looper.getMainLooper())
+    private var activeDialog: Dialog? = null
+
     private val overlayHideRunnable = Runnable {
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             landscapeOverlay.visibility = View.GONE
         }
     }
+
+    private fun resetOverlayHideTimer() {
+        handler.removeCallbacks(overlayHideRunnable)
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE &&
+            landscapeOverlay.visibility == View.VISIBLE) {
+            handler.postDelayed(overlayHideRunnable, 5000)
+        }
+    }
+
     private val osdHideRunnable = Runnable {
         osdBanner.visibility = View.GONE
     }
@@ -727,15 +741,22 @@ class PlayerActivity : ComponentActivity() {
             }
         }.coerceAtLeast(0)
 
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
             .setTitle("Servidores Disponíveis")
-            .setSingleChoiceItems(titles, currentSelectedIndex) { dialog, which ->
-                dialog.dismiss()
+            .setSingleChoiceItems(titles, currentSelectedIndex) { d, which ->
+                d.dismiss()
                 val selected = options[which]
                 applyServerOption(selected)
             }
             .setNegativeButton("Fechar", null)
-            .show()
+            .create()
+
+        activeDialog = dialog
+        dialog.setOnDismissListener {
+            activeDialog = null
+            resetOverlayHideTimer()
+        }
+        dialog.show()
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -790,6 +811,36 @@ class PlayerActivity : ComponentActivity() {
                         }
                     }
 
+                    function autoUnmuteInFrame() {
+                        try {
+                            var btn = document.getElementById('unmute') || document.querySelector('[aria-label*="unmute" i], .jw-icon-volume, .vjs-mute-control');
+                            if (btn && (!btn.hidden || btn.offsetParent !== null)) {
+                                btn.click();
+                            }
+                            var vids = document.querySelectorAll('video, audio');
+                            for (var i = 0; i < vids.length; i++) {
+                                vids[i].muted = false;
+                                vids[i].defaultMuted = false;
+                                vids[i].volume = 1.0;
+                            }
+                            if (window.jwplayer && typeof window.jwplayer === 'function') {
+                                var jw = window.jwplayer();
+                                if (jw && typeof jw.setMute === 'function') {
+                                    jw.setMute(false);
+                                    jw.setVolume(100);
+                                }
+                            }
+                        } catch(e) {}
+                    }
+                    var unmuteInterval = setInterval(autoUnmuteInFrame, 350);
+                    setTimeout(function() { clearInterval(unmuteInterval); }, 20000);
+
+                    window.addEventListener('message', function(ev) {
+                        if (ev.data === 'FORCE_UNMUTE') {
+                            autoUnmuteInFrame();
+                        }
+                    });
+
                     function reportFailover(reason) {
                         try {
                             var b = window.AndroidFailover || (window.top && window.top.AndroidFailover);
@@ -822,7 +873,8 @@ class PlayerActivity : ComponentActivity() {
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
-                val url = request?.url?.toString()?.lowercase() ?: return null
+                val rawUrl = request?.url?.toString() ?: return null
+                val urlLower = rawUrl.lowercase()
                 val adBlockPatterns = listOf(
                     "piousshiners", "nanisms", "histats", "premiumvertising",
                     "dzlhwcoblmc", "azrmpjyh", "smartbanner", "adsco",
@@ -832,8 +884,86 @@ class PlayerActivity : ComponentActivity() {
                     "exdynsrv", "adsystem", "adnxs", "burstyflavia",
                     "profitableratecpmnetwork", "cleverwebserver", "adsboosters"
                 )
-                if (adBlockPatterns.any { url.contains(it) }) {
+                if (adBlockPatterns.any { urlLower.contains(it) }) {
                     return WebResourceResponse("text/plain", "UTF-8", ByteArrayInputStream(ByteArray(0)))
+                }
+
+                // Intercept player HTML to force unmute and inject auto-unmute script
+                if (urlLower.contains("daddy.php") || urlLower.contains("premiumtv") ||
+                    urlLower.contains("daddyliveplayer") || urlLower.contains("wideiptv") ||
+                    urlLower.contains("thedaddy") || urlLower.contains("epicsports")) {
+                    try {
+                        val conn = (URL(rawUrl).openConnection() as HttpURLConnection).apply {
+                            connectTimeout = 5000
+                            readTimeout = 6000
+                            instanceFollowRedirects = true
+                            for ((k, v) in (request?.requestHeaders ?: emptyMap())) {
+                                setRequestProperty(k, v)
+                            }
+                            if (getRequestProperty("Referer").isNullOrBlank()) {
+                                setRequestProperty("Referer", repository.getBaseUrl() + "/")
+                            }
+                            if (getRequestProperty("User-Agent").isNullOrBlank()) {
+                                setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 10; TV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                            }
+                        }
+                        if (conn.responseCode in 200..299) {
+                            val encoding = conn.contentEncoding ?: "UTF-8"
+                            var html = conn.inputStream.bufferedReader(charset(encoding)).use { it.readText() }
+
+                            // Force player unmuted
+                            html = html.replace("mute: true", "mute: false")
+                                .replace("mute:!0", "mute:!1")
+                                .replace("media.muted = true", "media.muted = false")
+                                .replace("muted=\"\"", "")
+                                .replace("muted ", " ")
+
+                            val autoUnmuteInjection = """
+                                <script>
+                                (function() {
+                                    function forcePlayerUnmute() {
+                                        try {
+                                            var b = document.getElementById('unmute') || document.querySelector('[aria-label*="unmute" i], .jw-icon-volume, .vjs-mute-control');
+                                            if (b && (!b.hidden || b.offsetParent !== null)) {
+                                                b.click();
+                                            }
+                                            var vids = document.querySelectorAll('video, audio');
+                                            for (var i = 0; i < vids.length; i++) {
+                                                vids[i].muted = false;
+                                                vids[i].defaultMuted = false;
+                                                vids[i].volume = 1.0;
+                                            }
+                                            if (window.jwplayer && typeof window.jwplayer === 'function') {
+                                                var jw = window.jwplayer();
+                                                if (jw && typeof jw.setMute === 'function') {
+                                                    jw.setMute(false);
+                                                    jw.setVolume(100);
+                                                }
+                                            }
+                                        } catch(e) {}
+                                    }
+                                    var timer = setInterval(forcePlayerUnmute, 300);
+                                    setTimeout(function() { clearInterval(timer); }, 15000);
+                                    window.addEventListener('message', function(ev) {
+                                        if (ev.data === 'FORCE_UNMUTE') {
+                                            forcePlayerUnmute();
+                                        }
+                                    });
+                                })();
+                                </script>
+                            """.trimIndent()
+
+                            html = if (html.contains("</body>", ignoreCase = true)) {
+                                html.replace("</body>", "$autoUnmuteInjection</body>")
+                            } else {
+                                html + autoUnmuteInjection
+                            }
+
+                            val bytes = html.toByteArray(Charsets.UTF_8)
+                            val contentType = conn.contentType?.split(";")?.firstOrNull() ?: "text/html"
+                            return WebResourceResponse(contentType, "UTF-8", ByteArrayInputStream(bytes))
+                        }
+                    } catch (_: Exception) {}
                 }
                 return super.shouldInterceptRequest(view, request)
             }
@@ -961,27 +1091,11 @@ class PlayerActivity : ComponentActivity() {
 
     private fun startAutoUnmuteSequence() {
         if (!repository.isAutoUnmuteEnabled()) return
-        val delays = listOf(1000L, 2500L)
+        val delays = listOf(800L, 1800L, 3000L)
         for (d in delays) {
             handler.postDelayed({
                 try {
-                    val safeUnmuteJs = """
-                        (function() {
-                            var vids = document.querySelectorAll('video, audio');
-                            for (var i = 0; i < vids.length; i++) {
-                                try { vids[i].muted = false; vids[i].volume = 1.0; } catch(e){}
-                            }
-                            if (window.jwplayer && typeof window.jwplayer === 'function') {
-                                try { window.jwplayer().setMute(false); window.jwplayer().setVolume(100); } catch(e){}
-                            }
-                        })();
-                    """.trimIndent()
-                    webView.evaluateJavascript(safeUnmuteJs, null)
-                    val w = webView.width.toFloat()
-                    val h = webView.height.toFloat()
-                    if (w > 0 && h > 0) {
-                        simulateTouchOnWebView(w * 0.5f, h * 0.5f)
-                    }
+                    performSafeUnmute(showToast = false)
                 } catch (_: Exception) {}
             }, d)
         }
@@ -1123,7 +1237,7 @@ class PlayerActivity : ComponentActivity() {
         } catch (_: Exception) {}
     }
 
-    private fun performSafeUnmute() {
+    private fun performSafeUnmute(showToast: Boolean = true) {
         val safeUnmuteJs = """
             (function() {
                 var unmuted = false;
@@ -1144,6 +1258,9 @@ class PlayerActivity : ComponentActivity() {
                 unmuteDom(document);
                 var iframes = document.querySelectorAll('iframe');
                 for (var i = 0; i < iframes.length; i++) {
+                    try {
+                        iframes[i].contentWindow.postMessage('FORCE_UNMUTE', '*');
+                    } catch(e) {}
                     try {
                         var doc = iframes[i].contentDocument || iframes[i].contentWindow.document;
                         if (doc) unmuteDom(doc);
@@ -1178,11 +1295,14 @@ class PlayerActivity : ComponentActivity() {
         val h = webView.height.toFloat()
         if (w > 0 && h > 0) {
             simulateTouchOnWebView(w * 0.5f, h * 0.5f)
+            simulateTouchOnWebView(w - 30f, 30f) // DaddyLive top-right unmute button coordinates
             simulateTouchOnWebView(w * 0.88f, h * 0.12f)
             simulateTouchOnWebView(w * 0.12f, h * 0.88f)
         }
 
-        Toast.makeText(this, "🔊 Áudio ativado", Toast.LENGTH_SHORT).show()
+        if (showToast) {
+            Toast.makeText(this, "🔊 Áudio ativado", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun loadCurrentStream() {
@@ -1302,10 +1422,18 @@ class PlayerActivity : ComponentActivity() {
         }
 
         // 3. TimStreams backup
-        val timstUrl = if (ntvUrl != null && ntvUrl.contains("exmxbxe")) ntvUrl
-            else currentChannel?.backupStreamUrl2?.takeIf { it.contains("exmxbxe") }
+        val rawTimst = if (ntvUrl != null && (ntvUrl.contains("exmxbxe") || ntvUrl.contains("timst"))) ntvUrl
+            else currentChannel?.backupStreamUrl2?.takeIf { it.contains("exmxbxe") || it.contains("timst") }
+        val timstUrl = rawTimst?.let { url ->
+            val base = repository.getTimstBaseUrl()
+            if (base != "https://timst.top" && url.contains("exmxbxe.cfd")) {
+                url.replace("https://exmxbxe.cfd", base)
+            } else {
+                url
+            }
+        }
         if (timstUrl != null) {
-            val label = if (options.size == 1) "Servidor Alternativo 1 (TimStreams)" else "Servidor Alternativo 2 (TimStreams)"
+            val label = if (options.size == 1) "Servidor Alternativo 1 (TimStreams 1080p)" else "Servidor Alternativo 2 (TimStreams 1080p)"
             options.add(ServerOption(label, isDirect = true, directUrl = timstUrl))
         }
 
@@ -1409,18 +1537,36 @@ class PlayerActivity : ComponentActivity() {
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (event.action == KeyEvent.ACTION_DOWN) {
+            // Se houver algum diálogo aberto (ex: Servidores, Definições, EPG), passar todas as teclas para o diálogo
+            if (activeDialog?.isShowing == true) {
+                return super.dispatchKeyEvent(event)
+            }
+
             val isOverlayVisible = landscapeOverlay.visibility == View.VISIBLE || playerHeader.visibility == View.VISIBLE
             val isDrawerOpen = drawerLayout.isDrawerOpen(GravityCompat.START)
 
             when (event.keyCode) {
-                // 1. Tecla de Áudio/Som dedicada no comando (AUDIO, MUTE, PLAY/PAUSE, etc.)
+                // 1. Teclas de Som / Áudio dedicada no comando (AUDIO, MUTE, PLAY, cores, INFO)
                 KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK,
                 KeyEvent.KEYCODE_VOLUME_MUTE,
                 KeyEvent.KEYCODE_MUTE,
                 KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
-                KeyEvent.KEYCODE_PROG_YELLOW -> {
-                    performSafeUnmute()
+                KeyEvent.KEYCODE_MEDIA_PLAY,
+                KeyEvent.KEYCODE_PROG_YELLOW,
+                KeyEvent.KEYCODE_PROG_RED,
+                KeyEvent.KEYCODE_PROG_GREEN,
+                KeyEvent.KEYCODE_PROG_BLUE,
+                KeyEvent.KEYCODE_CAPTIONS,
+                KeyEvent.KEYCODE_INFO,
+                KeyEvent.KEYCODE_HELP -> {
+                    performSafeUnmute(showToast = true)
                     return true
+                }
+
+                // Volume Up: além de aumentar o volume do sistema, assegura que o player web fica unmuted
+                KeyEvent.KEYCODE_VOLUME_UP -> {
+                    performSafeUnmute(showToast = false)
+                    return super.dispatchKeyEvent(event)
                 }
 
                 // 2. Tecla Definições (engrenagem no comando)
@@ -1453,10 +1599,9 @@ class PlayerActivity : ComponentActivity() {
                             return true
                         }
                     } else if (isOverlayVisible) {
-                        // Barra de controlos visível: D-Pad percorre os botões para a direita
+                        resetOverlayHideTimer()
                         return super.dispatchKeyEvent(event)
                     } else {
-                        // Ecrã normal de TV: Seta Direita abre o EPG!
                         showEpgDialog()
                         return true
                     }
@@ -1467,10 +1612,9 @@ class PlayerActivity : ComponentActivity() {
                     if (isDrawerOpen) {
                         return super.dispatchKeyEvent(event)
                     } else if (isOverlayVisible) {
-                        // Barra de controlos visível: D-Pad percorre os botões para a esquerda
+                        resetOverlayHideTimer()
                         return super.dispatchKeyEvent(event)
                     } else {
-                        // Ecrã normal de TV: Seta Esquerda abre o Guia de Canais
                         openDrawer()
                         return true
                     }
@@ -1481,14 +1625,13 @@ class PlayerActivity : ComponentActivity() {
                     if (isDrawerOpen) {
                         return super.dispatchKeyEvent(event)
                     } else if (isOverlayVisible) {
-                        // Barra visível: mantém o foco nos botões da barra e não muda de canal
+                        resetOverlayHideTimer()
                         val serverBtn = findViewById<View>(R.id.btnLandscapeServer)
                         if (currentFocus == null || !isDescendantOf(currentFocus!!, landscapeOverlay)) {
                             serverBtn?.requestFocus()
                         }
                         return true
                     } else {
-                        // Ecrã normal: muda para canal anterior
                         zapPreviousChannel()
                         return true
                     }
@@ -1504,11 +1647,10 @@ class PlayerActivity : ComponentActivity() {
                     if (isDrawerOpen) {
                         return super.dispatchKeyEvent(event)
                     } else if (isOverlayVisible) {
-                        // Barra visível: seta para baixo fecha a barra e volta ao vídeo
+                        resetOverlayHideTimer()
                         hideControlsOverlay()
                         return true
                     } else {
-                        // Ecrã normal: muda para canal seguinte
                         zapNextChannel()
                         return true
                     }
@@ -1524,6 +1666,7 @@ class PlayerActivity : ComponentActivity() {
                     if (isDrawerOpen) {
                         return super.dispatchKeyEvent(event)
                     } else if (isOverlayVisible) {
+                        resetOverlayHideTimer()
                         val focused = currentFocus
                         if (focused != null && isDescendantOf(focused, landscapeOverlay)) {
                             focused.performClick()
@@ -1533,7 +1676,6 @@ class PlayerActivity : ComponentActivity() {
                             return true
                         }
                     } else {
-                        // Mostra a barra de controlos e foca imediatamente no botão de servidor [S1 ▾]
                         showControlsOverlay()
                         return true
                     }
@@ -1791,7 +1933,7 @@ class PlayerActivity : ComponentActivity() {
             dialogView.addView(btnRestoreHidden)
         }
 
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setView(scroll)
             .setPositiveButton("Guardar") { _, _ ->
                 repository.setAutoUnmuteEnabled(swUnmute.isChecked)
@@ -1803,7 +1945,14 @@ class PlayerActivity : ComponentActivity() {
                 Toast.makeText(this, "Definições guardadas!", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancelar", null)
-            .show()
+            .create()
+
+        activeDialog = dialog
+        dialog.setOnDismissListener {
+            activeDialog = null
+            resetOverlayHideTimer()
+        }
+        dialog.show()
     }
 
     private fun showEpgDialog() {
@@ -1914,7 +2063,13 @@ class PlayerActivity : ComponentActivity() {
 
         dialog.setView(view)
         dialog.setPositiveButton("Fechar", null)
-        dialog.show()
+        val created = dialog.create()
+        activeDialog = created
+        created.setOnDismissListener {
+            activeDialog = null
+            resetOverlayHideTimer()
+        }
+        created.show()
     }
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent?): Boolean {

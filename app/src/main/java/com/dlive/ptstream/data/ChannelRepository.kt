@@ -123,7 +123,7 @@ class ChannelRepository(private val context: Context) {
     fun isAutoPipOnBack(): Boolean = prefs.getBoolean(PREF_AUTO_PIP_ON_BACK, true)
     fun setAutoPipOnBack(enabled: Boolean) = prefs.edit().putBoolean(PREF_AUTO_PIP_ON_BACK, enabled).apply()
 
-    fun isAutoUnmuteEnabled(): Boolean = prefs.getBoolean(PREF_AUTO_UNMUTE, false)
+    fun isAutoUnmuteEnabled(): Boolean = prefs.getBoolean(PREF_AUTO_UNMUTE, true)
     fun setAutoUnmuteEnabled(enabled: Boolean) = prefs.edit().putBoolean(PREF_AUTO_UNMUTE, enabled).apply()
 
     fun getDefaultServer(): String = prefs.getString(PREF_DEFAULT_SERVER, "stream") ?: "stream"
@@ -160,21 +160,17 @@ class ChannelRepository(private val context: Context) {
 
     private fun loadChannels() {
         val favIds = getFavoriteIds()
-
-        // Clean stale cache file if present
         val cacheFile = File(context.filesDir, CACHE_FILE_NAME)
-        if (cacheFile.exists()) {
-            try {
-                cacheFile.delete()
-            } catch (e: Exception) {}
-        }
 
-        // Bundled curated channels
         try {
-            context.assets.open("channels.json").use { inputStream ->
-                val reader = InputStreamReader(inputStream, "UTF-8")
+            val reader = if (cacheFile.exists() && cacheFile.length() > 100) {
+                InputStreamReader(cacheFile.inputStream(), "UTF-8")
+            } else {
+                InputStreamReader(context.assets.open("channels.json"), "UTF-8")
+            }
+            reader.use { r ->
                 val itemType = object : TypeToken<List<Channel>>() {}.type
-                val list: List<Channel> = Gson().fromJson(reader, itemType) ?: emptyList()
+                val list: List<Channel> = Gson().fromJson(r, itemType) ?: emptyList()
 
                 cachedChannels = list.map { ch ->
                     val isPt = ch.isPortuguese
@@ -192,18 +188,55 @@ class ChannelRepository(private val context: Context) {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            cachedChannels = emptyList()
-            rebuildPrecomputedLists()
+            try {
+                context.assets.open("channels.json").use { inputStream ->
+                    val r = InputStreamReader(inputStream, "UTF-8")
+                    val itemType = object : TypeToken<List<Channel>>() {}.type
+                    val list: List<Channel> = Gson().fromJson(r, itemType) ?: emptyList()
+                    cachedChannels = list.map { ch ->
+                        val isPt = ch.isPortuguese
+                        ch.copy(
+                            isPt = isPt,
+                            country = if (isPt) "PT" else ch.country,
+                            category = ch.category,
+                            isFavorite = favIds.contains(ch.id),
+                            logoUrl = ch.logoUrl ?: ChannelLogoHelper.getDefaultOnlineLogo(ch.name),
+                            status = ch.safeStatus
+                        )
+                    }
+                    rebuildPrecomputedLists()
+                }
+            } catch (_: Exception) {
+                cachedChannels = emptyList()
+                rebuildPrecomputedLists()
+            }
         }
     }
 
     /**
-     * Sincroniza canais online e atualiza grelha
+     * Sincroniza canais online a partir do repositório GitHub e deteta domínios
      */
     fun syncChannelsFromWeb(scope: CoroutineScope, onFinished: ((Boolean) -> Unit)? = null) {
         scope.launch(Dispatchers.IO) {
             var success = false
             try {
+                autoDetectWorkingDomains()
+                val remoteUrl = "https://raw.githubusercontent.com/dnogueira61/daniel-streams/main/app/src/main/assets/channels.json"
+                val conn = (URL(remoteUrl).openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 6000
+                    readTimeout = 6000
+                    instanceFollowRedirects = true
+                    setRequestProperty("User-Agent", "Mozilla/5.0")
+                }
+                if (conn.responseCode == HttpURLConnection.HTTP_OK) {
+                    val jsonStr = conn.inputStream.bufferedReader().use { it.readText() }
+                    val itemType = object : TypeToken<List<Channel>>() {}.type
+                    val list: List<Channel> = Gson().fromJson(jsonStr, itemType) ?: emptyList()
+                    if (list.isNotEmpty()) {
+                        val cacheFile = File(context.filesDir, CACHE_FILE_NAME)
+                        cacheFile.writeText(jsonStr)
+                    }
+                }
                 loadChannels()
                 success = true
             } catch (e: Exception) {
@@ -214,6 +247,20 @@ class ChannelRepository(private val context: Context) {
                 onFinished?.invoke(success)
             }
         }
+    }
+
+    fun autoDetectWorkingDomains() {
+        try {
+            val u = URL(getBaseUrl())
+            val conn = u.openConnection() as HttpURLConnection
+            conn.instanceFollowRedirects = false
+            conn.connectTimeout = 4000
+            conn.readTimeout = 4000
+            val location = conn.getHeaderField("Location")
+            if (!location.isNullOrBlank() && (location.startsWith("http://") || location.startsWith("https://"))) {
+                setBaseUrl(location)
+            }
+        } catch (_: Exception) {}
     }
 
     private fun normalizeChannelName(name: String): String {
