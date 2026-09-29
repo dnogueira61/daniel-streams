@@ -250,6 +250,12 @@ class PlayerActivity : ComponentActivity() {
         directStreamUrl = intent.getStringExtra("EXTRA_DIRECT_STREAM_URL")
         backupDirectUrl = intent.getStringExtra("EXTRA_BACKUP_STREAM_URL")
         backupDirectUrl2 = intent.getStringExtra("EXTRA_BACKUP_STREAM_URL2")
+
+        val timstCandidate = listOfNotNull(directStreamUrl, backupDirectUrl, backupDirectUrl2)
+            .firstOrNull { it.contains("exmxbxe") || it.contains("timst") }
+        if (timstCandidate != null && directStreamUrl == null) {
+            directStreamUrl = timstCandidate
+        }
         activeDirectUrl = directStreamUrl
 
         if (channelId.isBlank() && directStreamUrl.isNullOrBlank()) {
@@ -666,9 +672,20 @@ class PlayerActivity : ComponentActivity() {
         channelId = newChannel.id
         channelName = newChannel.name
         backupDirectUrl = newChannel.backupStreamUrl
+        backupDirectUrl2 = newChannel.backupStreamUrl2
         repository.setLastWatchedChannelId(channelId)
 
-        if (newChannel.id.toIntOrNull() == null) {
+        val timstUrl = when {
+            newChannel.backupStreamUrl?.let { it.contains("exmxbxe") || it.contains("timst") } == true -> newChannel.backupStreamUrl
+            newChannel.backupStreamUrl2?.let { it.contains("exmxbxe") || it.contains("timst") } == true -> newChannel.backupStreamUrl2
+            else -> null
+        }
+
+        if (timstUrl != null) {
+            activeDirectUrl = timstUrl
+            directStreamUrl = timstUrl
+            isBackupSelected = false
+        } else if (newChannel.id.toIntOrNull() == null) {
             activeDirectUrl = newChannel.backupStreamUrl
             directStreamUrl = newChannel.backupStreamUrl
             isBackupSelected = false
@@ -1293,6 +1310,7 @@ class PlayerActivity : ComponentActivity() {
                 targetDirect.contains("epicsports") || targetDirect.contains("ntv.st") -> "https://ntv.st/"
                 targetDirect.contains("twitch.tv") -> "https://dlive.sx/"
                 targetDirect.contains("cdnlivetv") || targetDirect.contains("streamsports") -> "https://streamsports99.ru/"
+                targetDirect.contains("embed.st") || targetDirect.contains("streamed") -> "https://streamed.pk/"
                 else -> "${repository.getTimstBaseUrl()}/"
             }
             if (targetDirect.contains(".m3u8")) {
@@ -1365,10 +1383,10 @@ class PlayerActivity : ComponentActivity() {
             val list = listOfNotNull(directStreamUrl, backupDirectUrl, backupDirectUrl2)
             list.forEachIndexed { idx, url ->
                 val name = when {
+                    url.contains("exmxbxe") || url.contains("timst") -> "Servidor Principal (TimStreams 1080p)"
                     url.contains("kobra") -> "Servidor Principal (NTV Kobra)"
                     url.contains("falcon") -> "Servidor Alternativo 1 (NTV Falcon)"
                     url.contains("raptor") -> "Servidor Alternativo 2 (NTV Raptor)"
-                    url.contains("exmxbxe") || url.contains("timst") -> "Servidor Rápido (TimStreams)"
                     idx == 0 -> "Servidor Principal (Direto)"
                     idx == 1 -> "Servidor Alternativo 1 (Direto)"
                     else -> "Servidor Reserva $idx (Direto)"
@@ -1378,20 +1396,8 @@ class PlayerActivity : ComponentActivity() {
             return options
         }
 
-        // 1. DaddyLive (highest priority if channel has numeric ID)
-        val hasDaddyLive = (currentChannel?.id?.toIntOrNull() != null) || (channelId.toIntOrNull() != null)
-        if (hasDaddyLive) {
-            options.add(ServerOption("Servidor Principal (DaddyLive)", isDirect = false, folder = "stream"))
-        }
-
-        // 2. NTV/EpicSports backup
+        // 1. TimStreams backup (HIGHEST PRIORITY when available)
         val ntvUrl = currentChannel?.backupStreamUrl
-        if (ntvUrl != null && (ntvUrl.contains("epicsports") || ntvUrl.contains("ntv.st"))) {
-            val label = if (hasDaddyLive) "Servidor Alternativo 1 (NTV)" else "Servidor Principal (NTV)"
-            options.add(ServerOption(label, isDirect = true, directUrl = ntvUrl))
-        }
-
-        // 3. TimStreams backup
         val rawTimst = if (ntvUrl != null && (ntvUrl.contains("exmxbxe") || ntvUrl.contains("timst"))) ntvUrl
             else currentChannel?.backupStreamUrl2?.takeIf { it.contains("exmxbxe") || it.contains("timst") }
         val timstUrl = rawTimst?.let { url ->
@@ -1403,8 +1409,20 @@ class PlayerActivity : ComponentActivity() {
             }
         }
         if (timstUrl != null) {
-            val label = if (options.size == 1) "Servidor Alternativo 1 (TimStreams 1080p)" else "Servidor Alternativo 2 (TimStreams 1080p)"
-            options.add(ServerOption(label, isDirect = true, directUrl = timstUrl))
+            options.add(ServerOption("Servidor Principal (TimStreams 1080p)", isDirect = true, directUrl = timstUrl))
+        }
+
+        // 2. DaddyLive (second priority if channel has numeric ID)
+        val hasDaddyLive = (currentChannel?.id?.toIntOrNull() != null) || (channelId.toIntOrNull() != null)
+        if (hasDaddyLive) {
+            val label = if (timstUrl != null) "Servidor Alternativo 1 (DaddyLive)" else "Servidor Principal (DaddyLive)"
+            options.add(ServerOption(label, isDirect = false, folder = "stream"))
+        }
+
+        // 3. NTV/EpicSports backup
+        if (ntvUrl != null && (ntvUrl.contains("epicsports") || ntvUrl.contains("ntv.st"))) {
+            val label = if (options.isEmpty()) "Servidor Principal (NTV)" else "Servidor Alternativo ${options.size} (NTV)"
+            options.add(ServerOption(label, isDirect = true, directUrl = ntvUrl))
         }
 
         // 4. M3UPT / Official direct stream
@@ -1419,7 +1437,7 @@ class PlayerActivity : ComponentActivity() {
             options.add(ServerOption("Servidor Oficial (Emissão Direta)", isDirect = true, directUrl = officialUrl))
         }
 
-        // 5. Non-NTV backup (if backupStreamUrl is not NTV)
+        // 5. Non-NTV backup (if backupStreamUrl is not NTV and not Timst)
         if (ntvUrl != null && !ntvUrl.contains("epicsports") && !ntvUrl.contains("ntv.st") && !ntvUrl.contains("exmxbxe") && options.none { it.directUrl == ntvUrl }) {
             options.add(ServerOption("Servidor Alternativo (Direto)", isDirect = true, directUrl = ntvUrl))
         }
@@ -1951,6 +1969,33 @@ class PlayerActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+
+        // Google TV D-Pad Focus Fix: Prevent getting trapped in EditTexts
+        etTimstDomain.setOnKeyListener { _, keyCode, event ->
+            if (event.action == KeyEvent.ACTION_DOWN) {
+                if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                    etDomain.requestFocus()
+                    return@setOnKeyListener true
+                } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+                    swAutoResume.requestFocus()
+                    return@setOnKeyListener true
+                }
+            }
+            false
+        }
+
+        etDomain.setOnKeyListener { _, keyCode, event ->
+            if (event.action == KeyEvent.ACTION_DOWN) {
+                if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                    btnSync.requestFocus()
+                    return@setOnKeyListener true
+                } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+                    etTimstDomain.requestFocus()
+                    return@setOnKeyListener true
+                }
+            }
+            false
         }
         // 6. Restore hidden channels button
         val hiddenIds = repository.getHiddenChannelIds()

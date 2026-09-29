@@ -31,11 +31,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -1599,6 +1602,7 @@ fun SettingsDialog(
     onThemeChange: (String, String) -> Unit = { _, _ -> }
 ) {
     val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
     var autoUnmute by remember { mutableStateOf(repository.isAutoUnmuteEnabled()) }
     var autoResume by remember { mutableStateOf(repository.isAutoResumeEnabled()) }
     var baseUrl by remember { mutableStateOf(repository.getBaseUrl()) }
@@ -1882,7 +1886,19 @@ fun SettingsDialog(
                             repository.setBaseUrl(it)
                         },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onPreviewKeyEvent { event ->
+                                if (event.type == KeyEventType.KeyDown) {
+                                    if (event.key == Key.DirectionDown) {
+                                        focusManager.moveFocus(FocusDirection.Down)
+                                        true
+                                    } else if (event.key == Key.DirectionUp) {
+                                        focusManager.moveFocus(FocusDirection.Up)
+                                        true
+                                    } else false
+                                } else false
+                            },
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = BackgroundDark,
                             unfocusedContainerColor = BackgroundDark,
@@ -1914,7 +1930,19 @@ fun SettingsDialog(
                             repository.setTimstBaseUrl(it)
                         },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onPreviewKeyEvent { event ->
+                                if (event.type == KeyEventType.KeyDown) {
+                                    if (event.key == Key.DirectionDown) {
+                                        focusManager.moveFocus(FocusDirection.Down)
+                                        true
+                                    } else if (event.key == Key.DirectionUp) {
+                                        focusManager.moveFocus(FocusDirection.Up)
+                                        true
+                                    } else false
+                                } else false
+                            },
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = BackgroundDark,
                             unfocusedContainerColor = BackgroundDark,

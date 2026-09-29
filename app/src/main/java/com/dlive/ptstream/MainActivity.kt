@@ -65,24 +65,29 @@ class MainActivity : ComponentActivity() {
 
     private fun launchPlayer(channel: com.dlive.ptstream.data.Channel, directUrl: String? = null) {
         PlayerActivity.closeActivePip()
+        val timstUrl = when {
+            channel.backupStreamUrl?.let { it.contains("exmxbxe") || it.contains("timst") } == true -> channel.backupStreamUrl
+            channel.backupStreamUrl2?.let { it.contains("exmxbxe") || it.contains("timst") } == true -> channel.backupStreamUrl2
+            else -> null
+        }
+
         val intent = Intent(this, PlayerActivity::class.java).apply {
             putExtra("EXTRA_CHANNEL_ID", channel.id)
             putExtra("EXTRA_CHANNEL_NAME", channel.name)
+            if (channel.backupStreamUrl != null) {
+                putExtra("EXTRA_BACKUP_STREAM_URL", channel.backupStreamUrl)
+            }
+            if (channel.backupStreamUrl2 != null) {
+                putExtra("EXTRA_BACKUP_STREAM_URL2", channel.backupStreamUrl2)
+            }
+
             if (!directUrl.isNullOrBlank()) {
                 putExtra("EXTRA_DIRECT_STREAM_URL", directUrl)
-                if (channel.backupStreamUrl != null && channel.backupStreamUrl != directUrl) {
-                    putExtra("EXTRA_BACKUP_STREAM_URL", channel.backupStreamUrl)
-                }
+            } else if (timstUrl != null) {
+                // Preferência prioritária para TimStreams conforme solicitado pelo utilizador
+                putExtra("EXTRA_DIRECT_STREAM_URL", timstUrl)
             } else if (channel.id.toIntOrNull() == null) {
                 putExtra("EXTRA_DIRECT_STREAM_URL", channel.backupStreamUrl)
-                if (channel.backupStreamUrl2 != null) {
-                    putExtra("EXTRA_BACKUP_STREAM_URL", channel.backupStreamUrl2)
-                }
-            } else if (channel.backupStreamUrl != null) {
-                putExtra("EXTRA_BACKUP_STREAM_URL", channel.backupStreamUrl)
-                if (channel.backupStreamUrl2 != null) {
-                    putExtra("EXTRA_TERTIARY_STREAM_URL", channel.backupStreamUrl2)
-                }
             }
         }
         startActivity(intent)

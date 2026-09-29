@@ -490,6 +490,84 @@ class ChannelRepository(private val context: Context) {
                 e.printStackTrace()
             }
 
+            // Also fetch from Streamed (streamed.pk / strmd.link active mirror)
+            try {
+                val streamedConn = (URL("https://streamed.pk/api/matches/all-today").openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 6000
+                    readTimeout = 6000
+                    setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+                    setRequestProperty("Referer", "https://streamed.pk/")
+                }
+                if (streamedConn.responseCode == HttpURLConnection.HTTP_OK) {
+                    val strmJson = streamedConn.inputStream.bufferedReader().use { it.readText() }
+                    val strmArray = JsonParser.parseString(strmJson).asJsonArray
+                    for (item in strmArray) {
+                        val obj = item.asJsonObject
+                        val id = obj.get("id")?.asString ?: continue
+                        val title = obj.get("title")?.asString ?: continue
+                        val category = obj.get("category")?.asString ?: "sports"
+                        val poster = obj.get("poster")?.asString?.let {
+                            if (it.startsWith("/")) "https://streamed.pk$it" else it
+                        }
+                        val sourcesArr = obj.getAsJsonArray("sources")
+
+                        val streamedStreams = mutableListOf<EventStream>()
+                        if (sourcesArr != null) {
+                            for (s in sourcesArr) {
+                                val sObj = s.asJsonObject
+                                val srcName = sObj.get("source")?.asString ?: "server"
+                                val srcId = sObj.get("id")?.asString ?: continue
+                                val embedUrl = "https://embed.st/embed/$srcName/$srcId/1"
+                                streamedStreams.add(EventStream("Streamed (${srcName.uppercase()})", embedUrl))
+                            }
+                        }
+                        if (streamedStreams.isEmpty()) continue
+
+                        val genreName = when (category.lowercase()) {
+                            "football", "soccer" -> "⚽ Futebol"
+                            "basketball" -> "🏀 Basquetebol"
+                            "hockey" -> "🏒 Hóquei"
+                            "baseball" -> "⚾ Basebol"
+                            "tennis" -> "🎾 Ténis"
+                            "motor-sports", "motorsports" -> "🏎️ Motores"
+                            "fighting", "mma", "boxing" -> "🥊 Desportos Combate"
+                            "american-football" -> "🏈 Futebol Americano"
+                            else -> "🏆 Desporto"
+                        }
+                        val isSoccer = category.lowercase() in listOf("football", "soccer")
+
+                        // Match against existing events (e.g. from TimStreams) to merge alternative streams
+                        val existingIndex = eventsList.indexOfFirst {
+                            val n1 = it.name.lowercase().replace(" ", "").replace("@", "vs").replace("-", "vs").replace(".", "")
+                            val n2 = title.lowercase().replace(" ", "").replace("@", "vs").replace("-", "vs").replace(".", "")
+                            n1.contains(n2) || n2.contains(n1)
+                        }
+
+                        if (existingIndex >= 0) {
+                            val existing = eventsList[existingIndex]
+                            val combined = existing.streams + streamedStreams
+                            eventsList[existingIndex] = existing.copy(streams = combined)
+                        } else {
+                            eventsList.add(
+                                LiveEvent(
+                                    id = "strmd-$id",
+                                    name = title,
+                                    logo = poster,
+                                    genre = if (isSoccer) 1 else 99,
+                                    genreName = genreName,
+                                    time = "Hoje",
+                                    viewers = 250,
+                                    streams = streamedStreams,
+                                    isSoccer = isSoccer
+                                )
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
             // Prioritize soccer, then sort by viewers descending
             eventsList.sortWith(compareBy({ !it.isSoccer }, { -it.viewers }))
             liveEvents = eventsList
