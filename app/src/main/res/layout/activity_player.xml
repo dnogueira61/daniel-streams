@@ -566,19 +566,6 @@
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp" />
 
-                <Button
-                    android:id="@+id/btnTabMovies"
-                    android:layout_width="wrap_content"
-                    android:layout_height="34dp"
-                    android:layout_marginStart="4dp"
-                    android:text="🎬 Filmes"
-                    android:textSize="11sp"
-                    android:textColor="#9CA3AF"
-                    android:backgroundTint="#202330"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp" />
 
                 <Button
                     android:id="@+id/btnTabFav"

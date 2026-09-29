@@ -125,7 +125,6 @@ class PlayerActivity : ComponentActivity() {
     private lateinit var tvDrawerEmpty: TextView
     private lateinit var btnTabPt: Button
     private lateinit var btnTabSports: Button
-    private lateinit var btnTabMovies: Button
     private lateinit var btnTabFav: Button
     private lateinit var btnTabAll: Button
     private lateinit var drawerAdapter: DrawerChannelAdapter
@@ -472,7 +471,6 @@ class PlayerActivity : ComponentActivity() {
         tvDrawerEmpty = findViewById(R.id.tvDrawerEmpty)
         btnTabPt = findViewById(R.id.btnTabPt)
         btnTabSports = findViewById(R.id.btnTabSports)
-        btnTabMovies = findViewById(R.id.btnTabMovies)
         btnTabFav = findViewById(R.id.btnTabFav)
         btnTabAll = findViewById(R.id.btnTabAll)
 
@@ -512,8 +510,7 @@ class PlayerActivity : ComponentActivity() {
         rvDrawerChannels.adapter = drawerAdapter
 
         btnTabPt.setOnClickListener { selectDrawerCategory("Todos", TabFilter.PORTUGAL) }
-        btnTabSports.setOnClickListener { selectDrawerCategory("Desporto", TabFilter.PORTUGAL) }
-        btnTabMovies.setOnClickListener { selectDrawerCategory("Filmes & Séries", TabFilter.PORTUGAL) }
+        btnTabSports.setOnClickListener { selectDrawerCategory("Desporto", TabFilter.ALL) }
         btnTabFav.setOnClickListener { selectDrawerCategory("Favoritos", TabFilter.FAVORITES) }
         btnTabAll.setOnClickListener { selectDrawerCategory("Mundo", TabFilter.ALL) }
 
@@ -624,14 +621,11 @@ class PlayerActivity : ComponentActivity() {
         btnTabSports.backgroundTintList = if (cat == "Desporto") activeColor else inactiveColor
         btnTabSports.setTextColor(if (cat == "Desporto") Color.WHITE else Color.parseColor("#9CA3AF"))
 
-        btnTabMovies.backgroundTintList = if (cat == "Filmes & Séries") activeColor else inactiveColor
-        btnTabMovies.setTextColor(if (cat == "Filmes & Séries") Color.WHITE else Color.parseColor("#9CA3AF"))
-
         btnTabFav.backgroundTintList = if (tab == TabFilter.FAVORITES) activeColor else inactiveColor
         btnTabFav.setTextColor(if (tab == TabFilter.FAVORITES) Color.WHITE else Color.parseColor("#9CA3AF"))
 
-        btnTabAll.backgroundTintList = if (tab == TabFilter.ALL) activeColor else inactiveColor
-        btnTabAll.setTextColor(if (tab == TabFilter.ALL) Color.WHITE else Color.parseColor("#9CA3AF"))
+        btnTabAll.backgroundTintList = if (tab == TabFilter.ALL && cat == "Mundo") activeColor else inactiveColor
+        btnTabAll.setTextColor(if (tab == TabFilter.ALL && cat == "Mundo") Color.WHITE else Color.parseColor("#9CA3AF"))
 
         refreshDrawerList()
     }
@@ -639,10 +633,9 @@ class PlayerActivity : ComponentActivity() {
     private fun refreshDrawerList() {
         val query = etDrawerSearch.text.toString().trim()
         val list = when {
+            currentDrawerCategory == "Desporto" -> repository.getChannels(TabFilter.ALL, query, "Desporto").filter { !it.isPortuguese }
             currentDrawerTab == TabFilter.ALL -> repository.getChannels(TabFilter.ALL, query)
             currentDrawerTab == TabFilter.FAVORITES -> repository.getChannels(TabFilter.FAVORITES, query)
-            currentDrawerCategory == "Desporto" -> repository.getChannels(TabFilter.PORTUGAL, query, "Desporto")
-            currentDrawerCategory == "Filmes & Séries" -> repository.getChannels(TabFilter.PORTUGAL, query, "Filmes & Séries")
             else -> repository.getChannels(TabFilter.PORTUGAL, query)
         }
         drawerAdapter.updateChannels(list, channelId)

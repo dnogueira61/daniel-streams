@@ -79,11 +79,12 @@ class ChannelRepository(private val context: Context) {
         precomputedAllChannels = all
         precomputedFavChannels = fav
 
-        val preferredPtCats = listOf("Generalistas", "Desporto", "Filmes & Séries")
-        val availablePtCats = pt.map { it.category }.distinct()
+        val preferredPtCats = listOf("Generalistas", "Desporto")
+        val availablePtCats = pt.map { it.category }.distinct().filter { !it.contains("Filme", ignoreCase = true) }
         val orderedPtCats = preferredPtCats.filter { availablePtCats.contains(it) } + availablePtCats.filter { !preferredPtCats.contains(it) }.sorted()
+        precomputedPtCategories = listOf("Todos") + orderedPtCats
 
-        val allCats = all.map { it.category }.distinct().filter { !preferredPtCats.contains(it) }.sorted()
+        val allCats = all.map { it.category }.distinct().filter { !it.contains("Filme", ignoreCase = true) && !preferredPtCats.contains(it) }.sorted()
         precomputedAllCategories = listOf("Todos") + orderedPtCats + allCats
 
         channelsVersion.intValue++
@@ -644,6 +645,9 @@ class ChannelRepository(private val context: Context) {
         return baseList.filter { ch ->
             val matchesCategory = if (categoryFilter == "Todos") true
             else if (categoryFilter == "⚡ TimStreams") !ch.backupStreamUrl.isNullOrBlank() || ch.category == "TimStreams" || ch.id.startsWith("timst-")
+            else if (categoryFilter.equals("Desporto", ignoreCase = true) && tab == TabFilter.ALL) {
+                ch.category.equals("Desporto", ignoreCase = true) && !ch.isPortuguese
+            }
             else ch.category.equals(categoryFilter, ignoreCase = true)
 
             val matchesQuery = if (query.isBlank()) true else {
@@ -665,12 +669,12 @@ class ChannelRepository(private val context: Context) {
 
     fun getAvailableCategories(tab: TabFilter): List<String> {
         val base = when (tab) {
-            TabFilter.PORTUGAL -> precomputedPtCategories
-            TabFilter.ALL -> precomputedAllCategories
-            TabFilter.TIMSTREAMS -> listOf("Todos", "Desporto", "Filmes", "Infantil")
+            TabFilter.PORTUGAL -> precomputedPtCategories.filter { !it.contains("Filme", ignoreCase = true) }
+            TabFilter.ALL -> precomputedAllCategories.filter { !it.contains("Filme", ignoreCase = true) }
+            TabFilter.TIMSTREAMS -> listOf("Todos", "Desporto", "Infantil")
             TabFilter.LIVE_GAMES -> listOf("Todos", "Futebol", "Motores", "Outros")
             TabFilter.FAVORITES -> {
-                val cats = precomputedFavChannels.map { it.category }.distinct().sorted()
+                val cats = precomputedFavChannels.map { it.category }.distinct().filter { !it.contains("Filme", ignoreCase = true) }.sorted()
                 listOf("Todos") + cats
             }
         }
