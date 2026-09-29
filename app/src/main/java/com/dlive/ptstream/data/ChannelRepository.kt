@@ -20,6 +20,7 @@ import java.util.regex.Pattern
 enum class TabFilter {
     PORTUGAL,
     LIVE_GAMES,
+    GAMING,
     FAVORITES,
     TIMSTREAMS,
     ALL
@@ -52,6 +53,8 @@ class ChannelRepository(private val context: Context) {
     @Volatile
     private var precomputedFavChannels: List<Channel> = emptyList()
     @Volatile
+    private var precomputedGamingChannels: List<Channel> = emptyList()
+    @Volatile
     private var precomputedPtCategories: List<String> = listOf("Todos")
     @Volatile
     private var precomputedAllCategories: List<String> = listOf("Todos")
@@ -67,17 +70,23 @@ class ChannelRepository(private val context: Context) {
         val pt = ArrayList<Channel>()
         val all = ArrayList<Channel>()
         val fav = ArrayList<Channel>()
+        val gaming = ArrayList<Channel>()
 
         for (ch in cachedChannels) {
             if (hiddenIds.contains(ch.id)) continue
-            all.add(ch)
+            // Exclui canais portugueses do separador TODOS (Mundo), pois já têm separador próprio
+            if (!ch.isPortuguese) all.add(ch)
             if (ch.isPortuguese) pt.add(ch)
             if (ch.isFavorite) fav.add(ch)
+            if (ch.category.equals("Gaming", ignoreCase = true) || ch.category.contains("Gaming", ignoreCase = true)) {
+                gaming.add(ch)
+            }
         }
 
         precomputedPtChannels = pt
         precomputedAllChannels = all
         precomputedFavChannels = fav
+        precomputedGamingChannels = gaming
 
         val preferredPtCats = listOf("Generalistas", "Desporto")
         val availablePtCats = pt.map { it.category }.distinct().filter { !it.contains("Filme", ignoreCase = true) }
@@ -85,7 +94,7 @@ class ChannelRepository(private val context: Context) {
         precomputedPtCategories = listOf("Todos") + orderedPtCats
 
         val allCats = all.map { it.category }.distinct().filter { !it.contains("Filme", ignoreCase = true) && !preferredPtCats.contains(it) }.sorted()
-        precomputedAllCategories = listOf("Todos") + orderedPtCats + allCats
+        precomputedAllCategories = listOf("Todos", "Gaming") + (allCats.filter { it != "Gaming" })
 
         channelsVersion.intValue++
     }
@@ -620,6 +629,7 @@ class ChannelRepository(private val context: Context) {
                 TabFilter.PORTUGAL -> precomputedPtChannels
                 TabFilter.ALL -> precomputedAllChannels
                 TabFilter.FAVORITES -> precomputedFavChannels
+                TabFilter.GAMING -> precomputedGamingChannels
                 TabFilter.LIVE_GAMES -> getTopFootballChannels()
                 TabFilter.TIMSTREAMS -> {
                     val hidden = getHiddenChannelIds()
@@ -631,6 +641,7 @@ class ChannelRepository(private val context: Context) {
         val baseList = when (tab) {
             TabFilter.PORTUGAL -> if (includeHidden) cachedChannels.filter { it.isPortuguese } else precomputedPtChannels
             TabFilter.LIVE_GAMES -> getTopFootballChannels(query)
+            TabFilter.GAMING -> if (includeHidden) cachedChannels.filter { it.category.contains("Gaming", ignoreCase = true) } else precomputedGamingChannels
             TabFilter.TIMSTREAMS -> {
                 val list = cachedChannels.filter { !it.backupStreamUrl.isNullOrBlank() || it.category == "TimStreams" || it.id.startsWith("timst-") }
                 if (includeHidden) list else {
@@ -639,7 +650,7 @@ class ChannelRepository(private val context: Context) {
                 }
             }
             TabFilter.FAVORITES -> if (includeHidden) cachedChannels.filter { it.isFavorite } else precomputedFavChannels
-            TabFilter.ALL -> if (includeHidden) cachedChannels else precomputedAllChannels
+            TabFilter.ALL -> if (includeHidden) cachedChannels.filter { !it.isPortuguese } else precomputedAllChannels
         }
 
         return baseList.filter { ch ->
@@ -671,6 +682,7 @@ class ChannelRepository(private val context: Context) {
         val base = when (tab) {
             TabFilter.PORTUGAL -> precomputedPtCategories.filter { !it.contains("Filme", ignoreCase = true) }
             TabFilter.ALL -> precomputedAllCategories.filter { !it.contains("Filme", ignoreCase = true) }
+            TabFilter.GAMING -> listOf("Todos")
             TabFilter.TIMSTREAMS -> listOf("Todos", "Desporto", "Infantil")
             TabFilter.LIVE_GAMES -> listOf("Todos", "Futebol", "Motores", "Outros")
             TabFilter.FAVORITES -> {

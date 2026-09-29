@@ -125,9 +125,11 @@ class PlayerActivity : ComponentActivity() {
     private lateinit var tvDrawerEmpty: TextView
     private lateinit var btnTabPt: Button
     private lateinit var btnTabSports: Button
+    private lateinit var btnTabGaming: Button
     private lateinit var btnTabFav: Button
     private lateinit var btnTabAll: Button
     private lateinit var drawerAdapter: DrawerChannelAdapter
+    private var lastOverlayShowTime = 0L
 
     // Connecting Overlay (Breathing Logo)
     private lateinit var connectingOverlay: FrameLayout
@@ -471,6 +473,7 @@ class PlayerActivity : ComponentActivity() {
         tvDrawerEmpty = findViewById(R.id.tvDrawerEmpty)
         btnTabPt = findViewById(R.id.btnTabPt)
         btnTabSports = findViewById(R.id.btnTabSports)
+        btnTabGaming = findViewById(R.id.btnTabGaming)
         btnTabFav = findViewById(R.id.btnTabFav)
         btnTabAll = findViewById(R.id.btnTabAll)
 
@@ -511,6 +514,7 @@ class PlayerActivity : ComponentActivity() {
 
         btnTabPt.setOnClickListener { selectDrawerCategory("Todos", TabFilter.PORTUGAL) }
         btnTabSports.setOnClickListener { selectDrawerCategory("Desporto", TabFilter.ALL) }
+        btnTabGaming.setOnClickListener { selectDrawerCategory("Gaming", TabFilter.GAMING) }
         btnTabFav.setOnClickListener { selectDrawerCategory("Favoritos", TabFilter.FAVORITES) }
         btnTabAll.setOnClickListener { selectDrawerCategory("Mundo", TabFilter.ALL) }
 
@@ -621,6 +625,9 @@ class PlayerActivity : ComponentActivity() {
         btnTabSports.backgroundTintList = if (cat == "Desporto") activeColor else inactiveColor
         btnTabSports.setTextColor(if (cat == "Desporto") Color.WHITE else Color.parseColor("#9CA3AF"))
 
+        btnTabGaming.backgroundTintList = if (tab == TabFilter.GAMING) activeColor else inactiveColor
+        btnTabGaming.setTextColor(if (tab == TabFilter.GAMING) Color.WHITE else Color.parseColor("#9CA3AF"))
+
         btnTabFav.backgroundTintList = if (tab == TabFilter.FAVORITES) activeColor else inactiveColor
         btnTabFav.setTextColor(if (tab == TabFilter.FAVORITES) Color.WHITE else Color.parseColor("#9CA3AF"))
 
@@ -634,6 +641,7 @@ class PlayerActivity : ComponentActivity() {
         val query = etDrawerSearch.text.toString().trim()
         val list = when {
             currentDrawerCategory == "Desporto" -> repository.getChannels(TabFilter.ALL, query, "Desporto").filter { !it.isPortuguese }
+            currentDrawerTab == TabFilter.GAMING -> repository.getChannels(TabFilter.GAMING, query)
             currentDrawerTab == TabFilter.ALL -> repository.getChannels(TabFilter.ALL, query)
             currentDrawerTab == TabFilter.FAVORITES -> repository.getChannels(TabFilter.FAVORITES, query)
             else -> repository.getChannels(TabFilter.PORTUGAL, query)
@@ -1283,6 +1291,8 @@ class PlayerActivity : ComponentActivity() {
                 targetDirect.contains("rtp.pt") -> "https://www.rtp.pt/"
                 targetDirect.contains("TVI") || targetDirect.contains("iol.pt") || targetDirect.contains("raw.githubusercontent.com") -> "https://tviplayer.iol.pt/"
                 targetDirect.contains("epicsports") || targetDirect.contains("ntv.st") -> "https://ntv.st/"
+                targetDirect.contains("twitch.tv") -> "https://dlive.sx/"
+                targetDirect.contains("cdnlivetv") || targetDirect.contains("streamsports") -> "https://streamsports99.ru/"
                 else -> "${repository.getTimstBaseUrl()}/"
             }
             if (targetDirect.contains(".m3u8")) {
@@ -1347,6 +1357,7 @@ class PlayerActivity : ComponentActivity() {
     private fun buildFailoverList(): List<ServerOption> {
         val currentChannel = repository.getChannels(TabFilter.PORTUGAL).firstOrNull { it.id == channelId }
             ?: repository.getChannels(TabFilter.ALL).firstOrNull { it.id == channelId }
+            ?: repository.getChannels(TabFilter.GAMING).firstOrNull { it.id == channelId }
 
         val options = mutableListOf<ServerOption>()
 
@@ -1455,6 +1466,7 @@ class PlayerActivity : ComponentActivity() {
     }
 
     private fun showControlsOverlay() {
+        lastOverlayShowTime = SystemClock.uptimeMillis()
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (isLandscape) {
             landscapeOverlay.visibility = View.VISIBLE
@@ -1489,10 +1501,38 @@ class PlayerActivity : ComponentActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        // Se houver algum diálogo aberto (ex: Servidores, Definições, EPG), passar todas as teclas para o diálogo
+        if (activeDialog?.isShowing == true) {
+            return super.dispatchKeyEvent(event)
+        }
+
+        // 1. Filtrar ACTION_UP para a tecla OK se a barra de controlos acabou de abrir
+        // Evita que o evento de libertar o botão ative imediatamente o botão focado (ex: Servidores)
+        if (event.action == KeyEvent.ACTION_UP) {
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_DPAD_CENTER,
+                KeyEvent.KEYCODE_ENTER,
+                KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                    if (SystemClock.uptimeMillis() - lastOverlayShowTime < 600L) {
+                        return true
+                    }
+                }
+            }
+            return super.dispatchKeyEvent(event)
+        }
+
         if (event.action == KeyEvent.ACTION_DOWN) {
-            // Se houver algum diálogo aberto (ex: Servidores, Definições, EPG), passar todas as teclas para o diálogo
-            if (activeDialog?.isShowing == true) {
-                return super.dispatchKeyEvent(event)
+            // Evita repetição rápida ao manter o botão premido no comando TV
+            if (event.repeatCount > 0) {
+                when (event.keyCode) {
+                    KeyEvent.KEYCODE_DPAD_CENTER,
+                    KeyEvent.KEYCODE_ENTER,
+                    KeyEvent.KEYCODE_NUMPAD_ENTER,
+                    KeyEvent.KEYCODE_DPAD_UP,
+                    KeyEvent.KEYCODE_DPAD_DOWN,
+                    KeyEvent.KEYCODE_DPAD_LEFT,
+                    KeyEvent.KEYCODE_DPAD_RIGHT -> return true
+                }
             }
 
             val isOverlayVisible = landscapeOverlay.visibility == View.VISIBLE || playerHeader.visibility == View.VISIBLE
@@ -1604,7 +1644,7 @@ class PlayerActivity : ComponentActivity() {
                     }
                 }
 
-                // Seta Cima (DPAD_UP)
+                // Seta Cima (DPAD_UP): Abre a barra de opções/controlos quando o vídeo está em reprodução
                 KeyEvent.KEYCODE_DPAD_UP -> {
                     if (isDrawerOpen) {
                         return super.dispatchKeyEvent(event)
@@ -1616,7 +1656,7 @@ class PlayerActivity : ComponentActivity() {
                         }
                         return true
                     } else {
-                        zapPreviousChannel()
+                        showControlsOverlay()
                         return true
                     }
                 }
@@ -1626,7 +1666,7 @@ class PlayerActivity : ComponentActivity() {
                     return true
                 }
 
-                // Seta Baixo (DPAD_DOWN)
+                // Seta Baixo (DPAD_DOWN): Fecha a barra se aberta, ou abre a gaveta de canais
                 KeyEvent.KEYCODE_DPAD_DOWN -> {
                     if (isDrawerOpen) {
                         return super.dispatchKeyEvent(event)
@@ -1635,7 +1675,7 @@ class PlayerActivity : ComponentActivity() {
                         hideControlsOverlay()
                         return true
                     } else {
-                        zapNextChannel()
+                        openDrawer()
                         return true
                     }
                 }
@@ -1650,6 +1690,10 @@ class PlayerActivity : ComponentActivity() {
                     if (isDrawerOpen) {
                         return super.dispatchKeyEvent(event)
                     } else if (isOverlayVisible) {
+                        // Evita clique acidental imediato após abrir a barra
+                        if (SystemClock.uptimeMillis() - lastOverlayShowTime < 400L) {
+                            return true
+                        }
                         resetOverlayHideTimer()
                         val focused = currentFocus
                         if (focused != null && isDescendantOf(focused, landscapeOverlay)) {

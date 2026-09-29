@@ -64,6 +64,7 @@ fun HomeScreen(
     val initialTab = remember {
         when (defaultTabPref.uppercase()) {
             "LIVE_GAMES" -> TabFilter.LIVE_GAMES
+            "GAMING" -> TabFilter.GAMING
             "FAVORITES" -> TabFilter.FAVORITES
             "ALL" -> TabFilter.ALL
             else -> TabFilter.PORTUGAL
@@ -174,6 +175,7 @@ fun HomeScreen(
                             Text(
                                 text = when (selectedTab) {
                                     TabFilter.LIVE_GAMES -> "Jogos em Direto"
+                                    TabFilter.GAMING -> "Gaming & Esports 🎮"
                                     TabFilter.ALL -> "Mundo"
                                     else -> "Canais"
                                 },
@@ -383,6 +385,28 @@ fun HomeScreen(
                             "Jogos",
                             fontSize = 12.sp,
                             fontWeight = if (selectedTab == TabFilter.LIVE_GAMES) FontWeight.Bold else FontWeight.Normal
+                        )
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = theme.primary,
+                        selectedTextColor = theme.primary,
+                        indicatorColor = theme.primary.copy(alpha = 0.2f),
+                        unselectedIconColor = TextSecondary,
+                        unselectedTextColor = TextSecondary
+                    )
+                )
+                NavigationBarItem(
+                    selected = selectedTab == TabFilter.GAMING && selectedCategory != "⭐ Favoritos",
+                    onClick = {
+                        selectedTab = TabFilter.GAMING
+                        selectedCategory = "Todos"
+                    },
+                    icon = { Icon(Icons.Default.SportsEsports, contentDescription = "Gaming") },
+                    label = {
+                        Text(
+                            "Gaming",
+                            fontSize = 12.sp,
+                            fontWeight = if (selectedTab == TabFilter.GAMING && selectedCategory != "⭐ Favoritos") FontWeight.Bold else FontWeight.Normal
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
@@ -1545,6 +1569,7 @@ fun EmptyStateView(tab: TabFilter, query: String) {
                 text = when {
                     query.isNotBlank() -> "Nenhum canal encontrado para \"$query\""
                     tab == TabFilter.FAVORITES -> "Ainda não tem canais favoritos"
+                    tab == TabFilter.GAMING -> "Nenhum canal gaming disponível"
                     else -> "Nenhum canal disponível"
                 },
                 color = TextPrimary,
