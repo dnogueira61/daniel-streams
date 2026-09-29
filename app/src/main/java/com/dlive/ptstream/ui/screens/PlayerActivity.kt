@@ -976,18 +976,22 @@ class PlayerActivity : ComponentActivity() {
                     return false
                 }
 
-                val isAllowed = host.contains("dlive.sx") ||
+                val isAllowed = host.contains("dlive") ||
                         host.contains("daddylive") ||
                         host.contains("thedaddy") ||
                         host.contains("dlhd") ||
+                        host.contains("dlstreams") ||
                         host.contains("wideiptv") ||
                         host.contains("assetrage") ||
                         host.contains("exmxbxe") ||
                         host.contains("timst") ||
                         host.contains("tim-streams") ||
-                        host.contains("ntv.st") ||
+                        host.contains("ntv") ||
                         host.contains("epicsports") ||
                         host.contains(".cfd") ||
+                        host.contains(".pk") ||
+                        host.contains(".cx") ||
+                        host.contains(".st") ||
                         url.startsWith("blob:") ||
                         url.startsWith("data:")
 

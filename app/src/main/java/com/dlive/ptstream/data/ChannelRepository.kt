@@ -250,17 +250,36 @@ class ChannelRepository(private val context: Context) {
     }
 
     fun autoDetectWorkingDomains() {
-        try {
-            val u = URL(getBaseUrl())
-            val conn = u.openConnection() as HttpURLConnection
-            conn.instanceFollowRedirects = false
-            conn.connectTimeout = 4000
-            conn.readTimeout = 4000
-            val location = conn.getHeaderField("Location")
-            if (!location.isNullOrBlank() && (location.startsWith("http://") || location.startsWith("https://"))) {
-                setBaseUrl(location)
-            }
-        } catch (_: Exception) {}
+        val mirrors = listOf(
+            getBaseUrl(),
+            "https://dlhd.pk",
+            "https://dlhd.st",
+            "https://dlstreams.st",
+            "https://dlhd.dad",
+            "https://dlive.sx"
+        )
+        for (m in mirrors) {
+            try {
+                val u = URL(m)
+                val conn = (u.openConnection() as HttpURLConnection).apply {
+                    instanceFollowRedirects = false
+                    connectTimeout = 3000
+                    readTimeout = 3000
+                    requestMethod = "HEAD"
+                    setRequestProperty("User-Agent", "Mozilla/5.0")
+                }
+                val code = conn.responseCode
+                val location = conn.getHeaderField("Location")
+                if (!location.isNullOrBlank() && (location.startsWith("http://") || location.startsWith("https://"))) {
+                    setBaseUrl(location)
+                    return
+                }
+                if (code in 200..399) {
+                    setBaseUrl(m)
+                    return
+                }
+            } catch (_: Exception) {}
+        }
     }
 
     private fun normalizeChannelName(name: String): String {
