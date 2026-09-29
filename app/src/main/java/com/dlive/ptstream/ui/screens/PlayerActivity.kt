@@ -887,84 +887,6 @@ class PlayerActivity : ComponentActivity() {
                 if (adBlockPatterns.any { urlLower.contains(it) }) {
                     return WebResourceResponse("text/plain", "UTF-8", ByteArrayInputStream(ByteArray(0)))
                 }
-
-                // Intercept player HTML to force unmute and inject auto-unmute script
-                if (urlLower.contains("daddy.php") || urlLower.contains("premiumtv") ||
-                    urlLower.contains("daddyliveplayer") || urlLower.contains("wideiptv") ||
-                    urlLower.contains("thedaddy") || urlLower.contains("epicsports")) {
-                    try {
-                        val conn = (URL(rawUrl).openConnection() as HttpURLConnection).apply {
-                            connectTimeout = 5000
-                            readTimeout = 6000
-                            instanceFollowRedirects = true
-                            for ((k, v) in (request?.requestHeaders ?: emptyMap())) {
-                                setRequestProperty(k, v)
-                            }
-                            if (getRequestProperty("Referer").isNullOrBlank()) {
-                                setRequestProperty("Referer", repository.getBaseUrl() + "/")
-                            }
-                            if (getRequestProperty("User-Agent").isNullOrBlank()) {
-                                setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 10; TV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-                            }
-                        }
-                        if (conn.responseCode in 200..299) {
-                            val encoding = conn.contentEncoding ?: "UTF-8"
-                            var html = conn.inputStream.bufferedReader(charset(encoding)).use { it.readText() }
-
-                            // Force player unmuted
-                            html = html.replace("mute: true", "mute: false")
-                                .replace("mute:!0", "mute:!1")
-                                .replace("media.muted = true", "media.muted = false")
-                                .replace("muted=\"\"", "")
-                                .replace("muted ", " ")
-
-                            val autoUnmuteInjection = """
-                                <script>
-                                (function() {
-                                    function forcePlayerUnmute() {
-                                        try {
-                                            var b = document.getElementById('unmute') || document.querySelector('[aria-label*="unmute" i], .jw-icon-volume, .vjs-mute-control');
-                                            if (b && (!b.hidden || b.offsetParent !== null)) {
-                                                b.click();
-                                            }
-                                            var vids = document.querySelectorAll('video, audio');
-                                            for (var i = 0; i < vids.length; i++) {
-                                                vids[i].muted = false;
-                                                vids[i].defaultMuted = false;
-                                                vids[i].volume = 1.0;
-                                            }
-                                            if (window.jwplayer && typeof window.jwplayer === 'function') {
-                                                var jw = window.jwplayer();
-                                                if (jw && typeof jw.setMute === 'function') {
-                                                    jw.setMute(false);
-                                                    jw.setVolume(100);
-                                                }
-                                            }
-                                        } catch(e) {}
-                                    }
-                                    var timer = setInterval(forcePlayerUnmute, 300);
-                                    setTimeout(function() { clearInterval(timer); }, 15000);
-                                    window.addEventListener('message', function(ev) {
-                                        if (ev.data === 'FORCE_UNMUTE') {
-                                            forcePlayerUnmute();
-                                        }
-                                    });
-                                })();
-                                </script>
-                            """.trimIndent()
-
-                            html = if (html.contains("</body>", ignoreCase = true)) {
-                                html.replace("</body>", "$autoUnmuteInjection</body>")
-                            } else {
-                                html + autoUnmuteInjection
-                            }
-
-                            val bytes = html.toByteArray(Charsets.UTF_8)
-                            val contentType = conn.contentType?.split(";")?.firstOrNull() ?: "text/html"
-                            return WebResourceResponse(contentType, "UTF-8", ByteArrayInputStream(bytes))
-                        }
-                    } catch (_: Exception) {}
-                }
                 return super.shouldInterceptRequest(view, request)
             }
 
@@ -1083,7 +1005,7 @@ class PlayerActivity : ComponentActivity() {
                 style.type = 'text/css';
                 style.innerHTML = 'header, footer, nav, .site-header, .site-footer, .watch-channel-header, .watch-controls-bar, .watch-sidebar, .watch-chat, .chat-panel, #shareCodeOverlay, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], iframe:not(#thatframe):not([id^="player"]):not(#streamPlayer) { display: none !important; } ' +
                                   'html, body { margin:0 !important; padding:0 !important; background-color:#000 !important; overflow:hidden !important; width:100% !important; height:100% !important; } ' +
-                                  'iframe#thatframe, .preview-wrap, #player, iframe#streamPlayer, .watch-player-wrapper, video#video { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
+                                  'iframe#thatframe, .preview-wrap, #player, iframe#streamPlayer, .watch-player-wrapper, video#video, #player_prog, #player_prog video, .vjs-tech { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
                                   '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], button[title*="ecrã inteiro" i], button[aria-label*="ecrã inteiro" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"] { display: none !important; pointer-events: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }';
                 document.head.appendChild(style);
 
@@ -1450,7 +1372,7 @@ class PlayerActivity : ComponentActivity() {
             it.contains("cloudfront") || it.contains("fastly") || it.contains("livextend")
         }
         if (officialUrl != null && options.none { it.directUrl == officialUrl }) {
-            options.add(ServerOption("Servidor Oficial (M3U)", isDirect = true, directUrl = officialUrl))
+            options.add(ServerOption("Servidor Oficial (Emissão Direta)", isDirect = true, directUrl = officialUrl))
         }
 
         // 5. Non-NTV backup (if backupStreamUrl is not NTV)

@@ -36,6 +36,7 @@ class ChannelRepository(private val context: Context) {
     private val PREF_DEFAULT_SERVER = "pref_default_server"
     private val PREF_AUTO_RESUME_LAST_CHANNEL = "pref_auto_resume_last_channel"
     private val PREF_LAST_WATCHED_CHANNEL_ID = "pref_last_watched_channel_id"
+    private val PREF_RECENT_CHANNEL_IDS = "pref_recent_channel_ids"
     private val PREF_THEME_MODE = "pref_theme_mode"
     private val PREF_ACCENT_COLOR = "pref_accent_color"
     private val PREF_DEFAULT_TAB = "pref_default_tab"
@@ -74,7 +75,12 @@ class ChannelRepository(private val context: Context) {
             if (ch.isFavorite) fav.add(ch)
         }
 
-        precomputedPtChannels = pt
+        // Reorganizar canais PT por ltimos usados no topo
+        val recentIds = getRecentChannelIds()
+        val recentMap = recentIds.mapIndexed { index, id -> id to index }.toMap()
+        val sortedPt = pt.sortedWith(compareBy { recentMap[it.id] ?: Int.MAX_VALUE })
+
+        precomputedPtChannels = sortedPt
         precomputedAllChannels = all
         precomputedFavChannels = fav
 
@@ -132,8 +138,26 @@ class ChannelRepository(private val context: Context) {
     fun isAutoResumeEnabled(): Boolean = prefs.getBoolean(PREF_AUTO_RESUME_LAST_CHANNEL, false)
     fun setAutoResumeEnabled(enabled: Boolean) = prefs.edit().putBoolean(PREF_AUTO_RESUME_LAST_CHANNEL, enabled).apply()
 
+    fun getRecentChannelIds(): List<String> {
+        val raw = prefs.getString(PREF_RECENT_CHANNEL_IDS, null) ?: return emptyList()
+        return raw.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+    }
+
+    fun recordChannelWatched(channelId: String) {
+        if (channelId.isBlank() || channelId.startsWith("event_")) return
+        prefs.edit().putString(PREF_LAST_WATCHED_CHANNEL_ID, channelId).apply()
+        val current = getRecentChannelIds().toMutableList()
+        current.remove(channelId)
+        current.add(0, channelId)
+        val trimmed = current.take(30)
+        prefs.edit().putString(PREF_RECENT_CHANNEL_IDS, trimmed.joinToString(",")).apply()
+        rebuildPrecomputedLists()
+    }
+
     fun getLastWatchedChannelId(): String? = prefs.getString(PREF_LAST_WATCHED_CHANNEL_ID, null)
-    fun setLastWatchedChannelId(channelId: String) = prefs.edit().putString(PREF_LAST_WATCHED_CHANNEL_ID, channelId).apply()
+    fun setLastWatchedChannelId(channelId: String) {
+        recordChannelWatched(channelId)
+    }
 
     fun getBaseUrl(): String = prefs.getString(PREF_BASE_URL, "https://dlive.sx") ?: "https://dlive.sx"
     fun setBaseUrl(newUrl: String) {
