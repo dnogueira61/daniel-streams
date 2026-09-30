@@ -789,4 +789,12 @@ class ChannelRepository(private val context: Context) {
             if (base.contains("⚡ TimStreams")) base else base + listOf("⚡ TimStreams")
         } else base
     }
+
+    fun getChannelById(channelId: String): Channel? {
+        if (channelId.isBlank()) return null
+        return cachedChannels.firstOrNull { it.id == channelId }
+    }
+
+    fun getAllCachedChannels(): List<Channel> = cachedChannels
 }
+

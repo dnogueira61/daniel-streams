@@ -868,7 +868,7 @@ class PlayerActivity : ComponentActivity() {
                     var origCreateElement = document.createElement;
                     document.createElement = function(tag) {
                         var el = origCreateElement.call(document, tag);
-                        if (tag.toLowerCase() === 'a') {
+                        if (tag && tag.toLowerCase() === 'a') {
                             el.target = '_self';
                         }
                         return el;
@@ -887,42 +887,74 @@ class PlayerActivity : ComponentActivity() {
                         }
                     }
 
-                    function autoUnmuteInFrame() {
+                    function kickstartAndUnmute() {
                         try {
-                            var unmuted = false;
-                            var btn = document.getElementById('unmute') || document.querySelector('.unmute-button');
-                            if (btn && (!btn.hidden && btn.offsetParent !== null)) {
-                                btn.click();
-                                unmuted = true;
+                            // 1. Click 'Tap to play' message if present
+                            var msg = document.getElementById('msg');
+                            if (msg) {
+                                try { msg.click(); } catch(e) {}
                             }
+
+                            // 2. Click Unmute button if present
+                            var unmuteBtn = document.getElementById('unmute') || document.querySelector('.unmute-button, [aria-label*="unmute" i]');
+                            if (unmuteBtn) {
+                                try { unmuteBtn.click(); } catch(e) {}
+                            }
+
+                            // 3. Play & Unmute all video/audio tags
                             var vids = document.querySelectorAll('video, audio');
                             for (var i = 0; i < vids.length; i++) {
-                                if (vids[i].muted) {
-                                    vids[i].muted = false;
-                                    vids[i].defaultMuted = false;
-                                    vids[i].volume = 1.0;
-                                    unmuted = true;
+                                var v = vids[i];
+                                if (v.muted || v.defaultMuted) {
+                                    v.muted = false;
+                                    v.defaultMuted = false;
+                                    v.volume = 1.0;
+                                }
+                                if (v.paused) {
+                                    v.play().catch(function(){});
                                 }
                             }
+
+                            // 4. Handle JWPlayer
                             if (window.jwplayer && typeof window.jwplayer === 'function') {
                                 var jw = window.jwplayer();
-                                if (jw && typeof jw.getMute === 'function' && jw.getMute()) {
-                                    jw.setMute(false);
-                                    jw.setVolume(100);
-                                    unmuted = true;
+                                if (jw) {
+                                    if (typeof jw.getMute === 'function' && jw.getMute()) {
+                                        jw.setMute(false);
+                                        jw.setVolume(100);
+                                    }
+                                    if (typeof jw.getState === 'function' && jw.getState() !== 'playing') {
+                                        jw.play();
+                                    }
                                 }
-                            }
-                            if (unmuted) {
-                                clearInterval(unmuteInterval);
                             }
                         } catch(e) {}
                     }
-                    var unmuteInterval = setInterval(autoUnmuteInFrame, 500);
-                    setTimeout(function() { clearInterval(unmuteInterval); }, 4000);
 
+                    // Run gentle kickstart/unmute loop during initial buffering
+                    var kickstartInterval = setInterval(kickstartAndUnmute, 500);
+                    setTimeout(function() { clearInterval(kickstartInterval); }, 12000);
+
+                    // Cross-frame message handling
                     window.addEventListener('message', function(ev) {
-                        if (ev.data === 'FORCE_UNMUTE') {
-                            autoUnmuteInFrame();
+                        if (!ev || !ev.data) return;
+                        var d = ev.data;
+                        if (d === 'FORCE_UNMUTE' || (d && d.type === 'FORCE_UNMUTE') || d === 'FORCE_PLAY' || (d && d.type === 'FORCE_PLAY')) {
+                            kickstartAndUnmute();
+                        } else if (d === 'TOGGLE_PLAY_PAUSE' || (d && d.type === 'TOGGLE_PLAY_PAUSE')) {
+                            try {
+                                var v = document.querySelector('video');
+                                if (v) {
+                                    if (v.paused) v.play().catch(function(){});
+                                    else v.pause();
+                                } else if (window.jwplayer && typeof window.jwplayer === 'function') {
+                                    var jw = window.jwplayer();
+                                    if (jw && typeof jw.getState === 'function') {
+                                        if (jw.getState() === 'playing') jw.pause();
+                                        else jw.play();
+                                    }
+                                }
+                            } catch(e) {}
                         }
                     });
 
@@ -1102,7 +1134,7 @@ class PlayerActivity : ComponentActivity() {
 
     private fun startAutoUnmuteSequence() {
         if (!repository.isAutoUnmuteEnabled()) return
-        val delays = listOf(800L, 1800L, 3000L)
+        val delays = listOf(600L, 1500L, 2800L, 4500L, 7000L)
         for (d in delays) {
             handler.postDelayed({
                 try {
@@ -1252,53 +1284,57 @@ class PlayerActivity : ComponentActivity() {
         val safeUnmuteJs = """
             (function() {
                 var unmuted = false;
-                function unmuteDom(root) {
-                    if (!root) return;
+                function doUnmute(doc, win) {
+                    if (!doc) return;
                     try {
-                        root.querySelectorAll('video, audio').forEach(function(v) {
-                            try {
-                                if (v.muted) {
-                                    v.muted = false;
-                                    v.defaultMuted = false;
-                                    v.volume = 1.0;
-                                    unmuted = true;
+                        var msg = doc.getElementById('msg');
+                        if (msg) {
+                            try { msg.click(); unmuted = true; } catch(e) {}
+                        }
+                        var btn = doc.getElementById('unmute') || doc.querySelector('.unmute-button, [aria-label*="unmute" i]');
+                        if (btn) {
+                            try { btn.click(); unmuted = true; } catch(e) {}
+                        }
+                        var vids = doc.querySelectorAll('video, audio');
+                        for (var i = 0; i < vids.length; i++) {
+                            var v = vids[i];
+                            if (v.muted || v.defaultMuted) {
+                                v.muted = false;
+                                v.defaultMuted = false;
+                                v.volume = 1.0;
+                                unmuted = true;
+                            }
+                            if (v.paused) {
+                                v.play().catch(function(){});
+                                unmuted = true;
+                            }
+                        }
+                        if (win && win.jwplayer && typeof win.jwplayer === 'function') {
+                            var jw = win.jwplayer();
+                            if (jw) {
+                                if (jw.setMute) jw.setMute(false);
+                                if (jw.setVolume) jw.setVolume(100);
+                                if (jw.getState && jw.getState() !== 'playing') {
+                                    jw.play();
                                 }
-                            } catch(e) {}
-                        });
+                                unmuted = true;
+                            }
+                        }
                     } catch(e) {}
                 }
 
-                unmuteDom(document);
+                doUnmute(document, window);
                 var iframes = document.querySelectorAll('iframe');
                 for (var i = 0; i < iframes.length; i++) {
                     try {
                         iframes[i].contentWindow.postMessage('FORCE_UNMUTE', '*');
+                        iframes[i].contentWindow.postMessage('FORCE_PLAY', '*');
                     } catch(e) {}
                     try {
                         var doc = iframes[i].contentDocument || iframes[i].contentWindow.document;
-                        if (doc) unmuteDom(doc);
+                        if (doc) doUnmute(doc, iframes[i].contentWindow);
                     } catch(e) {}
                 }
-
-                try {
-                    if (window.jwplayer && typeof window.jwplayer === 'function') {
-                        var jw = window.jwplayer();
-                        if (jw && typeof jw.getMute === 'function' && jw.getMute()) {
-                            jw.setMute(false);
-                            jw.setVolume(100);
-                            unmuted = true;
-                        }
-                    }
-                } catch(e) {}
-
-                try {
-                    var btn = document.getElementById('unmute') || document.querySelector('.unmute-button, [aria-label*="unmute" i]');
-                    if (btn && (!btn.hidden && btn.offsetParent !== null)) {
-                        btn.click();
-                        unmuted = true;
-                    }
-                } catch(e) {}
-
                 return unmuted;
             })();
         """.trimIndent()
@@ -1313,23 +1349,63 @@ class PlayerActivity : ComponentActivity() {
     private fun togglePlayPause() {
         val js = """
             (function() {
-                var v = document.querySelector('video');
-                if (v) {
-                    if (v.paused) {
-                        v.play().catch(function(){});
-                        return 'playing';
-                    } else {
-                        v.pause();
-                        return 'paused';
-                    }
+                var status = 'unknown';
+                function doToggle(doc, win) {
+                    if (!doc) return null;
+                    try {
+                        var v = doc.querySelector('video');
+                        if (v) {
+                            if (v.paused) {
+                                v.play().catch(function(){});
+                                return 'playing';
+                            } else {
+                                v.pause();
+                                return 'paused';
+                            }
+                        }
+                    } catch(e) {}
+                    try {
+                        if (win && win.jwplayer && typeof win.jwplayer === 'function') {
+                            var jw = win.jwplayer();
+                            if (jw && typeof jw.getState === 'function') {
+                                if (jw.getState() === 'playing') {
+                                    jw.pause();
+                                    return 'paused';
+                                } else {
+                                    jw.play();
+                                    return 'playing';
+                                }
+                            }
+                        }
+                    } catch(e) {}
+                    return null;
                 }
-                return 'novideo';
+
+                var r = doToggle(document, window);
+                if (r) return r;
+
+                var frames = document.querySelectorAll('iframe');
+                for (var i = 0; i < frames.length; i++) {
+                    try {
+                        frames[i].contentWindow.postMessage('TOGGLE_PLAY_PAUSE', '*');
+                        status = 'toggled';
+                    } catch(e) {}
+                    try {
+                        var fdoc = frames[i].contentDocument || frames[i].contentWindow.document;
+                        if (fdoc) {
+                            var fr = doToggle(fdoc, frames[i].contentWindow);
+                            if (fr) return fr;
+                        }
+                    } catch(e) {}
+                }
+                return status;
             })();
         """.trimIndent()
         webView.evaluateJavascript(js) { result ->
             when (result?.replace("\"", "")) {
                 "playing" -> Toast.makeText(this@PlayerActivity, "▶️ A reproduzir", Toast.LENGTH_SHORT).show()
                 "paused" -> Toast.makeText(this@PlayerActivity, "⏸️ Em pausa", Toast.LENGTH_SHORT).show()
+                "toggled" -> Toast.makeText(this@PlayerActivity, "▶️/⏸️ Play/Pausa", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -1419,9 +1495,8 @@ class PlayerActivity : ComponentActivity() {
     }
 
     private fun buildFailoverList(): List<ServerOption> {
-        val currentChannel = repository.getChannels(TabFilter.PORTUGAL).firstOrNull { it.id == channelId }
-            ?: repository.getChannels(TabFilter.ALL).firstOrNull { it.id == channelId }
-            ?: repository.getChannels(TabFilter.GAMING).firstOrNull { it.id == channelId }
+        val currentChannel = repository.getChannelById(channelId)
+            ?: repository.getAllCachedChannels().firstOrNull { it.id == channelId }
 
         val options = mutableListOf<ServerOption>()
 
@@ -1443,9 +1518,10 @@ class PlayerActivity : ComponentActivity() {
         }
 
         // 1. TimStreams backup (HIGHEST PRIORITY when available)
-        val ntvUrl = currentChannel?.backupStreamUrl
+        val ntvUrl = currentChannel.backupStreamUrl ?: backupDirectUrl
         val rawTimst = if (ntvUrl != null && (ntvUrl.contains("exmxbxe") || ntvUrl.contains("timst"))) ntvUrl
-            else currentChannel?.backupStreamUrl2?.takeIf { it.contains("exmxbxe") || it.contains("timst") }
+            else (currentChannel.backupStreamUrl2 ?: backupDirectUrl2)?.takeIf { it.contains("exmxbxe") || it.contains("timst") }
+            ?: directStreamUrl?.takeIf { it.contains("exmxbxe") || it.contains("timst") }
         val timstUrl = rawTimst?.let { url ->
             val base = repository.getTimstBaseUrl()
             if (base != "https://timst.top" && url.contains("exmxbxe.cfd")) {
@@ -1604,11 +1680,12 @@ class PlayerActivity : ComponentActivity() {
             val isDrawerOpen = drawerLayout.isDrawerOpen(GravityCompat.START)
 
             when (event.keyCode) {
-                // 1. Áudio / Som dedicado no comando (Audio Track, Language, etc.)
+                // 1. Áudio / Som dedicado no comando (Audio Track, Language, code 256, etc.)
                 KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK,
                 KeyEvent.KEYCODE_LANGUAGE_SWITCH,
                 KeyEvent.KEYCODE_TV_AUDIO_DESCRIPTION,
-                KeyEvent.KEYCODE_PROG_YELLOW -> {
+                KeyEvent.KEYCODE_PROG_YELLOW,
+                256 -> { // Raw keycode 256 used for AUDIO key on G10/G20 Google TV remotes
                     performSafeUnmute(showToast = true)
                     return true
                 }
@@ -1624,7 +1701,7 @@ class PlayerActivity : ComponentActivity() {
                     return super.dispatchKeyEvent(event)
                 }
 
-                // Play / Pause
+                // Play / Pause (▶|| no comando)
                 KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
                 KeyEvent.KEYCODE_MEDIA_PLAY,
                 KeyEvent.KEYCODE_MEDIA_PAUSE,
@@ -1633,45 +1710,65 @@ class PlayerActivity : ComponentActivity() {
                     return true
                 }
 
-                // Info / OSD
+                // Info / OSD / Legendas
                 KeyEvent.KEYCODE_INFO,
-                KeyEvent.KEYCODE_WINDOW,
                 KeyEvent.KEYCODE_CAPTIONS -> {
                     showOsdBanner(if (directStreamUrl != null) "LIVE" else channelId, channelName, if (directStreamUrl != null) "DIRETO ⚽" else "PT 🇵🇹")
                     return true
                 }
 
-                // Tecla Definições (engrenagem no comando)
+                // Tecla Definições (engrenagem no comando ⚙)
                 KeyEvent.KEYCODE_SETTINGS -> {
                     showSettingsDialog()
                     return true
                 }
 
-                // Tecla TV / Guia no comando (ou botão verde/azul)
+                // Tecla TV no comando (ícone de TV 📺 ao lado de Home)
                 KeyEvent.KEYCODE_TV,
-                KeyEvent.KEYCODE_GUIDE,
-                KeyEvent.KEYCODE_PROG_BLUE -> {
-                    if (isDrawerOpen) {
-                        drawerLayout.closeDrawer(GravityCompat.START)
-                    } else {
-                        showEpgDialog()
-                    }
-                    return true
-                }
-
-                // Botão Verde: Atalho de Servidores
-                KeyEvent.KEYCODE_PROG_GREEN -> {
-                    showServerSelectionDialog()
-                    return true
-                }
-
-                // Botão Vermelho: Atalho Guia/Gaveta de Canais
-                KeyEvent.KEYCODE_PROG_RED -> {
+                KeyEvent.KEYCODE_WINDOW,
+                KeyEvent.KEYCODE_TV_DATA_SERVICE -> {
                     if (isDrawerOpen) {
                         drawerLayout.closeDrawer(GravityCompat.START)
                     } else {
                         openDrawer()
                     }
+                    return true
+                }
+
+                // Tecla Guia / EPG ([||| TV] no centro do comando ou botão azul)
+                KeyEvent.KEYCODE_GUIDE,
+                KeyEvent.KEYCODE_TV_CONTENTS_MENU,
+                KeyEvent.KEYCODE_PROG_BLUE -> {
+                    showEpgDialog()
+                    return true
+                }
+
+                // Menu (☰) / MEDIA / Source / Botão Verde: Atalho para diálogo de Servidores
+                KeyEvent.KEYCODE_MENU,
+                KeyEvent.KEYCODE_DVR,
+                KeyEvent.KEYCODE_BUTTON_B,
+                KeyEvent.KEYCODE_TV_INPUT,
+                KeyEvent.KEYCODE_PAIRING,
+                KeyEvent.KEYCODE_PROG_GREEN -> {
+                    showServerSelectionDialog()
+                    return true
+                }
+
+                // Botão Vermelho (círculo play/marcador no comando): Alterna gaveta de canais
+                KeyEvent.KEYCODE_PROG_RED,
+                KeyEvent.KEYCODE_BUTTON_1 -> {
+                    if (isDrawerOpen) {
+                        drawerLayout.closeDrawer(GravityCompat.START)
+                    } else {
+                        openDrawer()
+                    }
+                    return true
+                }
+
+                // Botão Grelha de Apps (⠿ no comando): Ativa Picture-in-Picture
+                KeyEvent.KEYCODE_ALL_APPS,
+                KeyEvent.KEYCODE_APP_SWITCH -> {
+                    enterPipMode()
                     return true
                 }
 
@@ -1694,7 +1791,7 @@ class PlayerActivity : ComponentActivity() {
                 }
 
                 // Seta Esquerda (DPAD_LEFT)
-                KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_MENU -> {
+                KeyEvent.KEYCODE_DPAD_LEFT -> {
                     if (isDrawerOpen) {
                         val focused = currentFocus
                         if (focused == etDrawerSearch) {
@@ -1780,6 +1877,8 @@ class PlayerActivity : ComponentActivity() {
                         }
                     } else {
                         showControlsOverlay()
+                        // Kickstart playback immediately se a stream estiver parada em "Tap to play"
+                        performSafeUnmute(showToast = false)
                         return true
                     }
                 }
