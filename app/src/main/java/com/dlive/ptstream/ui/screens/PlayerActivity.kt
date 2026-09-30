@@ -680,16 +680,20 @@ class PlayerActivity : ComponentActivity() {
         rvDrawerChannels.postDelayed({
             rvDrawerChannels.scrollToPosition(0)
             val holder = rvDrawerChannels.findViewHolderForAdapterPosition(0)
-            holder?.itemView?.requestFocus()
-        }, 80)
+            if (holder != null) {
+                holder.itemView.requestFocus()
+            } else {
+                rvDrawerChannels.requestFocus()
+            }
+        }, 150)
     }
 
     private fun refreshDrawerList() {
         val query = etDrawerSearch.text.toString().trim()
         val list = when {
-            currentDrawerCategory == "Desporto" -> repository.getChannels(TabFilter.ALL, query, "Desporto").filter { !it.isPortuguese }
+            currentDrawerCategory == "Desporto" -> repository.getChannels(TabFilter.ALL, query, "Desporto")
             currentDrawerTab == TabFilter.GAMING -> repository.getChannels(TabFilter.GAMING, query)
-            currentDrawerTab == TabFilter.ALL -> repository.getChannels(TabFilter.ALL, query)
+            currentDrawerTab == TabFilter.ALL -> repository.getChannels(TabFilter.ALL, query).filter { !it.isPortuguese }
             currentDrawerTab == TabFilter.FAVORITES -> repository.getChannels(TabFilter.FAVORITES, query)
             else -> repository.getChannels(TabFilter.PORTUGAL, query)
         }
@@ -931,9 +935,30 @@ class PlayerActivity : ComponentActivity() {
                         } catch(e) {}
                     }
 
-                    // Run gentle kickstart/unmute loop during initial buffering
-                    var kickstartInterval = setInterval(kickstartAndUnmute, 500);
-                    setTimeout(function() { clearInterval(kickstartInterval); }, 12000);
+                    // Run kickstart loop during initial buffering, but stop as soon as stream is playing
+                    var _kickstarted = false;
+                    var kickstartInterval = setInterval(function() {
+                        // If already playing with audio, stop the interval immediately
+                        try {
+                            var isVideoPlaying = false;
+                            var vv = document.querySelector('video');
+                            if (vv && !vv.paused && !vv.muted && vv.volume > 0) { isVideoPlaying = true; }
+                            if (!isVideoPlaying && window.jwplayer && typeof window.jwplayer === 'function') {
+                                var jw = window.jwplayer();
+                                if (jw && typeof jw.getState === 'function' && jw.getState() === 'playing' &&
+                                    typeof jw.getMute === 'function' && !jw.getMute()) {
+                                    isVideoPlaying = true;
+                                }
+                            }
+                            if (isVideoPlaying && _kickstarted) {
+                                clearInterval(kickstartInterval);
+                                return;
+                            }
+                        } catch(e) {}
+                        kickstartAndUnmute();
+                        _kickstarted = true;
+                    }, 1000);
+                    setTimeout(function() { clearInterval(kickstartInterval); }, 14000);
 
                     // Cross-frame message handling
                     window.addEventListener('message', function(ev) {
@@ -1123,7 +1148,8 @@ class PlayerActivity : ComponentActivity() {
                 style.innerHTML = 'header, footer, nav, .site-header, .site-footer, .watch-channel-header, .watch-controls-bar, .watch-sidebar, .watch-chat, .chat-panel, #shareCodeOverlay, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], iframe:not(#thatframe):not([id^="player"]):not(#streamPlayer) { display: none !important; } ' +
                                   'html, body { margin:0 !important; padding:0 !important; background-color:#000 !important; overflow:hidden !important; width:100% !important; height:100% !important; } ' +
                                   'iframe#thatframe, .preview-wrap, #player, iframe#streamPlayer, .watch-player-wrapper, video#video, #player_prog, #player_prog video, .vjs-tech { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
-                                  '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], button[title*="ecrã inteiro" i], button[aria-label*="ecrã inteiro" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"] { display: none !important; pointer-events: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }';
+                                  '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], button[title*="ecrã inteiro" i], button[aria-label*="ecrã inteiro" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"] { display: none !important; pointer-events: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; } ' +
+                                  '.jw-controls, .jw-controlbar, .jw-display-icon-container, .jw-icon-display { opacity: 0 !important; transition: opacity 0.3s !important; pointer-events: none !important; }';
                 document.head.appendChild(style);
 
                 window.open = function() { return null; };
@@ -1611,9 +1637,8 @@ class PlayerActivity : ComponentActivity() {
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (isLandscape) {
             landscapeOverlay.visibility = View.VISIBLE
-            findViewById<View>(R.id.btnLandscapeServer)?.post {
-                findViewById<View>(R.id.btnLandscapeServer)?.requestFocus()
-            }
+            // Do NOT auto-focus btnLandscapeServer on first show — it would cause the next OK press
+            // to immediately open the server dialog before the user can navigate
             handler.removeCallbacks(overlayHideRunnable)
             handler.postDelayed(overlayHideRunnable, 4000)
         } else {
@@ -1863,7 +1888,7 @@ class PlayerActivity : ComponentActivity() {
                         return super.dispatchKeyEvent(event)
                     } else if (isOverlayVisible) {
                         // Evita clique acidental imediato após abrir a barra
-                        if (SystemClock.uptimeMillis() - lastOverlayShowTime < 400L) {
+                        if (SystemClock.uptimeMillis() - lastOverlayShowTime < 600L) {
                             return true
                         }
                         resetOverlayHideTimer()
@@ -1872,7 +1897,14 @@ class PlayerActivity : ComponentActivity() {
                             focused.performClick()
                             return true
                         } else {
-                            findViewById<View>(R.id.btnLandscapeServer)?.requestFocus()
+                            // Focus btnLandscapeChannels first (more useful than Server dialog)
+                            val channelsBtn = findViewById<View>(R.id.btnLandscapeChannels)
+                            val serverBtn = findViewById<View>(R.id.btnLandscapeServer)
+                            if (channelsBtn != null && channelsBtn.isFocusable) {
+                                channelsBtn.requestFocus()
+                            } else {
+                                serverBtn?.requestFocus()
+                            }
                             return true
                         }
                     } else {
@@ -2153,6 +2185,11 @@ class PlayerActivity : ComponentActivity() {
             }
             false
         }
+
+        // Google TV: btnSync DPAD_DOWN should move focus to Guardar button (added below)
+        // We'll set this after building the dialog so we can reference the positive button
+        dialogView.addView(btnSync)
+
         // 6. Restore hidden channels button
         val hiddenIds = repository.getHiddenChannelIds()
         if (hiddenIds.isNotEmpty()) {
@@ -2176,19 +2213,48 @@ class PlayerActivity : ComponentActivity() {
             dialogView.addView(btnRestoreHidden)
         }
 
+        // Add inline Save button for Google TV D-Pad navigation
+        val btnSave = Button(this).apply {
+            text = "✅ Guardar"
+            setBackgroundColor(Color.parseColor("#16a34a"))
+            setTextColor(Color.WHITE)
+            setPadding(0, 12, 0, 12)
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = 24 }
+            layoutParams = params
+        }
+        dialogView.addView(btnSave)
+
         val dialog = AlertDialog.Builder(this)
             .setView(scroll)
-            .setPositiveButton("Guardar") { _, _ ->
-                repository.setAutoUnmuteEnabled(swUnmute.isChecked)
-                repository.setAutoResumeEnabled(swAutoResume.isChecked)
-                val domain = etDomain.text.toString().trim()
-                if (domain.isNotBlank()) repository.setBaseUrl(domain)
-                val timst = etTimstDomain.text.toString().trim()
-                if (timst.isNotBlank()) repository.setTimstBaseUrl(timst)
-                Toast.makeText(this, "Definições guardadas!", Toast.LENGTH_SHORT).show()
-            }
             .setNegativeButton("Cancelar", null)
             .create()
+
+        btnSave.setOnClickListener {
+            repository.setAutoUnmuteEnabled(swUnmute.isChecked)
+            repository.setAutoResumeEnabled(swAutoResume.isChecked)
+            val domain = etDomain.text.toString().trim()
+            if (domain.isNotBlank()) repository.setBaseUrl(domain)
+            val timst = etTimstDomain.text.toString().trim()
+            if (timst.isNotBlank()) repository.setTimstBaseUrl(timst)
+            Toast.makeText(this, "Definições guardadas!", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+
+        // D-Pad: btnSync → DPAD_DOWN → btnSave
+        btnSync.setOnKeyListener { _, keyCode, event ->
+            if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                btnSave.requestFocus()
+                return@setOnKeyListener true
+            }
+            if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+                etDomain.requestFocus()
+                return@setOnKeyListener true
+            }
+            false
+        }
 
         activeDialog = dialog
         dialog.setOnDismissListener {
@@ -2458,9 +2524,14 @@ class PlayerActivity : ComponentActivity() {
         handleBackOrPip()
     }
 
+    override fun onResume() {
+        super.onResume()
+        webView.resumeTimers()
+    }
+
     override fun onPause() {
         super.onPause()
-        webView.resumeTimers()
+        webView.pauseTimers()
     }
 
     override fun onStop() {
