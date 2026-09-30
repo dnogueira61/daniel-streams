@@ -640,7 +640,48 @@ class PlayerActivity : ComponentActivity() {
         btnTabAll.backgroundTintList = if (tab == TabFilter.ALL && cat == "Mundo") activeColor else inactiveColor
         btnTabAll.setTextColor(if (tab == TabFilter.ALL && cat == "Mundo") Color.WHITE else Color.parseColor("#9CA3AF"))
 
+        val targetBtn = when {
+            cat == "Todos" && tab == TabFilter.PORTUGAL -> btnTabPt
+            cat == "Desporto" -> btnTabSports
+            tab == TabFilter.GAMING -> btnTabGaming
+            tab == TabFilter.FAVORITES -> btnTabFav
+            else -> btnTabAll
+        }
+        val scrollTabs = findViewById<HorizontalScrollView>(R.id.scrollDrawerTabs)
+        scrollTabs?.post {
+            scrollTabs.smoothScrollTo(targetBtn.left - 20, 0)
+        }
+
         refreshDrawerList()
+    }
+
+    private val drawerTabList = listOf(
+        Pair("Todos", TabFilter.PORTUGAL),
+        Pair("Desporto", TabFilter.ALL),
+        Pair("Gaming", TabFilter.GAMING),
+        Pair("Favoritos", TabFilter.FAVORITES),
+        Pair("Mundo", TabFilter.ALL)
+    )
+
+    fun cycleDrawerTab(forward: Boolean) {
+        val currentIndex = drawerTabList.indexOfFirst {
+            it.first == currentDrawerCategory && it.second == currentDrawerTab
+        }.let { if (it == -1) 0 else it }
+
+        val nextIndex = if (forward) {
+            (currentIndex + 1) % drawerTabList.size
+        } else {
+            if (currentIndex - 1 < 0) drawerTabList.size - 1 else currentIndex - 1
+        }
+
+        val (cat, tab) = drawerTabList[nextIndex]
+        selectDrawerCategory(cat, tab)
+
+        rvDrawerChannels.postDelayed({
+            rvDrawerChannels.scrollToPosition(0)
+            val holder = rvDrawerChannels.findViewHolderForAdapterPosition(0)
+            holder?.itemView?.requestFocus()
+        }, 80)
     }
 
     private fun refreshDrawerList() {
@@ -848,27 +889,36 @@ class PlayerActivity : ComponentActivity() {
 
                     function autoUnmuteInFrame() {
                         try {
-                            var btn = document.getElementById('unmute') || document.querySelector('[aria-label*="unmute" i], .jw-icon-volume, .vjs-mute-control');
-                            if (btn && (!btn.hidden || btn.offsetParent !== null)) {
+                            var unmuted = false;
+                            var btn = document.getElementById('unmute') || document.querySelector('.unmute-button');
+                            if (btn && (!btn.hidden && btn.offsetParent !== null)) {
                                 btn.click();
+                                unmuted = true;
                             }
                             var vids = document.querySelectorAll('video, audio');
                             for (var i = 0; i < vids.length; i++) {
-                                vids[i].muted = false;
-                                vids[i].defaultMuted = false;
-                                vids[i].volume = 1.0;
+                                if (vids[i].muted) {
+                                    vids[i].muted = false;
+                                    vids[i].defaultMuted = false;
+                                    vids[i].volume = 1.0;
+                                    unmuted = true;
+                                }
                             }
                             if (window.jwplayer && typeof window.jwplayer === 'function') {
                                 var jw = window.jwplayer();
-                                if (jw && typeof jw.setMute === 'function') {
+                                if (jw && typeof jw.getMute === 'function' && jw.getMute()) {
                                     jw.setMute(false);
                                     jw.setVolume(100);
+                                    unmuted = true;
                                 }
+                            }
+                            if (unmuted) {
+                                clearInterval(unmuteInterval);
                             }
                         } catch(e) {}
                     }
-                    var unmuteInterval = setInterval(autoUnmuteInFrame, 350);
-                    setTimeout(function() { clearInterval(unmuteInterval); }, 20000);
+                    var unmuteInterval = setInterval(autoUnmuteInFrame, 500);
+                    setTimeout(function() { clearInterval(unmuteInterval); }, 4000);
 
                     window.addEventListener('message', function(ev) {
                         if (ev.data === 'FORCE_UNMUTE') {
@@ -1207,10 +1257,12 @@ class PlayerActivity : ComponentActivity() {
                     try {
                         root.querySelectorAll('video, audio').forEach(function(v) {
                             try {
-                                v.muted = false;
-                                v.defaultMuted = false;
-                                v.volume = 1.0;
-                                unmuted = true;
+                                if (v.muted) {
+                                    v.muted = false;
+                                    v.defaultMuted = false;
+                                    v.volume = 1.0;
+                                    unmuted = true;
+                                }
                             } catch(e) {}
                         });
                     } catch(e) {}
@@ -1231,7 +1283,7 @@ class PlayerActivity : ComponentActivity() {
                 try {
                     if (window.jwplayer && typeof window.jwplayer === 'function') {
                         var jw = window.jwplayer();
-                        if (jw && typeof jw.setMute === 'function') {
+                        if (jw && typeof jw.getMute === 'function' && jw.getMute()) {
                             jw.setMute(false);
                             jw.setVolume(100);
                             unmuted = true;
@@ -1240,10 +1292,11 @@ class PlayerActivity : ComponentActivity() {
                 } catch(e) {}
 
                 try {
-                    var btns = document.querySelectorAll('[aria-label*="unmute" i], [title*="unmute" i], .jw-icon-volume, .vjs-mute-control, .plyr__control[data-plyr="mute"]');
-                    btns.forEach(function(b) {
-                        try { b.click(); unmuted = true; } catch(e) {}
-                    });
+                    var btn = document.getElementById('unmute') || document.querySelector('.unmute-button, [aria-label*="unmute" i]');
+                    if (btn && (!btn.hidden && btn.offsetParent !== null)) {
+                        btn.click();
+                        unmuted = true;
+                    }
                 } catch(e) {}
 
                 return unmuted;
@@ -1251,14 +1304,6 @@ class PlayerActivity : ComponentActivity() {
         """.trimIndent()
 
         webView.evaluateJavascript(safeUnmuteJs, null)
-
-        val w = webView.width.toFloat()
-        val h = webView.height.toFloat()
-        if (w > 0 && h > 0) {
-            simulateTouchOnWebView(w - 30f, 30f) // DaddyLive top-right unmute button coordinates
-            simulateTouchOnWebView(w * 0.88f, h * 0.12f)
-            simulateTouchOnWebView(w * 0.12f, h * 0.88f)
-        }
 
         if (showToast) {
             Toast.makeText(this, "🔊 Áudio ativado", Toast.LENGTH_SHORT).show()
@@ -1360,8 +1405,9 @@ class PlayerActivity : ComponentActivity() {
                 val headers = mapOf("Referer" to referer)
                 webView.loadUrl(targetDirect, headers)
             }
-            // Start failover timeout
-            handler.postDelayed(failoverTimeoutRunnable, failoverTimeoutMs)
+            // Start failover timeout: shorter timeout for NTV streams to quickly switch if unresponsive
+            val timeout = if (targetDirect.contains("epicsports") || targetDirect.contains("ntv.st")) 4500L else failoverTimeoutMs
+            handler.postDelayed(failoverTimeoutRunnable, timeout)
             return
         }
 
@@ -1384,9 +1430,9 @@ class PlayerActivity : ComponentActivity() {
             list.forEachIndexed { idx, url ->
                 val name = when {
                     url.contains("exmxbxe") || url.contains("timst") -> "Servidor Principal (TimStreams 1080p)"
-                    url.contains("kobra") -> "Servidor Principal (NTV Kobra)"
-                    url.contains("falcon") -> "Servidor Alternativo 1 (NTV Falcon)"
-                    url.contains("raptor") -> "Servidor Alternativo 2 (NTV Raptor)"
+                    url.contains("kobra") -> "Servidor Alternativo (NTV Kobra)"
+                    url.contains("falcon") -> "Servidor Alternativo (NTV Falcon)"
+                    url.contains("raptor") -> "Servidor Alternativo (NTV Raptor)"
                     idx == 0 -> "Servidor Principal (Direto)"
                     idx == 1 -> "Servidor Alternativo 1 (Direto)"
                     else -> "Servidor Reserva $idx (Direto)"
@@ -1419,13 +1465,7 @@ class PlayerActivity : ComponentActivity() {
             options.add(ServerOption(label, isDirect = false, folder = "stream"))
         }
 
-        // 3. NTV/EpicSports backup
-        if (ntvUrl != null && (ntvUrl.contains("epicsports") || ntvUrl.contains("ntv.st"))) {
-            val label = if (options.isEmpty()) "Servidor Principal (NTV)" else "Servidor Alternativo ${options.size} (NTV)"
-            options.add(ServerOption(label, isDirect = true, directUrl = ntvUrl))
-        }
-
-        // 4. M3UPT / Official direct stream
+        // 3. M3UPT / Official direct stream (Higher quality and stability than NTV)
         val officialUrl = currentChannel?.backupStreamUrl2?.takeIf {
             it.contains("rtp.pt") || it.contains("impresa.pt") || it.contains("github.com") ||
             it.contains("cloudfront") || it.contains("fastly") || it.contains("livextend")
@@ -1434,7 +1474,14 @@ class PlayerActivity : ComponentActivity() {
             it.contains("cloudfront") || it.contains("fastly") || it.contains("livextend")
         }
         if (officialUrl != null && options.none { it.directUrl == officialUrl }) {
-            options.add(ServerOption("Servidor Oficial (Emissão Direta)", isDirect = true, directUrl = officialUrl))
+            val label = if (options.isEmpty()) "Servidor Oficial (Emissão Direta)" else "Servidor Alternativo ${options.size} (Emissão Direta)"
+            options.add(ServerOption(label, isDirect = true, directUrl = officialUrl))
+        }
+
+        // 4. NTV/EpicSports backup (relegated after TimStreams, DaddyLive and Official streams)
+        if (ntvUrl != null && (ntvUrl.contains("epicsports") || ntvUrl.contains("ntv.st"))) {
+            val label = if (options.isEmpty()) "Servidor Principal (NTV)" else "Servidor Alternativo ${options.size} (NTV - Backup)"
+            options.add(ServerOption(label, isDirect = true, directUrl = ntvUrl))
         }
 
         // 5. Non-NTV backup (if backupStreamUrl is not NTV and not Timst)
@@ -1632,14 +1679,11 @@ class PlayerActivity : ComponentActivity() {
                 KeyEvent.KEYCODE_DPAD_RIGHT -> {
                     if (isDrawerOpen) {
                         val focused = currentFocus
-                        val drawer = findViewById<View>(R.id.channelDrawer)
-                        val nextFocus = focused?.focusSearch(View.FOCUS_RIGHT)
-                        if (nextFocus != null && drawer != null && isDescendantOf(nextFocus, drawer)) {
+                        if (focused == etDrawerSearch) {
                             return super.dispatchKeyEvent(event)
-                        } else {
-                            drawerLayout.closeDrawer(GravityCompat.START)
-                            return true
                         }
+                        cycleDrawerTab(forward = true)
+                        return true
                     } else if (isOverlayVisible) {
                         resetOverlayHideTimer()
                         return super.dispatchKeyEvent(event)
@@ -1652,7 +1696,12 @@ class PlayerActivity : ComponentActivity() {
                 // Seta Esquerda (DPAD_LEFT)
                 KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_MENU -> {
                     if (isDrawerOpen) {
-                        return super.dispatchKeyEvent(event)
+                        val focused = currentFocus
+                        if (focused == etDrawerSearch) {
+                            return super.dispatchKeyEvent(event)
+                        }
+                        cycleDrawerTab(forward = false)
+                        return true
                     } else if (isOverlayVisible) {
                         resetOverlayHideTimer()
                         return super.dispatchKeyEvent(event)
@@ -1679,7 +1728,11 @@ class PlayerActivity : ComponentActivity() {
                     }
                 }
 
-                KeyEvent.KEYCODE_CHANNEL_UP -> {
+                KeyEvent.KEYCODE_CHANNEL_UP, KeyEvent.KEYCODE_PAGE_UP -> {
+                    if (isDrawerOpen) {
+                        cycleDrawerTab(forward = false)
+                        return true
+                    }
                     zapPreviousChannel()
                     return true
                 }
@@ -1698,7 +1751,11 @@ class PlayerActivity : ComponentActivity() {
                     }
                 }
 
-                KeyEvent.KEYCODE_CHANNEL_DOWN -> {
+                KeyEvent.KEYCODE_CHANNEL_DOWN, KeyEvent.KEYCODE_PAGE_DOWN -> {
+                    if (isDrawerOpen) {
+                        cycleDrawerTab(forward = true)
+                        return true
+                    }
                     zapNextChannel()
                     return true
                 }

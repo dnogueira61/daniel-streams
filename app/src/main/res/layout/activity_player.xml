@@ -523,8 +523,9 @@
                 android:contentDescription="Fechar" />
         </LinearLayout>
 
-        <!-- Quick Tabs (Todos, Desporto, Filmes, Favoritos, Mundo) -->
+        <!-- Quick Tabs (Todos, Desporto, Gaming, Favoritos, Mundo) -->
         <HorizontalScrollView
+            android:id="@+id/scrollDrawerTabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbars="none"

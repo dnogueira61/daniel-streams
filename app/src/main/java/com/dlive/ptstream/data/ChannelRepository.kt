@@ -93,8 +93,8 @@ class ChannelRepository(private val context: Context) {
         val orderedPtCats = preferredPtCats.filter { availablePtCats.contains(it) } + availablePtCats.filter { !preferredPtCats.contains(it) }.sorted()
         precomputedPtCategories = listOf("Todos") + orderedPtCats
 
-        val allCats = all.map { it.category }.distinct().filter { !it.contains("Filme", ignoreCase = true) && !preferredPtCats.contains(it) }.sorted()
-        precomputedAllCategories = listOf("Todos", "Gaming") + (allCats.filter { it != "Gaming" })
+        val allCats = all.map { it.category }.distinct().filter { !it.contains("Filme", ignoreCase = true) && !it.equals("Generalistas", ignoreCase = true) }.sorted()
+        precomputedAllCategories = listOf("Todos", "Desporto", "Gaming") + (allCats.filter { it != "Gaming" && it != "Desporto" })
 
         channelsVersion.intValue++
     }
@@ -192,6 +192,23 @@ class ChannelRepository(private val context: Context) {
         val cacheFile = File(context.filesDir, CACHE_FILE_NAME)
 
         try {
+            val appVersionCode = try {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                    context.packageManager.getPackageInfo(context.packageName, 0).longVersionCode
+                } else {
+                    @Suppress("DEPRECATION")
+                    context.packageManager.getPackageInfo(context.packageName, 0).versionCode.toLong()
+                }
+            } catch (_: Exception) { 0L }
+
+            val lastLoadedVersion = prefs.getLong("last_loaded_channels_version", 0L)
+            if (lastLoadedVersion < appVersionCode) {
+                if (cacheFile.exists()) {
+                    cacheFile.delete()
+                }
+                prefs.edit().putLong("last_loaded_channels_version", appVersionCode).apply()
+            }
+
             val reader = if (cacheFile.exists() && cacheFile.length() > 100) {
                 InputStreamReader(cacheFile.inputStream(), "UTF-8")
             } else {

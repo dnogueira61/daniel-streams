@@ -973,9 +973,9 @@
   },
   {
     "id": "271",
-    "name": "CANAL+ MotoGP France",
+    "name": "Canal+ MotoGP France",
     "country": "FR",
-    "category": "France",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -1126,9 +1126,9 @@
   },
   {
     "id": "463",
-    "name": "Canal+ Foot France",
+    "name": "Canal+ Foot",
     "country": "FR",
-    "category": "France",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -1137,7 +1137,7 @@
     "id": "273",
     "name": "Canal+ Formula 1",
     "country": "FR",
-    "category": "France",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -1218,7 +1218,7 @@
     "id": "122",
     "name": "Canal+ Sport France",
     "country": "FR",
-    "category": "France",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -1551,7 +1551,7 @@
     "id": "426",
     "name": "DAZN 1 Bar DE",
     "country": "DE",
-    "category": "Germany",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -1560,7 +1560,7 @@
     "id": "445",
     "name": "DAZN 1 Spain",
     "country": "ES",
-    "category": "Spain",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -1569,7 +1569,7 @@
     "id": "427",
     "name": "DAZN 2 Bar DE",
     "country": "DE",
-    "category": "Germany",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -1578,7 +1578,7 @@
     "id": "446",
     "name": "DAZN 2 Spain",
     "country": "ES",
-    "category": "Spain",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -1614,7 +1614,7 @@
     "id": "538",
     "name": "DAZN LaLiga",
     "country": "ES",
-    "category": "Spain",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -1965,7 +1965,7 @@
     "id": "44",
     "name": "ESPN USA",
     "country": "US",
-    "category": "United States",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -1992,7 +1992,7 @@
     "id": "45",
     "name": "ESPN2 USA",
     "country": "US",
-    "category": "United States",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -2082,7 +2082,7 @@
     "id": "524",
     "name": "EuroSport 1 Spain",
     "country": "ES",
-    "category": "Spain",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -2091,7 +2091,7 @@
     "id": "41",
     "name": "EuroSport 1 UK",
     "country": "UK",
-    "category": "United Kingdom",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -2127,7 +2127,7 @@
     "id": "42",
     "name": "EuroSport 2 UK",
     "country": "UK",
-    "category": "United Kingdom",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -2145,7 +2145,7 @@
     "id": "772",
     "name": "Eurosport 1 France",
     "country": "FR",
-    "category": "France",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -2514,7 +2514,7 @@
     "id": "39",
     "name": "Fox Sports 1 USA",
     "country": "US",
-    "category": "United States",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -2532,7 +2532,7 @@
     "id": "758",
     "name": "Fox Sports 2 USA",
     "country": "US",
-    "category": "United States",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -3304,9 +3304,9 @@
   },
   {
     "id": "436",
-    "name": "Movistar Deportes Spain",
+    "name": "Movistar Deportes",
     "country": "ES",
-    "category": "Spain",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -3322,9 +3322,9 @@
   },
   {
     "id": "84",
-    "name": "Movistar Laliga",
+    "name": "Movistar LaLiga",
     "country": "ES",
-    "category": "Spain",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -3333,7 +3333,7 @@
     "id": "435",
     "name": "Movistar Liga de Campeones",
     "country": "ES",
-    "category": "Spain",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -4773,7 +4773,7 @@
     "id": "870",
     "name": "Sky Sport Calcio Italy",
     "country": "IT",
-    "category": "Italy",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -4782,16 +4782,16 @@
     "id": "577",
     "name": "Sky Sport F1 Italy",
     "country": "IT",
-    "category": "Italy",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
   },
   {
     "id": "460",
-    "name": "Sky Sport Max (Sky Sport Football Italy)",
+    "name": "Sky Sport Football Italy",
     "country": "IT",
-    "category": "Italy",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -4843,27 +4843,27 @@
   },
   {
     "id": "461",
-    "name": "Sky Sport UNO Italy",
+    "name": "Sky Sport Uno Italy",
     "country": "IT",
-    "category": "Italy",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
   },
   {
     "id": "37",
-    "name": "Sky Sports Action UK",
+    "name": "Sky Sports Action",
     "country": "UK",
-    "category": "United Kingdom",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
   },
   {
     "id": "36",
-    "name": "Sky Sports Arena UK",
+    "name": "Sky Sports Arena",
     "country": "UK",
-    "category": "United Kingdom",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -4872,34 +4872,34 @@
     "id": "65",
     "name": "Sky Sports Cricket",
     "country": "UK",
-    "category": "United Kingdom",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
   },
   {
     "id": "274",
-    "name": "Sky Sports F1 DE",
+    "name": "Sky Sports F1 Germany",
     "country": "DE",
-    "category": "Germany",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
   },
   {
     "id": "60",
-    "name": "Sky Sports F1 UK",
+    "name": "Sky Sports F1",
     "country": "UK",
-    "category": "United Kingdom",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
   },
   {
     "id": "35",
-    "name": "Sky Sports Football UK",
+    "name": "Sky Sports Football",
     "country": "UK",
-    "category": "United Kingdom",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -4915,9 +4915,9 @@
   },
   {
     "id": "70",
-    "name": "Sky Sports Golf UK",
+    "name": "Sky Sports Golf",
     "country": "UK",
-    "category": "United Kingdom",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -4935,7 +4935,7 @@
     "id": "38",
     "name": "Sky Sports Main Event",
     "country": "UK",
-    "category": "United Kingdom",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -4998,7 +4998,7 @@
     "id": "130",
     "name": "Sky Sports Premier League",
     "country": "UK",
-    "category": "United Kingdom",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -5545,36 +5545,36 @@
   },
   {
     "id": "31",
-    "name": "TNT Sports 1 UK",
+    "name": "TNT Sports 1",
     "country": "UK",
-    "category": "United Kingdom",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
   },
   {
     "id": "32",
-    "name": "TNT Sports 2 UK",
+    "name": "TNT Sports 2",
     "country": "UK",
-    "category": "United Kingdom",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
   },
   {
     "id": "33",
-    "name": "TNT Sports 3 UK",
+    "name": "TNT Sports 3",
     "country": "UK",
-    "category": "United Kingdom",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
   },
   {
     "id": "34",
-    "name": "TNT Sports 4 UK",
+    "name": "TNT Sports 4",
     "country": "UK",
-    "category": "United Kingdom",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -6454,9 +6454,9 @@
   },
   {
     "id": "43",
-    "name": "beIN SPORTS XTRA 2",
-    "country": "INT",
-    "category": "Others",
+    "name": "DAZN LaLiga 2",
+    "country": "ES",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -6643,9 +6643,9 @@
   },
   {
     "id": "46",
-    "name": "beIN Sports MENA English 3",
-    "country": "INT",
-    "category": "Others",
+    "name": "Sky Sports Tennis",
+    "country": "UK",
+    "category": "Desporto",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
