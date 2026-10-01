@@ -245,6 +245,10 @@ class PlayerActivity : ComponentActivity() {
         repository = ChannelRepository(this)
         currentFolder = repository.getDefaultServer()
 
+        if (repository.epgRepository.getProgramsCount() == 0 || repository.epgRepository.isCacheStale()) {
+            repository.epgRepository.syncEpgFromWeb(lifecycleScope)
+        }
+
         channelId = intent.getStringExtra("EXTRA_CHANNEL_ID") ?: ""
         channelName = intent.getStringExtra("EXTRA_CHANNEL_NAME") ?: "Stream"
         directStreamUrl = intent.getStringExtra("EXTRA_DIRECT_STREAM_URL")
@@ -520,9 +524,24 @@ class PlayerActivity : ComponentActivity() {
 
         btnTabPt.setOnClickListener { selectDrawerCategory("Todos", TabFilter.PORTUGAL) }
         btnTabSports.setOnClickListener { selectDrawerCategory("Desporto", TabFilter.ALL) }
-        btnTabGaming.setOnClickListener { selectDrawerCategory("Gaming", TabFilter.GAMING) }
+        btnTabGaming.visibility = View.GONE
         btnTabFav.setOnClickListener { selectDrawerCategory("Favoritos", TabFilter.FAVORITES) }
         btnTabAll.setOnClickListener { selectDrawerCategory("Mundo", TabFilter.ALL) }
+
+        // Tablet & Touchscreen soft keyboard trigger
+        etDrawerSearch.setOnClickListener {
+            etDrawerSearch.isFocusable = true
+            etDrawerSearch.isFocusableInTouchMode = true
+            etDrawerSearch.requestFocus()
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            imm?.showSoftInput(etDrawerSearch, InputMethodManager.SHOW_IMPLICIT)
+        }
+        etDrawerSearch.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                imm?.showSoftInput(etDrawerSearch, InputMethodManager.SHOW_IMPLICIT)
+            }
+        }
 
         etDrawerSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -631,9 +650,6 @@ class PlayerActivity : ComponentActivity() {
         btnTabSports.backgroundTintList = if (cat == "Desporto") activeColor else inactiveColor
         btnTabSports.setTextColor(if (cat == "Desporto") Color.WHITE else Color.parseColor("#9CA3AF"))
 
-        btnTabGaming.backgroundTintList = if (tab == TabFilter.GAMING) activeColor else inactiveColor
-        btnTabGaming.setTextColor(if (tab == TabFilter.GAMING) Color.WHITE else Color.parseColor("#9CA3AF"))
-
         btnTabFav.backgroundTintList = if (tab == TabFilter.FAVORITES) activeColor else inactiveColor
         btnTabFav.setTextColor(if (tab == TabFilter.FAVORITES) Color.WHITE else Color.parseColor("#9CA3AF"))
 
@@ -643,7 +659,6 @@ class PlayerActivity : ComponentActivity() {
         val targetBtn = when {
             cat == "Todos" && tab == TabFilter.PORTUGAL -> btnTabPt
             cat == "Desporto" -> btnTabSports
-            tab == TabFilter.GAMING -> btnTabGaming
             tab == TabFilter.FAVORITES -> btnTabFav
             else -> btnTabAll
         }
@@ -658,7 +673,6 @@ class PlayerActivity : ComponentActivity() {
     private val drawerTabList = listOf(
         Pair("Todos", TabFilter.PORTUGAL),
         Pair("Desporto", TabFilter.ALL),
-        Pair("Gaming", TabFilter.GAMING),
         Pair("Favoritos", TabFilter.FAVORITES),
         Pair("Mundo", TabFilter.ALL)
     )
@@ -692,7 +706,6 @@ class PlayerActivity : ComponentActivity() {
         val query = etDrawerSearch.text.toString().trim()
         val list = when {
             currentDrawerCategory == "Desporto" -> repository.getChannels(TabFilter.ALL, query, "Desporto")
-            currentDrawerTab == TabFilter.GAMING -> repository.getChannels(TabFilter.GAMING, query)
             currentDrawerTab == TabFilter.ALL -> repository.getChannels(TabFilter.ALL, query).filter { !it.isPortuguese }
             currentDrawerTab == TabFilter.FAVORITES -> repository.getChannels(TabFilter.FAVORITES, query)
             else -> repository.getChannels(TabFilter.PORTUGAL, query)
@@ -2327,12 +2340,25 @@ class PlayerActivity : ComponentActivity() {
         val upcoming = schedule.filter { it != current }
         if (upcoming.isEmpty() && current == null) {
             val emptyTv = TextView(this).apply {
-                text = "Guia de programação não disponível para este canal."
+                text = "Guia de programação a carregar ou indisponível..."
                 textSize = 13f
                 setTextColor(Color.parseColor("#9CA3AF"))
                 setPadding(0, 20, 0, 20)
             }
             progList.addView(emptyTv)
+
+            if (repository.epgRepository.getProgramsCount() == 0 || repository.epgRepository.isCacheStale()) {
+                repository.epgRepository.syncEpgFromWeb(lifecycleScope) { success, _ ->
+                    if (success && !isFinishing && !isDestroyed) {
+                        runOnUiThread {
+                            try {
+                                activeDialog?.dismiss()
+                                showEpgDialog()
+                            } catch (_: Exception) {}
+                        }
+                    }
+                }
+            }
         } else {
             val upHeader = TextView(this).apply {
                 text = "A SEGUIR:"

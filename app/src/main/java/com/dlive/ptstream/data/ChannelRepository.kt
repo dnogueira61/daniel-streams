@@ -93,8 +93,8 @@ class ChannelRepository(private val context: Context) {
         val orderedPtCats = preferredPtCats.filter { availablePtCats.contains(it) } + availablePtCats.filter { !preferredPtCats.contains(it) }.sorted()
         precomputedPtCategories = listOf("Todos") + orderedPtCats
 
-        val allCats = all.map { it.category }.distinct().filter { !it.contains("Filme", ignoreCase = true) && !it.equals("Generalistas", ignoreCase = true) }.sorted()
-        precomputedAllCategories = listOf("Todos", "Desporto", "Gaming") + (allCats.filter { it != "Gaming" && it != "Desporto" })
+        val allCats = all.map { it.category }.distinct().filter { !it.contains("Filme", ignoreCase = true) && !it.equals("Generalistas", ignoreCase = true) && !it.equals("Gaming", ignoreCase = true) }.sorted()
+        precomputedAllCategories = listOf("Todos", "Desporto") + (allCats.filter { it != "Desporto" })
 
         channelsVersion.intValue++
     }

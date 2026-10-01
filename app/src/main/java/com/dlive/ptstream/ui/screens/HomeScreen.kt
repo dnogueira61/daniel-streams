@@ -32,6 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
@@ -39,6 +41,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -76,6 +82,16 @@ fun HomeScreen(
     var selectedTab by remember { mutableStateOf(initialTab) }
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
+    val searchFocusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    LaunchedEffect(isSearchActive) {
+        if (isSearchActive) {
+            kotlinx.coroutines.delay(150)
+            searchFocusRequester.requestFocus()
+            keyboardController?.show()
+        }
+    }
     var selectedCategory by remember { mutableStateOf("Todos") }
     var gamesSubFilter by remember { mutableStateOf("Todos") }
     var refreshKey by remember { mutableStateOf(0) }
@@ -224,8 +240,18 @@ fun HomeScreen(
                             value = searchQuery,
                             onValueChange = { searchQuery = it },
                             placeholder = { Text("Pesquisar canais...", color = TextSecondary) },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(searchFocusRequester),
                             singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Search
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onSearch = {
+                                    keyboardController?.hide()
+                                }
+                            ),
                             leadingIcon = {
                                 Icon(Icons.Default.Search, contentDescription = null, tint = TextSecondary)
                             },
@@ -233,6 +259,7 @@ fun HomeScreen(
                                 IconButton(onClick = {
                                     searchQuery = ""
                                     isSearchActive = false
+                                    keyboardController?.hide()
                                 }) {
                                     Icon(Icons.Default.Close, contentDescription = "Fechar", tint = TextPrimary)
                                 }
@@ -398,28 +425,7 @@ fun HomeScreen(
                         unselectedTextColor = TextSecondary
                     )
                 )
-                NavigationBarItem(
-                    selected = selectedTab == TabFilter.GAMING && selectedCategory != "⭐ Favoritos",
-                    onClick = {
-                        selectedTab = TabFilter.GAMING
-                        selectedCategory = "Todos"
-                    },
-                    icon = { Icon(Icons.Default.SportsEsports, contentDescription = "Gaming") },
-                    label = {
-                        Text(
-                            "Gaming",
-                            fontSize = 12.sp,
-                            fontWeight = if (selectedTab == TabFilter.GAMING && selectedCategory != "⭐ Favoritos") FontWeight.Bold else FontWeight.Normal
-                        )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = theme.primary,
-                        selectedTextColor = theme.primary,
-                        indicatorColor = theme.primary.copy(alpha = 0.2f),
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
-                    )
-                )
+
                 NavigationBarItem(
                     selected = selectedTab == TabFilter.ALL && selectedCategory != "⭐ Favoritos",
                     onClick = {

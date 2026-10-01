@@ -576,6 +576,7 @@
                     android:textSize="11sp"
                     android:textColor="#9CA3AF"
                     android:backgroundTint="#202330"
+                    android:visibility="gone"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
                     android:paddingStart="10dp"
@@ -625,8 +626,9 @@
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:singleLine="true"
-            android:focusable="false"
+            android:focusable="true"
             android:focusableInTouchMode="true"
+            android:cursorVisible="true"
             android:imeOptions="actionDone|flagNoExtractUi"
             android:inputType="text|textNoSuggestions" />
 
