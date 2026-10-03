@@ -15,6 +15,10 @@ import java.io.File
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import java.util.regex.Pattern
 
 enum class TabFilter {
@@ -608,16 +612,43 @@ class ChannelRepository(private val context: Context) {
     }
 
     private fun formatEventTime(rawTime: String): String {
+        if (rawTime.isBlank()) return ""
         return try {
-            if (rawTime.contains("T")) {
-                val parts = rawTime.split("T")
-                val time = parts[1].take(5)
-                val date = parts[0]
-                "Hoje $time"
+            val lisbonTz = TimeZone.getTimeZone("Europe/Lisbon")
+            val utcTz = TimeZone.getTimeZone("UTC")
+
+            val cleanStr = rawTime.trim().replace("Z", "")
+            val parsedDate: Date? = if (cleanStr.contains("T")) {
+                val pattern = if (cleanStr.length >= 19) "yyyy-MM-dd'T'HH:mm:ss" else "yyyy-MM-dd'T'HH:mm"
+                SimpleDateFormat(pattern, Locale.US).apply { timeZone = utcTz }.parse(cleanStr)
+            } else if (cleanStr.contains(" ")) {
+                val pattern = if (cleanStr.length >= 19) "yyyy-MM-dd HH:mm:ss" else "yyyy-MM-dd HH:mm"
+                SimpleDateFormat(pattern, Locale.US).apply { timeZone = utcTz }.parse(cleanStr)
+            } else {
+                null
+            }
+
+            if (parsedDate != null) {
+                val lisbonDateFmt = SimpleDateFormat("yyyyMMdd", Locale.US).apply { timeZone = lisbonTz }
+                val eventDay = lisbonDateFmt.format(parsedDate)
+                val today = lisbonDateFmt.format(Date())
+                val tomorrow = lisbonDateFmt.format(Date(System.currentTimeMillis() + 86400000L))
+
+                val lisbonTimeFmt = SimpleDateFormat("HH:mm", Locale.getDefault()).apply { timeZone = lisbonTz }
+                val timeFormatted = lisbonTimeFmt.format(parsedDate)
+
+                when (eventDay) {
+                    today -> "Hoje $timeFormatted"
+                    tomorrow -> "Amanhã $timeFormatted"
+                    else -> {
+                        val displayDateFmt = SimpleDateFormat("dd/MM", Locale.getDefault()).apply { timeZone = lisbonTz }
+                        "${displayDateFmt.format(parsedDate)} $timeFormatted"
+                    }
+                }
             } else {
                 rawTime
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             rawTime
         }
     }

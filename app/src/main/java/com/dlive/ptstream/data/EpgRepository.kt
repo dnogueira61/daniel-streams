@@ -54,6 +54,7 @@ class EpgRepository(private val context: Context) {
 
     // Primary Feeds
     private val EPG_M3UPT_URL = "https://raw.githubusercontent.com/LITUATUI/M3UPT/main/EPG/epg-m3upt.xml.gz"
+    private val EPG_GENIUS_STRONG_URL = "https://github.com/ferteque/Curated-M3U-Repository/raw/refs/heads/main/epg6.xml.gz"
     private val EPG_SPORTS_UK_URL = "https://epgshare01.online/epgshare01/epg_ripper_UK1.xml.gz"
     private val EPG_SPORTS_ES_URL = "https://epgshare01.online/epgshare01/epg_ripper_ES1.xml.gz"
 
@@ -69,7 +70,8 @@ class EpgRepository(private val context: Context) {
         private set
 
     // Channel name keywords mapped to EPG Channel IDs (Portuguese, European Sports, International)
-    private val channelToEpgIds = mapOf(
+    private val channelToEpgIds: Map<String, List<String>> by lazy {
+        val baseMap = mutableMapOf<String, List<String>>(
         // Portugal Generalistas & Notícias
         "rtp 1" to listOf("RTP1.pt", "RTP.1.HD.pt", "rtp1.pt"),
         "rtp 2" to listOf("RTP2.pt", "RTP.2.HD.pt", "rtp2.pt"),
@@ -206,6 +208,21 @@ class EpgRepository(private val context: Context) {
         "mezzo" to listOf("Mezzo.pt", "mezzo.pt"),
         "stingray iconcerts" to listOf("Stingray.iConcerts.HD.pt")
     )
+    try {
+        val jsonStr = context.assets.open("epg_mundo_mapping.json").bufferedReader().use { it.readText() }
+        val type = object : TypeToken<Map<String, String>>() {}.type
+        val mundoMap: Map<String, String>? = Gson().fromJson(jsonStr, type)
+        mundoMap?.forEach { (k, v) ->
+            val lowerKey = k.lowercase().trim()
+            if (!baseMap.containsKey(lowerKey)) {
+                baseMap[lowerKey] = listOf(v)
+            }
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    baseMap
+}
 
     // Chaves ordenadas por tamanho decrescente para garantir correspondência exata
     // (ex: "sport tv 1" antes de "sport tv", "movistar deportes 2" antes de "movistar deportes")
@@ -228,9 +245,15 @@ class EpgRepository(private val context: Context) {
                 val type = object : TypeToken<Map<String, List<EpgProgram>>>() {}.type
                 val map: Map<String, List<EpgProgram>>? = Gson().fromJson(cacheFile.readText(), type)
                 if (!map.isNullOrEmpty()) {
+                    val cutoff = System.currentTimeMillis() - 4 * 3600 * 1000L
                     synchronized(programMap) {
                         programMap.clear()
-                        map.forEach { (k, v) -> programMap[k] = v.toMutableList() }
+                        map.forEach { (k, v) ->
+                            val fresh = v.filter { it.stopEpoch >= cutoff }
+                            if (fresh.isNotEmpty()) {
+                                programMap[k] = fresh.toMutableList()
+                            }
+                        }
                     }
                     epgVersion.intValue++
                 }
@@ -302,25 +325,32 @@ class EpgRepository(private val context: Context) {
 
             // 1. Fonte Principal M3UPT (Canais PT + Desporto Internacional TNT, Premier, beIN)
             try {
-                fetchAndParseUrl(EPG_M3UPT_URL, allParsed)
+                fetchAndParseUrl(EPG_M3UPT_URL, allParsed, skipExisting = false)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
 
-            // 2. Fontes Secundárias Desporto Internacional (Sky Sports UK e Movistar/DAZN Espanha)
+            // 2. Fonte EPG Genius Strong (Mundo + Desporto Internacional Strong IPTV)
+            try {
+                fetchAndParseUrl(EPG_GENIUS_STRONG_URL, allParsed, skipExisting = true)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            // 3. Fontes Secundárias Desporto Internacional (Sky Sports UK e Movistar/DAZN Espanha)
             val sportsFeeds = listOf(
                 EPG_SPORTS_ES_URL,
                 EPG_SPORTS_UK_URL
             )
             for (feedUrl in sportsFeeds) {
                 try {
-                    fetchAndParseUrl(feedUrl, allParsed)
+                    fetchAndParseUrl(feedUrl, allParsed, skipExisting = true)
                 } catch (e: Exception) {
                     // Falha numa fonte de desporto não é crítica se a principal funcionou
                 }
             }
 
-            // 3. Fallbacks de emergência se nada foi descarregado
+            // 4. Fallbacks de emergência se nada foi descarregado
             if (allParsed.isEmpty()) {
                 val fallbacks = listOf(
                     EPG_PT_FALLBACK_URL,
@@ -328,7 +358,7 @@ class EpgRepository(private val context: Context) {
                 )
                 for (fallback in fallbacks) {
                     try {
-                        fetchAndParseUrl(fallback, allParsed)
+                        fetchAndParseUrl(fallback, allParsed, skipExisting = false)
                         if (allParsed.isNotEmpty()) break
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -344,8 +374,11 @@ class EpgRepository(private val context: Context) {
 
                 // Guardar na cache persistente
                 try {
+                    val cutoff = System.currentTimeMillis() - 4 * 3600 * 1000L
+                    val toSave = allParsed.mapValues { (_, progs) -> progs.filter { it.stopEpoch >= cutoff } }
+                        .filterValues { it.isNotEmpty() }
                     val cacheFile = File(context.filesDir, EPG_CACHE_FILE)
-                    cacheFile.writeText(Gson().toJson(allParsed))
+                    cacheFile.writeText(Gson().toJson(toSave))
                     prefs.edit().putLong("last_epg_update_time", System.currentTimeMillis()).apply()
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -368,19 +401,27 @@ class EpgRepository(private val context: Context) {
         }
     }
 
-    private fun fetchAndParseUrl(targetUrl: String, destination: MutableMap<String, MutableList<EpgProgram>>) {
+    private fun fetchAndParseUrl(
+        targetUrl: String,
+        destination: MutableMap<String, MutableList<EpgProgram>>,
+        skipExisting: Boolean = false
+    ) {
         val conn = (URL(targetUrl).openConnection() as HttpURLConnection).apply {
-            connectTimeout = 12000
-            readTimeout = 25000
+            connectTimeout = 15000
+            readTimeout = 45000
             setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
         }
         if (conn.responseCode == HttpURLConnection.HTTP_OK) {
             val gzipStream = GZIPInputStream(conn.inputStream)
-            parseXmlGzip(gzipStream, destination)
+            parseXmlGzip(gzipStream, destination, skipExisting)
         }
     }
 
-    private fun parseXmlGzip(input: InputStream, result: MutableMap<String, MutableList<EpgProgram>>) {
+    private fun parseXmlGzip(
+        input: InputStream,
+        result: MutableMap<String, MutableList<EpgProgram>>,
+        skipExisting: Boolean = false
+    ) {
         val factory = XmlPullParserFactory.newInstance()
         factory.isNamespaceAware = false
         val parser = factory.newPullParser()
@@ -403,7 +444,7 @@ class EpgRepository(private val context: Context) {
                     when (parser.name) {
                         "programme" -> {
                             val ch = parser.getAttributeValue(null, "channel")
-                            if (ch != null && targetEpgIds.contains(ch)) {
+                            if (ch != null && targetEpgIds.contains(ch) && (!skipExisting || result[ch].isNullOrEmpty())) {
                                 currentChannel = ch
                                 val startStr = parser.getAttributeValue(null, "start")
                                 val stopStr = parser.getAttributeValue(null, "stop")
