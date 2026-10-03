@@ -95,6 +95,7 @@ fun HomeScreen(
     }
     var selectedCategory by remember { mutableStateOf("Todos") }
     var gamesSubFilter by remember { mutableStateOf("Canais") }
+    var selectedLeagueFilter by remember { mutableStateOf("Todas") }
     var refreshKey by remember { mutableStateOf(0) }
     var showSettingsDialog by remember { mutableStateOf(false) }
 
@@ -613,7 +614,15 @@ fun HomeScreen(
                             }
                         }
                     } else {
-                        // Sub-tab 2: Live matches for today
+                        // Sub-tab 2: Live matches for today (StreamFC style: Matchday by Leagues + Game-to-Channel Mapping)
+                        val allCachedChannels = remember(refreshKey, channelsVersion) { repository.getAllCachedChannels() }
+                        val leagueGroups = remember(filteredEvents) {
+                            filteredEvents.groupBy { SportsMatchHelper.getCompetitionCategory(it) }
+                        }
+                        val availableLeagues = remember(leagueGroups, filteredEvents.size) {
+                            listOf("Todas" to filteredEvents.size) + leagueGroups.map { it.key to it.value.size }
+                        }
+
                         if (isLoadingEvents && filteredEvents.isEmpty()) {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -622,69 +631,161 @@ fun HomeScreen(
                                     Text("A procurar jogos em direto...", color = TextSecondary, fontSize = 13.sp)
                                 }
                             }
+                        } else if (filteredEvents.isEmpty()) {
+                            Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.cardColors(containerColor = SurfaceDark)
+                                ) {
+                                    Text(
+                                        "Sem transmissões ao vivo agendadas no momento. Veja os canais de desporto 24/7 no separador ao lado.",
+                                        color = TextSecondary,
+                                        fontSize = 13.sp,
+                                        modifier = Modifier.padding(18.dp)
+                                    )
+                                }
+                            }
                         } else {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(12.dp),
-                                verticalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                item {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            "🔥 Jogos e Eventos Hoje (TimStreams)",
-                                            color = TextPrimary,
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                        Text(
-                                            "${filteredEvents.size} disponíveis",
-                                            color = TextSecondary,
-                                            fontSize = 11.sp
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                // Barra de Filtros de Competição / Ligas
+                                LazyRow(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    items(availableLeagues) { (leagueName, count) ->
+                                        val isSelected = selectedLeagueFilter == leagueName
+                                        FilterChip(
+                                            selected = isSelected,
+                                            onClick = { selectedLeagueFilter = leagueName },
+                                            label = {
+                                                Text(
+                                                    text = if (leagueName == "Todas") "⚽ Todas ($count)" else "$leagueName ($count)",
+                                                    fontSize = 11.sp,
+                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                                )
+                                            },
+                                            colors = FilterChipDefaults.filterChipColors(
+                                                selectedContainerColor = Color(0xFF38BDF8),
+                                                selectedLabelColor = Color.Black,
+                                                containerColor = SurfaceDark,
+                                                labelColor = TextSecondary
+                                            ),
+                                            border = FilterChipDefaults.filterChipBorder(
+                                                enabled = true,
+                                                selected = isSelected,
+                                                borderColor = if (isSelected) Color(0xFF38BDF8) else BorderDark,
+                                                selectedBorderColor = Color(0xFF38BDF8)
+                                            )
                                         )
                                     }
                                 }
 
-                                if (filteredEvents.isEmpty()) {
-                                    item {
-                                        Card(
-                                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                                            colors = CardDefaults.cardColors(containerColor = SurfaceDark)
-                                        ) {
-                                            Text(
-                                                "Sem transmissões ao vivo agendadas no momento. Veja os canais de desporto 24/7 no separador ao lado.",
-                                                color = TextSecondary,
-                                                fontSize = 12.sp,
-                                                modifier = Modifier.padding(14.dp)
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentPadding = PaddingValues(12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    if (selectedLeagueFilter == "Todas") {
+                                        // Agrupamento por cada liga com cabeçalho
+                                        leagueGroups.forEach { (leagueName, eventsInLeague) ->
+                                            item(key = "header_${leagueName}") {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 4.dp, vertical = 6.dp),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        text = leagueName,
+                                                        color = TextPrimary,
+                                                        fontSize = 14.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                    Text(
+                                                        text = "${eventsInLeague.size} jogos",
+                                                        color = TextSecondary,
+                                                        fontSize = 11.sp
+                                                    )
+                                                }
+                                            }
+
+                                            itemsIndexed(eventsInLeague, key = { index, event -> "ev_${event.id}_$index" }) { _, event ->
+                                                val matchedChannels = remember(event.id) {
+                                                    SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
+                                                }
+                                                LiveEventCard(
+                                                    event = event,
+                                                    broadcastingChannels = matchedChannels,
+                                                    onPlayClick = {
+                                                        PlayerActivity.closeActivePip()
+                                                        val streamUrl = event.streams.firstOrNull()?.url ?: ""
+                                                        val backupUrl = if (event.streams.size > 1) event.streams[1].url else null
+                                                        val backupUrl2 = if (event.streams.size > 2) event.streams[2].url else null
+                                                        val intent = Intent(context, PlayerActivity::class.java).apply {
+                                                            putExtra("EXTRA_CHANNEL_ID", "event_${event.id}")
+                                                            putExtra("EXTRA_CHANNEL_NAME", event.name)
+                                                            putExtra("EXTRA_DIRECT_STREAM_URL", streamUrl)
+                                                            if (backupUrl != null) putExtra("EXTRA_BACKUP_STREAM_URL", backupUrl)
+                                                            if (backupUrl2 != null) putExtra("EXTRA_BACKUP_STREAM_URL2", backupUrl2)
+                                                        }
+                                                        context.startActivity(intent)
+                                                    },
+                                                    onChannelClick = { ch -> onChannelClick(ch, null) }
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        // Apenas a liga selecionada
+                                        val eventsInLeague = leagueGroups[selectedLeagueFilter] ?: emptyList()
+                                        item(key = "header_single_${selectedLeagueFilter}") {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 4.dp, vertical = 6.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = selectedLeagueFilter,
+                                                    color = TextPrimary,
+                                                    fontSize = 14.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Text(
+                                                    text = "${eventsInLeague.size} jogos",
+                                                    color = TextSecondary,
+                                                    fontSize = 11.sp
+                                                )
+                                            }
+                                        }
+
+                                        itemsIndexed(eventsInLeague, key = { index, event -> "ev_filtered_${event.id}_$index" }) { _, event ->
+                                            val matchedChannels = remember(event.id) {
+                                                SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
+                                            }
+                                            LiveEventCard(
+                                                event = event,
+                                                broadcastingChannels = matchedChannels,
+                                                onPlayClick = {
+                                                    PlayerActivity.closeActivePip()
+                                                    val streamUrl = event.streams.firstOrNull()?.url ?: ""
+                                                    val backupUrl = if (event.streams.size > 1) event.streams[1].url else null
+                                                    val backupUrl2 = if (event.streams.size > 2) event.streams[2].url else null
+                                                    val intent = Intent(context, PlayerActivity::class.java).apply {
+                                                        putExtra("EXTRA_CHANNEL_ID", "event_${event.id}")
+                                                        putExtra("EXTRA_CHANNEL_NAME", event.name)
+                                                        putExtra("EXTRA_DIRECT_STREAM_URL", streamUrl)
+                                                        if (backupUrl != null) putExtra("EXTRA_BACKUP_STREAM_URL", backupUrl)
+                                                        if (backupUrl2 != null) putExtra("EXTRA_BACKUP_STREAM_URL2", backupUrl2)
+                                                    }
+                                                    context.startActivity(intent)
+                                                },
+                                                onChannelClick = { ch -> onChannelClick(ch, null) }
                                             )
                                         }
-                                    }
-                                } else {
-                                    itemsIndexed(filteredEvents, key = { index, event -> "ev_${event.id}_$index" }) { _, event ->
-                                        LiveEventCard(
-                                            event = event,
-                                            onPlayClick = {
-                                                PlayerActivity.closeActivePip()
-                                                val streamUrl = event.streams.firstOrNull()?.url ?: ""
-                                                val backupUrl = if (event.streams.size > 1) event.streams[1].url else null
-                                                val backupUrl2 = if (event.streams.size > 2) event.streams[2].url else null
-                                                val intent = Intent(context, PlayerActivity::class.java).apply {
-                                                    putExtra("EXTRA_CHANNEL_ID", "event_${event.id}")
-                                                    putExtra("EXTRA_CHANNEL_NAME", event.name)
-                                                    putExtra("EXTRA_DIRECT_STREAM_URL", streamUrl)
-                                                    if (backupUrl != null) {
-                                                        putExtra("EXTRA_BACKUP_STREAM_URL", backupUrl)
-                                                    }
-                                                    if (backupUrl2 != null) {
-                                                        putExtra("EXTRA_BACKUP_STREAM_URL2", backupUrl2)
-                                                    }
-                                                }
-                                                context.startActivity(intent)
-                                            }
-                                        )
                                     }
                                 }
                             }
@@ -862,7 +963,9 @@ fun HomeScreen(
 @Composable
 fun LiveEventCard(
     event: LiveEvent,
-    onPlayClick: () -> Unit
+    broadcastingChannels: List<Channel> = emptyList(),
+    onPlayClick: () -> Unit,
+    onChannelClick: ((Channel) -> Unit)? = null
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(if (isFocused) 1.025f else 1.0f, label = "event_scale")
@@ -884,97 +987,178 @@ fun LiveEventCard(
             CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(BorderDark))
         }
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(14.dp)
         ) {
             Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Team / Match Logo
-                Box(
-                    modifier = Modifier
-                        .size(46.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(SurfaceVariantDark),
-                    contentAlignment = Alignment.Center
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (!event.logo.isNullOrBlank()) {
-                        AsyncImage(
-                            model = event.logo,
-                            contentDescription = event.name,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(4.dp),
-                            contentScale = ContentScale.Fit
-                        )
-                    } else {
-                        Text(
-                            text = if (event.isSoccer) "⚽" else "🏁",
-                            fontSize = 22.sp
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column {
-                    Text(
-                        text = event.name,
-                        color = TextPrimary,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        TagBadge(text = event.genreName, color = if (event.isSoccer) RedPrimary else AccentGreen)
-                        if (event.time.isNotBlank()) {
-                            Spacer(modifier = Modifier.width(6.dp))
-                            TagBadge(text = event.time, color = TextSecondary)
+                    // Team / Match Logo
+                    Box(
+                        modifier = Modifier
+                            .size(46.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(SurfaceVariantDark),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (!event.logo.isNullOrBlank()) {
+                            AsyncImage(
+                                model = event.logo,
+                                contentDescription = event.name,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(4.dp),
+                                contentScale = ContentScale.Fit
+                            )
+                        } else {
+                            Text(
+                                text = if (event.isSoccer) "⚽" else "🏁",
+                                fontSize = 22.sp
+                            )
                         }
-                        if (event.viewers > 0) {
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(6.dp)
-                                        .clip(CircleShape)
-                                        .background(AccentGreen)
-                                )
-                                Spacer(modifier = Modifier.width(3.dp))
-                                Text(
-                                    "${event.viewers}",
-                                    color = TextSecondary,
-                                    fontSize = 11.sp
-                                )
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column {
+                        Text(
+                            text = event.name,
+                            color = TextPrimary,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            TagBadge(text = event.genreName, color = if (event.isSoccer) RedPrimary else AccentGreen)
+                            if (event.time.isNotBlank()) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                TagBadge(text = event.time, color = TextSecondary)
+                            }
+                            if (event.viewers > 0) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(6.dp)
+                                            .clip(CircleShape)
+                                            .background(AccentGreen)
+                                    )
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Text(
+                                        "${event.viewers}",
+                                        color = TextSecondary,
+                                        fontSize = 11.sp
+                                    )
+                                }
                             }
                         }
                     }
                 }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Watch Button
+                Button(
+                    onClick = onPlayClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = RedPrimary),
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Assistir",
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Assistir", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                }
             }
 
-            // Watch Button
-            Button(
-                onClick = onPlayClick,
-                colors = ButtonDefaults.buttonColors(containerColor = RedPrimary),
-                shape = RoundedCornerShape(8.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Assistir",
-                    tint = Color.White,
-                    modifier = Modifier.size(16.dp)
+            // StreamFC: Mapeamento de Canais de TV Oficiais
+            if (broadcastingChannels.isNotEmpty() && onChannelClick != null) {
+                Spacer(modifier = Modifier.height(10.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(BorderDark.copy(alpha = 0.6f))
                 )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Assistir", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "📺 Na TV:",
+                        color = Color(0xFF38BDF8),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    broadcastingChannels.forEach { channel ->
+                        TvChannelPill(
+                            channel = channel,
+                            onClick = { onChannelClick(channel) }
+                        )
+                    }
+                }
             }
+        }
+    }
+}
+
+@Composable
+fun TvChannelPill(
+    channel: Channel,
+    onClick: () -> Unit
+) {
+    var isFocused by remember { mutableStateOf(false) }
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(6.dp),
+        color = if (isFocused) Color(0xFF38BDF8) else if (channel.isPortuguese) Color(0x33E50914) else SurfaceVariantDark,
+        border = BorderStroke(1.dp, if (isFocused) Color.White else if (channel.isPortuguese) RedPrimary.copy(alpha = 0.6f) else BorderDark),
+        modifier = Modifier
+            .onFocusChanged { isFocused = it.isFocused }
+            .focusable()
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            val logo = channel.logoUrl ?: ChannelLogoHelper.getLogoUrl(channel.name)
+            if (!logo.isNullOrBlank()) {
+                AsyncImage(
+                    model = logo,
+                    contentDescription = channel.name,
+                    modifier = Modifier.size(16.dp),
+                    contentScale = ContentScale.Fit
+                )
+            } else {
+                Text(
+                    text = if (channel.isPortuguese) "🇵🇹" else "📺",
+                    fontSize = 11.sp
+                )
+            }
+            Text(
+                text = channel.name,
+                color = if (isFocused) Color.Black else TextPrimary,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
         }
     }
 }
