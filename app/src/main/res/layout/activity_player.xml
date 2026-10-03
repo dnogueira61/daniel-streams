@@ -543,7 +543,7 @@
                     android:id="@+id/btnTabPt"
                     android:layout_width="wrap_content"
                     android:layout_height="34dp"
-                    android:text="🇵🇹 Todos"
+                    android:text="🇵🇹 Canais"
                     android:textSize="11sp"
                     android:textColor="#FFFFFF"
                     android:backgroundTint="#E50914"
@@ -567,26 +567,11 @@
                     android:paddingEnd="10dp" />
 
                 <Button
-                    android:id="@+id/btnTabGaming"
+                    android:id="@+id/btnTabGames"
                     android:layout_width="wrap_content"
                     android:layout_height="34dp"
                     android:layout_marginStart="4dp"
-                    android:text="🎮 Gaming"
-                    android:textSize="11sp"
-                    android:textColor="#9CA3AF"
-                    android:backgroundTint="#202330"
-                    android:visibility="gone"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp" />
-
-                <Button
-                    android:id="@+id/btnTabFav"
-                    android:layout_width="wrap_content"
-                    android:layout_height="34dp"
-                    android:layout_marginStart="4dp"
-                    android:text="⭐ Favoritos"
+                    android:text="🔴 Jogos Hoje"
                     android:textSize="11sp"
                     android:textColor="#9CA3AF"
                     android:backgroundTint="#202330"
@@ -601,6 +586,20 @@
                     android:layout_height="34dp"
                     android:layout_marginStart="4dp"
                     android:text="🌐 Mundo"
+                    android:textSize="11sp"
+                    android:textColor="#9CA3AF"
+                    android:backgroundTint="#202330"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp" />
+
+                <Button
+                    android:id="@+id/btnTabFav"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="4dp"
+                    android:text="⭐ Favoritos"
                     android:textSize="11sp"
                     android:textColor="#9CA3AF"
                     android:backgroundTint="#202330"

@@ -147,9 +147,9 @@ class PlayerActivity : ComponentActivity() {
     private lateinit var tvDrawerEmpty: TextView
     private lateinit var btnTabPt: Button
     private lateinit var btnTabSports: Button
-    private lateinit var btnTabGaming: Button
-    private lateinit var btnTabFav: Button
+    private lateinit var btnTabGames: Button
     private lateinit var btnTabAll: Button
+    private lateinit var btnTabFav: Button
     private lateinit var drawerAdapter: DrawerChannelAdapter
     private var lastOverlayShowTime = 0L
 
@@ -278,6 +278,9 @@ class PlayerActivity : ComponentActivity() {
 
         if (repository.epgRepository.getProgramsCount() == 0 || repository.epgRepository.isCacheStale()) {
             repository.epgRepository.syncEpgFromWeb(lifecycleScope)
+        }
+        if (repository.getLiveEvents().isEmpty()) {
+            repository.fetchLiveMatches(lifecycleScope) {}
         }
 
         channelId = intent.getStringExtra("EXTRA_CHANNEL_ID") ?: ""
@@ -514,9 +517,9 @@ class PlayerActivity : ComponentActivity() {
         tvDrawerEmpty = findViewById(R.id.tvDrawerEmpty)
         btnTabPt = findViewById(R.id.btnTabPt)
         btnTabSports = findViewById(R.id.btnTabSports)
-        btnTabGaming = findViewById(R.id.btnTabGaming)
-        btnTabFav = findViewById(R.id.btnTabFav)
+        btnTabGames = findViewById(R.id.btnTabGames)
         btnTabAll = findViewById(R.id.btnTabAll)
+        btnTabFav = findViewById(R.id.btnTabFav)
 
         findViewById<ImageButton>(R.id.btnCloseDrawer).setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
@@ -530,6 +533,7 @@ class PlayerActivity : ComponentActivity() {
         drawerAdapter = DrawerChannelAdapter(
             channels = emptyList(),
             activeChannelId = channelId,
+            activeChannelName = channelName,
             epgRepository = repository.epgRepository,
             onChannelSelected = { selected ->
                 switchChannel(selected)
@@ -555,9 +559,9 @@ class PlayerActivity : ComponentActivity() {
 
         btnTabPt.setOnClickListener { selectDrawerCategory("Todos", TabFilter.PORTUGAL) }
         btnTabSports.setOnClickListener { selectDrawerCategory("Desporto", TabFilter.ALL) }
-        btnTabGaming.visibility = View.GONE
-        btnTabFav.setOnClickListener { selectDrawerCategory("Favoritos", TabFilter.FAVORITES) }
+        btnTabGames.setOnClickListener { selectDrawerCategory("Jogos Hoje", TabFilter.LIVE_GAMES) }
         btnTabAll.setOnClickListener { selectDrawerCategory("Mundo", TabFilter.ALL) }
+        btnTabFav.setOnClickListener { selectDrawerCategory("Favoritos", TabFilter.FAVORITES) }
 
         // Touch swipe fix: prevent DrawerLayout from intercepting horizontal swipes on drawer tabs
         val scrollDrawerTabs = findViewById<HorizontalScrollView>(R.id.scrollDrawerTabs)
@@ -607,28 +611,63 @@ class PlayerActivity : ComponentActivity() {
         }
 
         drawerLayout.addDrawerListener(object : androidx.drawerlayout.widget.DrawerLayout.SimpleDrawerListener() {
+            override fun onDrawerStateChanged(newState: Int) {
+                if (newState == androidx.drawerlayout.widget.DrawerLayout.STATE_DRAGGING && !drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    syncDrawerToActiveChannel()
+                }
+            }
             override fun onDrawerOpened(drawerView: View) {
                 scrollToActiveChannel()
+                rvDrawerChannels.postDelayed({ scrollToActiveChannel() }, 100)
             }
         })
 
-        selectDrawerCategory("Todos", TabFilter.PORTUGAL)
+        syncDrawerToActiveChannel()
+    }
+
+    private fun syncDrawerToActiveChannel() {
+        val isLiveEvent = channelId.startsWith("event_") || repository.getLiveEvents().any {
+            it.id == channelId.removePrefix("event_") || it.name.equals(channelName, ignoreCase = true)
+        }
+
+        if (isLiveEvent) {
+            selectDrawerCategory("Jogos Hoje", TabFilter.LIVE_GAMES)
+            return
+        }
+
+        val currentChannel = repository.getChannels(TabFilter.ALL).firstOrNull {
+            it.id == channelId || it.name.equals(channelName, ignoreCase = true)
+        }
+
+        if (currentChannel != null) {
+            if (currentDrawerTab == TabFilter.FAVORITES && currentChannel.isFavorite) {
+                selectDrawerCategory("Favoritos", TabFilter.FAVORITES)
+            } else if (currentChannel.category.contains("Desporto", ignoreCase = true) || currentChannel.category.contains("Sport", ignoreCase = true)) {
+                selectDrawerCategory("Desporto", TabFilter.ALL)
+            } else if (currentChannel.isPortuguese) {
+                selectDrawerCategory("Todos", TabFilter.PORTUGAL)
+            } else {
+                selectDrawerCategory("Mundo", TabFilter.ALL)
+            }
+        } else {
+            selectDrawerCategory("Todos", TabFilter.PORTUGAL)
+        }
     }
 
     private fun scrollToActiveChannel() {
         val list = drawerAdapter.getChannels()
         val index = list.indexOfFirst {
-            it.id == channelId || it.name.equals(channelName, ignoreCase = true)
+            it.id == channelId || (channelName.isNotBlank() && it.name.equals(channelName, ignoreCase = true))
         }
         if (index in 0 until drawerAdapter.itemCount) {
-            val lm = rvDrawerChannels.layoutManager as? LinearLayoutManager
-            val offset = (resources.displayMetrics.density * 80).toInt()
+            val lm = rvDrawerChannels.layoutManager as? LinearLayoutManager ?: return
+            val offset = if (index == 0) 0 else (resources.displayMetrics.density * 50).toInt()
             try {
-                lm?.scrollToPositionWithOffset(index, offset)
+                lm.scrollToPositionWithOffset(index, offset)
             } catch (_: Exception) {}
             rvDrawerChannels.post {
                 try {
-                    lm?.scrollToPositionWithOffset(index, offset)
+                    lm.scrollToPositionWithOffset(index, offset)
                 } catch (_: Exception) {}
             }
             rvDrawerChannels.postDelayed({
@@ -647,39 +686,13 @@ class PlayerActivity : ComponentActivity() {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
         imm?.hideSoftInputFromWindow(etDrawerSearch.windowToken, 0)
 
-        // 2. Identify active channel in repository
-        val currentChannel = repository.getChannels(TabFilter.ALL).firstOrNull {
-            it.id == channelId || it.name.equals(channelName, ignoreCase = true)
-        }
+        // 2. Sync tab and category to active channel/stream
+        syncDrawerToActiveChannel()
 
-        // 3. Ensure the active channel is in the visible drawer tab/category
-        if (currentChannel != null) {
-            if (currentChannel.isPortuguese) {
-                if (currentDrawerTab != TabFilter.PORTUGAL && currentDrawerTab != TabFilter.FAVORITES) {
-                    currentDrawerTab = TabFilter.PORTUGAL
-                    currentDrawerCategory = "Todos"
-                } else if (currentDrawerTab == TabFilter.PORTUGAL && currentDrawerCategory != "Todos") {
-                    val inCurrentCat = repository.getChannels(TabFilter.PORTUGAL, "", currentDrawerCategory)
-                        .any { it.id == currentChannel.id || it.name.equals(currentChannel.name, ignoreCase = true) }
-                    if (!inCurrentCat) {
-                        currentDrawerCategory = "Todos"
-                    }
-                }
-            } else {
-                if (currentDrawerTab != TabFilter.ALL) {
-                    currentDrawerTab = TabFilter.ALL
-                    currentDrawerCategory = "Mundo"
-                }
-            }
-        }
-
-        // 4. Update tab buttons and reload adapter
-        selectDrawerCategory(currentDrawerCategory, currentDrawerTab)
-
-        // 5. Open drawer
+        // 3. Open drawer
         drawerLayout.openDrawer(GravityCompat.START)
 
-        // 6. Scroll immediately and post-animation to guarantee correct channel position
+        // 4. Scroll immediately and post-animation to guarantee correct channel position
         scrollToActiveChannel()
         handler.postDelayed({
             scrollToActiveChannel()
@@ -698,18 +711,22 @@ class PlayerActivity : ComponentActivity() {
         btnTabPt.backgroundTintList = if (cat == "Todos" && tab == TabFilter.PORTUGAL) activeColor else inactiveColor
         btnTabPt.setTextColor(if (cat == "Todos" && tab == TabFilter.PORTUGAL) Color.WHITE else Color.parseColor("#9CA3AF"))
 
-        btnTabSports.backgroundTintList = if (cat == "Desporto") activeColor else inactiveColor
-        btnTabSports.setTextColor(if (cat == "Desporto") Color.WHITE else Color.parseColor("#9CA3AF"))
+        btnTabSports.backgroundTintList = if (cat == "Desporto" && tab == TabFilter.ALL) activeColor else inactiveColor
+        btnTabSports.setTextColor(if (cat == "Desporto" && tab == TabFilter.ALL) Color.WHITE else Color.parseColor("#9CA3AF"))
 
-        btnTabFav.backgroundTintList = if (tab == TabFilter.FAVORITES) activeColor else inactiveColor
-        btnTabFav.setTextColor(if (tab == TabFilter.FAVORITES) Color.WHITE else Color.parseColor("#9CA3AF"))
+        btnTabGames.backgroundTintList = if (tab == TabFilter.LIVE_GAMES) activeColor else inactiveColor
+        btnTabGames.setTextColor(if (tab == TabFilter.LIVE_GAMES) Color.WHITE else Color.parseColor("#9CA3AF"))
 
         btnTabAll.backgroundTintList = if (tab == TabFilter.ALL && cat == "Mundo") activeColor else inactiveColor
         btnTabAll.setTextColor(if (tab == TabFilter.ALL && cat == "Mundo") Color.WHITE else Color.parseColor("#9CA3AF"))
 
+        btnTabFav.backgroundTintList = if (tab == TabFilter.FAVORITES) activeColor else inactiveColor
+        btnTabFav.setTextColor(if (tab == TabFilter.FAVORITES) Color.WHITE else Color.parseColor("#9CA3AF"))
+
         val targetBtn = when {
             cat == "Todos" && tab == TabFilter.PORTUGAL -> btnTabPt
-            cat == "Desporto" -> btnTabSports
+            cat == "Desporto" && tab == TabFilter.ALL -> btnTabSports
+            tab == TabFilter.LIVE_GAMES -> btnTabGames
             tab == TabFilter.FAVORITES -> btnTabFav
             else -> btnTabAll
         }
@@ -724,8 +741,9 @@ class PlayerActivity : ComponentActivity() {
     private val drawerTabList = listOf(
         Pair("Todos", TabFilter.PORTUGAL),
         Pair("Desporto", TabFilter.ALL),
-        Pair("Favoritos", TabFilter.FAVORITES),
-        Pair("Mundo", TabFilter.ALL)
+        Pair("Jogos Hoje", TabFilter.LIVE_GAMES),
+        Pair("Mundo", TabFilter.ALL),
+        Pair("Favoritos", TabFilter.FAVORITES)
     )
 
     fun cycleDrawerTab(forward: Boolean) {
@@ -759,6 +777,44 @@ class PlayerActivity : ComponentActivity() {
 
     private fun refreshDrawerList() {
         val query = etDrawerSearch.text.toString().trim()
+        if (currentDrawerTab == TabFilter.LIVE_GAMES) {
+            val events = repository.getLiveEvents(query)
+            if (events.isEmpty() && query.isBlank()) {
+                repository.fetchLiveMatches(lifecycleScope) {
+                    refreshDrawerList()
+                }
+            }
+            val list = events.map { ev ->
+                Channel(
+                    id = "event_${ev.id}",
+                    name = ev.name,
+                    category = "${if (ev.time.isNotBlank()) "🔴 " + ev.time else "🔴 Em Direto"} • ${ev.genreName}",
+                    country = "LIVE",
+                    isPt = false,
+                    logoUrl = ev.logo,
+                    backupStreamUrl = ev.streams.firstOrNull()?.url,
+                    backupStreamUrl2 = if (ev.streams.size > 1) ev.streams[1].url else null
+                )
+            }
+            val updateAction = {
+                drawerAdapter.updateChannels(list, channelId, channelName)
+                if (list.isEmpty()) {
+                    tvDrawerEmpty.visibility = View.VISIBLE
+                    rvDrawerChannels.visibility = View.GONE
+                } else {
+                    tvDrawerEmpty.visibility = View.GONE
+                    rvDrawerChannels.visibility = View.VISIBLE
+                }
+                scrollToActiveChannel()
+            }
+            if (rvDrawerChannels.isComputingLayout || rvDrawerChannels.isAnimating) {
+                rvDrawerChannels.post(updateAction)
+            } else {
+                updateAction()
+            }
+            return
+        }
+
         val list = when {
             currentDrawerCategory == "Desporto" -> repository.getChannels(TabFilter.ALL, query, "Desporto")
             currentDrawerTab == TabFilter.ALL -> repository.getChannels(TabFilter.ALL, query).filter { !it.isPortuguese }
@@ -766,7 +822,7 @@ class PlayerActivity : ComponentActivity() {
             else -> repository.getChannels(TabFilter.PORTUGAL, query)
         }
         val updateAction = {
-            drawerAdapter.updateChannels(list, channelId)
+            drawerAdapter.updateChannels(list, channelId, channelName)
             if (list.isEmpty()) {
                 tvDrawerEmpty.visibility = View.VISIBLE
                 rvDrawerChannels.visibility = View.GONE
@@ -774,6 +830,7 @@ class PlayerActivity : ComponentActivity() {
                 tvDrawerEmpty.visibility = View.GONE
                 rvDrawerChannels.visibility = View.VISIBLE
             }
+            scrollToActiveChannel()
         }
         if (rvDrawerChannels.isComputingLayout || rvDrawerChannels.isAnimating) {
             rvDrawerChannels.post(updateAction)

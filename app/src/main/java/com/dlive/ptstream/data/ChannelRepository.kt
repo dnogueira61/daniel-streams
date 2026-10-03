@@ -46,6 +46,11 @@ class ChannelRepository(private val context: Context) {
     private var cachedChannels: List<Channel> = emptyList()
     private var liveEvents: List<LiveEvent> = emptyList()
 
+    companion object {
+        @Volatile
+        private var sharedLiveEvents: List<LiveEvent> = emptyList()
+    }
+
     @Volatile
     private var precomputedPtChannels: List<Channel> = emptyList()
     @Volatile
@@ -594,6 +599,7 @@ class ChannelRepository(private val context: Context) {
             // Prioritize soccer, then sort by viewers descending
             eventsList.sortWith(compareBy({ !it.isSoccer }, { -it.viewers }))
             liveEvents = eventsList
+            sharedLiveEvents = eventsList
 
             withContext(Dispatchers.Main) {
                 onResult(eventsList)
@@ -772,8 +778,9 @@ class ChannelRepository(private val context: Context) {
     }
 
     fun getLiveEvents(query: String = ""): List<LiveEvent> {
-        if (query.isBlank()) return liveEvents
-        return liveEvents.filter {
+        val list = if (liveEvents.isNotEmpty()) liveEvents else sharedLiveEvents
+        if (query.isBlank()) return list
+        return list.filter {
             it.name.contains(query, ignoreCase = true) ||
                     it.genreName.contains(query, ignoreCase = true)
         }

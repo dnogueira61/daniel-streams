@@ -17,6 +17,7 @@ import com.dlive.ptstream.data.EpgRepository
 class DrawerChannelAdapter(
     private var channels: List<Channel>,
     private var activeChannelId: String,
+    private var activeChannelName: String = "",
     private val epgRepository: EpgRepository? = null,
     private val onChannelSelected: (Channel) -> Unit,
     private val onFavoriteToggled: (Channel) -> Unit,
@@ -42,9 +43,10 @@ class DrawerChannelAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (position !in channels.indices) return
         val channel = channels[position]
-        val isCurrent = channel.id == activeChannelId
+        val isCurrent = channel.id == activeChannelId || (activeChannelName.isNotBlank() && channel.name.equals(activeChannelName, ignoreCase = true))
 
-        holder.tvId.text = channel.id
+        val isEvent = channel.id.startsWith("event_")
+        holder.tvId.text = if (isEvent) "LIVE" else channel.id
         holder.tvName.text = channel.name
 
         // Logo binding
@@ -67,8 +69,10 @@ class DrawerChannelAdapter(
             holder.tvId.visibility = View.VISIBLE
         }
 
-        val epgProgram = epgRepository?.getCurrentProgram(channel.name)
-        val subtitleText = if (epgProgram != null && epgProgram.title.isNotBlank()) {
+        val epgProgram = if (!isEvent) epgRepository?.getCurrentProgram(channel.name) else null
+        val subtitleText = if (isEvent) {
+            channel.category
+        } else if (epgProgram != null && epgProgram.title.isNotBlank()) {
             val start = epgProgram.timeRange.substringBefore(" -")
             "🔴 $start • ${epgProgram.title}"
         } else {
@@ -81,7 +85,7 @@ class DrawerChannelAdapter(
             }
         }
         holder.tvCategory.text = subtitleText
-        holder.tvCategory.setTextColor(if (epgProgram != null) Color.parseColor("#38BDF8") else Color.parseColor("#9CA3AF"))
+        holder.tvCategory.setTextColor(if (isEvent || epgProgram != null) Color.parseColor("#38BDF8") else Color.parseColor("#9CA3AF"))
 
         // Active playing indicator
         if (isCurrent) {
@@ -107,10 +111,15 @@ class DrawerChannelAdapter(
         }
 
         // Star favorite
-        if (channel.isFavorite) {
-            holder.btnFavorite.setImageResource(android.R.drawable.star_on)
+        if (isEvent) {
+            holder.btnFavorite.visibility = View.GONE
         } else {
-            holder.btnFavorite.setImageResource(android.R.drawable.star_off)
+            holder.btnFavorite.visibility = View.VISIBLE
+            if (channel.isFavorite) {
+                holder.btnFavorite.setImageResource(android.R.drawable.star_on)
+            } else {
+                holder.btnFavorite.setImageResource(android.R.drawable.star_off)
+            }
         }
 
         holder.root.setOnClickListener {
@@ -131,9 +140,12 @@ class DrawerChannelAdapter(
 
     fun getChannels(): List<Channel> = channels
 
-    fun updateChannels(newChannels: List<Channel>, newActiveId: String) {
+    fun updateChannels(newChannels: List<Channel>, newActiveId: String, newActiveName: String = "") {
         this.channels = newChannels
         this.activeChannelId = newActiveId
+        if (newActiveName.isNotBlank()) {
+            this.activeChannelName = newActiveName
+        }
         try {
             notifyDataSetChanged()
         } catch (_: Exception) {}
