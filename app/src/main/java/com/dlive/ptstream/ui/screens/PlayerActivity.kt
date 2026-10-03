@@ -528,6 +528,20 @@ class PlayerActivity : ComponentActivity() {
         btnTabFav.setOnClickListener { selectDrawerCategory("Favoritos", TabFilter.FAVORITES) }
         btnTabAll.setOnClickListener { selectDrawerCategory("Mundo", TabFilter.ALL) }
 
+        // Touch swipe fix: prevent DrawerLayout from intercepting horizontal swipes on drawer tabs
+        val scrollDrawerTabs = findViewById<HorizontalScrollView>(R.id.scrollDrawerTabs)
+        scrollDrawerTabs?.setOnTouchListener { v, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                    v.parent?.requestDisallowInterceptTouchEvent(true)
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    v.parent?.requestDisallowInterceptTouchEvent(false)
+                }
+            }
+            false
+        }
+
         // Tablet & Touchscreen soft keyboard trigger
         etDrawerSearch.setOnClickListener {
             etDrawerSearch.isFocusable = true
@@ -575,16 +589,22 @@ class PlayerActivity : ComponentActivity() {
         val index = list.indexOfFirst {
             it.id == channelId || it.name.equals(channelName, ignoreCase = true)
         }
-        if (index >= 0) {
+        if (index in 0 until drawerAdapter.itemCount) {
             val lm = rvDrawerChannels.layoutManager as? LinearLayoutManager
             val offset = (resources.displayMetrics.density * 80).toInt()
-            lm?.scrollToPositionWithOffset(index, offset)
-            rvDrawerChannels.post {
+            try {
                 lm?.scrollToPositionWithOffset(index, offset)
+            } catch (_: Exception) {}
+            rvDrawerChannels.post {
+                try {
+                    lm?.scrollToPositionWithOffset(index, offset)
+                } catch (_: Exception) {}
             }
             rvDrawerChannels.postDelayed({
-                val holder = rvDrawerChannels.findViewHolderForAdapterPosition(index)
-                holder?.itemView?.requestFocus()
+                try {
+                    val holder = rvDrawerChannels.findViewHolderForAdapterPosition(index)
+                    holder?.itemView?.requestFocus()
+                } catch (_: Exception) {}
             }, 80)
         }
     }
@@ -692,13 +712,17 @@ class PlayerActivity : ComponentActivity() {
         selectDrawerCategory(cat, tab)
 
         rvDrawerChannels.postDelayed({
-            rvDrawerChannels.scrollToPosition(0)
-            val holder = rvDrawerChannels.findViewHolderForAdapterPosition(0)
-            if (holder != null) {
-                holder.itemView.requestFocus()
-            } else {
-                rvDrawerChannels.requestFocus()
-            }
+            try {
+                if (drawerAdapter.itemCount > 0) {
+                    rvDrawerChannels.scrollToPosition(0)
+                    val holder = rvDrawerChannels.findViewHolderForAdapterPosition(0)
+                    if (holder != null) {
+                        holder.itemView.requestFocus()
+                    } else {
+                        rvDrawerChannels.requestFocus()
+                    }
+                }
+            } catch (_: Exception) {}
         }, 150)
     }
 
@@ -710,14 +734,20 @@ class PlayerActivity : ComponentActivity() {
             currentDrawerTab == TabFilter.FAVORITES -> repository.getChannels(TabFilter.FAVORITES, query)
             else -> repository.getChannels(TabFilter.PORTUGAL, query)
         }
-        drawerAdapter.updateChannels(list, channelId)
-
-        if (list.isEmpty()) {
-            tvDrawerEmpty.visibility = View.VISIBLE
-            rvDrawerChannels.visibility = View.GONE
+        val updateAction = {
+            drawerAdapter.updateChannels(list, channelId)
+            if (list.isEmpty()) {
+                tvDrawerEmpty.visibility = View.VISIBLE
+                rvDrawerChannels.visibility = View.GONE
+            } else {
+                tvDrawerEmpty.visibility = View.GONE
+                rvDrawerChannels.visibility = View.VISIBLE
+            }
+        }
+        if (rvDrawerChannels.isComputingLayout || rvDrawerChannels.isAnimating) {
+            rvDrawerChannels.post(updateAction)
         } else {
-            tvDrawerEmpty.visibility = View.GONE
-            rvDrawerChannels.visibility = View.VISIBLE
+            updateAction()
         }
     }
 

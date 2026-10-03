@@ -2547,7 +2547,7 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "767",
+    "id": "767-fox-sports-argentina",
     "name": "Fox Sports Argentina",
     "country": "AR",
     "category": "Argentina",
@@ -2603,15 +2603,6 @@
   {
     "id": "743",
     "name": "Galavisión USA",
-    "country": "US",
-    "category": "United States",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "743",
-    "name": "Galavisi贸n USA",
     "country": "US",
     "category": "United States",
     "isPt": false,
@@ -2934,15 +2925,6 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "539",
-    "name": "LaLiga SmartBank TV",
-    "country": "ES",
-    "category": "Spain",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
     "id": "276",
     "name": "LaLigaTV UK",
     "country": "UK",
@@ -2997,7 +2979,7 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "470",
+    "id": "470-m6-france",
     "name": "M6 France",
     "country": "FR",
     "category": "France",
@@ -3341,15 +3323,6 @@
   {
     "id": "437",
     "name": "Movistar Plus+ (#0 Spain)",
-    "country": "ES",
-    "category": "Spain",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "437",
-    "name": "Movistar Supercopa de Espa�a",
     "country": "ES",
     "category": "Spain",
     "isPt": false,
@@ -3753,7 +3726,7 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "43",
+    "id": "43-pdc-tv",
     "name": "PDC TV",
     "country": "US",
     "category": "United States",
@@ -3996,7 +3969,7 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "740",
+    "id": "740-rtl-de",
     "name": "RTL DE",
     "country": "DE",
     "category": "Germany",
@@ -4059,7 +4032,7 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "607",
+    "id": "607-rally-tv",
     "name": "Rally Tv",
     "country": "US",
     "category": "United States",
@@ -4617,7 +4590,7 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "685",
+    "id": "685-sky-crime",
     "name": "Sky Crime",
     "country": "UK",
     "category": "United Kingdom",
@@ -5346,15 +5319,6 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "771",
-    "name": "Stream 771",
-    "country": "INT",
-    "category": "Others",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
     "id": "658",
     "name": "Sundance TV",
     "country": "US",
@@ -5508,7 +5472,7 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "469",
+    "id": "469-tf1-france",
     "name": "TF1 France",
     "country": "FR",
     "category": "France",
@@ -6003,7 +5967,7 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "680",
+    "id": "680-the-hallmark",
     "name": "The Hallmark",
     "country": "US",
     "category": "United States",
@@ -6246,7 +6210,7 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "609",
+    "id": "609-yas-tv-uae",
     "name": "Yas TV UAE",
     "country": "INT",
     "category": "United Arab Emirates",
@@ -6453,26 +6417,8 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "43",
-    "name": "DAZN LaLiga 2",
-    "country": "ES",
-    "category": "Desporto",
-    "isPt": false,
-    "backupStreamUrl": "https://exmxbxe.cfd/fw2jrum9-448",
-    "backupStreamUrl2": null
-  },
-  {
     "id": "372",
     "name": "beIN SPORTS en Español",
-    "country": "INT",
-    "category": "Others",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "372",
-    "name": "beIN SPORTS en Espa単ol",
     "country": "INT",
     "category": "Others",
     "isPt": false,
@@ -6642,16 +6588,7 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "46",
-    "name": "Sky Sports Tennis",
-    "country": "UK",
-    "category": "Desporto",
-    "isPt": false,
-    "backupStreamUrl": "https://exmxbxe.cfd/kkbb5x8i-1991",
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "98",
+    "id": "98-bein-sports-mena-premium-1",
     "name": "beIN Sports MENA Premium 1",
     "country": "INT",
     "category": "Others",
@@ -6660,7 +6597,7 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "99",
+    "id": "99-bein-sports-mena-premium-2",
     "name": "beIN Sports MENA Premium 2",
     "country": "INT",
     "category": "Others",
@@ -6669,7 +6606,7 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "100",
+    "id": "100-bein-sports-mena-premium-3",
     "name": "beIN Sports MENA Premium 3",
     "country": "INT",
     "category": "Others",

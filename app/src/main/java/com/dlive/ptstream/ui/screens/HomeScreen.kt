@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -93,7 +94,7 @@ fun HomeScreen(
         }
     }
     var selectedCategory by remember { mutableStateOf("Todos") }
-    var gamesSubFilter by remember { mutableStateOf("Todos") }
+    var gamesSubFilter by remember { mutableStateOf("Canais") }
     var refreshKey by remember { mutableStateOf(0) }
     var showSettingsDialog by remember { mutableStateOf(false) }
 
@@ -136,8 +137,8 @@ fun HomeScreen(
 
     val channelsVersion by repository.channelsVersion
 
-    val footballChannels = remember(searchQuery, refreshKey, channelsVersion) {
-        repository.getTopFootballChannels(searchQuery)
+    val sportsChannels = remember(searchQuery, refreshKey, channelsVersion) {
+        repository.getChannels(TabFilter.ALL, searchQuery, "Desporto")
     }
 
     val favChannels = remember(refreshKey, channelsVersion) {
@@ -193,7 +194,7 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = when (selectedTab) {
-                                    TabFilter.LIVE_GAMES -> "Jogos em Direto"
+                                    TabFilter.LIVE_GAMES -> "Desporto"
                                     TabFilter.GAMING -> "Gaming & Esports 🎮"
                                     TabFilter.ALL -> "Mundo"
                                     else -> "Canais"
@@ -408,11 +409,12 @@ fun HomeScreen(
                     selected = selectedTab == TabFilter.LIVE_GAMES,
                     onClick = {
                         selectedTab = TabFilter.LIVE_GAMES
+                        gamesSubFilter = "Canais"
                     },
-                    icon = { Icon(Icons.Default.SportsSoccer, contentDescription = "Jogos") },
+                    icon = { Icon(Icons.Default.SportsSoccer, contentDescription = "Desporto") },
                     label = {
                         Text(
-                            "Jogos",
+                            "Desporto",
                             fontSize = 12.sp,
                             fontWeight = if (selectedTab == TabFilter.LIVE_GAMES) FontWeight.Bold else FontWeight.Normal
                         )
@@ -493,7 +495,7 @@ fun HomeScreen(
                 .padding(innerPadding)
         ) {
             if (selectedTab == TabFilter.LIVE_GAMES) {
-                // Live Matches Tab View with Football Channels + Live Events
+                // Desporto Tab View: Sub-tab 1 Canais de Desporto, Sub-tab 2 Jogos Hoje
                 val filteredEvents = remember(liveEvents, searchQuery) {
                     if (searchQuery.isBlank()) liveEvents
                     else liveEvents.filter {
@@ -503,7 +505,7 @@ fun HomeScreen(
                 }
 
                 Column(modifier = Modifier.fillMaxSize()) {
-                    // Sub-filter row
+                    // Sub-filter row: #1 Canais de Desporto, #2 Jogos Hoje
                     LazyRow(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -511,9 +513,8 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         val subOptions = listOf(
-                            "Todos" to "⚽ Todos (${filteredEvents.size + footballChannels.size})",
-                            "Jogos" to "🔥 Jogos Hoje (${filteredEvents.size})",
-                            "Canais" to "📺 Canais Futebol (${footballChannels.size})"
+                            "Canais" to "📺 Canais de Desporto (${sportsChannels.size})",
+                            "Jogos" to "🔥 Jogos Hoje (${filteredEvents.size})"
                         )
                         items(subOptions) { (key, label) ->
                             val isSelected = gamesSubFilter == key
@@ -537,22 +538,96 @@ fun HomeScreen(
                         }
                     }
 
-                    if (isLoadingEvents && filteredEvents.isEmpty() && gamesSubFilter != "Canais") {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                CircularProgressIndicator(color = RedPrimary)
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text("A procurar jogos em direto...", color = TextSecondary, fontSize = 13.sp)
+                    if (gamesSubFilter == "Canais") {
+                        // Sub-tab 1: All top sports TV channels
+                        if (sportsChannels.isEmpty()) {
+                            EmptyStateView(tab = selectedTab, query = searchQuery)
+                        } else if (isTabletOrLandscape) {
+                            val activeChannel = focusedOrSelectedChannel ?: sportsChannels.firstOrNull()
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 6.dp),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Box(modifier = Modifier.weight(0.40f).fillMaxHeight()) {
+                                    LazyColumn(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentPadding = PaddingValues(bottom = 16.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        itemsIndexed(sportsChannels, key = { index, ch -> "sp_split_${ch.id}_$index" }) { _, channel ->
+                                            val isSelected = activeChannel?.id == channel.id
+                                            SplitChannelRow(
+                                                channel = channel,
+                                                isSelected = isSelected,
+                                                epgProgram = repository.epgRepository.getCurrentProgram(channel.name),
+                                                onFocus = { focusedOrSelectedChannel = channel },
+                                                onClick = {
+                                                    focusedOrSelectedChannel = channel
+                                                    onChannelClick(channel, null)
+                                                },
+                                                onPlayDirect = {
+                                                    onChannelClick(channel, null)
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                                Box(modifier = Modifier.weight(0.60f).fillMaxHeight()) {
+                                    if (activeChannel != null) {
+                                        EpgDetailPanel(
+                                            channel = activeChannel,
+                                            epgRepository = repository.epgRepository,
+                                            onPlayClick = { directUrl -> onChannelClick(activeChannel, directUrl) },
+                                            onToggleFavorite = {
+                                                repository.toggleFavorite(activeChannel.id)
+                                                refreshKey++
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                itemsIndexed(sportsChannels, key = { index, ch -> "sp_${ch.id}_$index" }) { _, channel ->
+                                    ChannelCard(
+                                        channel = channel,
+                                        epgProgram = repository.epgRepository.getCurrentProgram(channel.name),
+                                        onPlayClick = { onChannelClick(channel, null) },
+                                        onShowDetails = { selectedChannelForSheet = channel },
+                                        onToggleFavorite = {
+                                            repository.toggleFavorite(channel.id)
+                                            refreshKey++
+                                        },
+                                        onHideChannel = {
+                                            repository.hideChannel(channel.id)
+                                            refreshKey++
+                                        }
+                                    )
+                                }
                             }
                         }
                     } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            // Section 1: Live Matches
-                            if (gamesSubFilter == "Todos" || gamesSubFilter == "Jogos") {
+                        // Sub-tab 2: Live matches for today
+                        if (isLoadingEvents && filteredEvents.isEmpty()) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    CircularProgressIndicator(color = RedPrimary)
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text("A procurar jogos em direto...", color = TextSecondary, fontSize = 13.sp)
+                                }
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
                                 item {
                                     Row(
                                         modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
@@ -580,7 +655,7 @@ fun HomeScreen(
                                             colors = CardDefaults.cardColors(containerColor = SurfaceDark)
                                         ) {
                                             Text(
-                                                "Sem transmissões ao vivo agendadas no momento. Veja os canais 24/7 abaixo.",
+                                                "Sem transmissões ao vivo agendadas no momento. Veja os canais de desporto 24/7 no separador ao lado.",
                                                 color = TextSecondary,
                                                 fontSize = 12.sp,
                                                 modifier = Modifier.padding(14.dp)
@@ -588,7 +663,7 @@ fun HomeScreen(
                                         }
                                     }
                                 } else {
-                                    items(filteredEvents, key = { it.id }) { event ->
+                                    itemsIndexed(filteredEvents, key = { index, event -> "ev_${event.id}_$index" }) { _, event ->
                                         LiveEventCard(
                                             event = event,
                                             onPlayClick = {
@@ -611,46 +686,6 @@ fun HomeScreen(
                                             }
                                         )
                                     }
-                                }
-                            }
-
-                            // Section 2: Top Football Channels (PT + English)
-                            if (gamesSubFilter == "Todos" || gamesSubFilter == "Canais") {
-                                item {
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            "🏆 Canais de Futebol 24/7 (PT & Mundiais)",
-                                            color = TextPrimary,
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                        Text(
-                                            "${footballChannels.size} canais",
-                                            color = TextSecondary,
-                                            fontSize = 11.sp
-                                        )
-                                    }
-                                }
-
-                                items(footballChannels, key = { "fb_${it.id}" }) { channel ->
-                                    ChannelCard(
-                                        channel = channel,
-                                        epgProgram = repository.epgRepository.getCurrentProgram(channel.name),
-                                        onPlayClick = { onChannelClick(channel, null) },
-                                        onToggleFavorite = {
-                                            repository.toggleFavorite(channel.id)
-                                            refreshKey++
-                                        },
-                                        onHideChannel = {
-                                            repository.hideChannel(channel.id)
-                                            refreshKey++
-                                        }
-                                    )
                                 }
                             }
                         }
@@ -686,7 +721,7 @@ fun HomeScreen(
                                         }
                                     }
                                 }
-                                items(channels, key = { it.id }) { channel ->
+                                itemsIndexed(channels, key = { index, channel -> "ch_split_${channel.id}_$index" }) { _, channel ->
                                     val isSelected = activeChannel?.id == channel.id
                                     SplitChannelRow(
                                         channel = channel,
@@ -737,7 +772,7 @@ fun HomeScreen(
                                 }
                             }
                         }
-                        items(channels, key = { it.id }) { channel ->
+                        itemsIndexed(channels, key = { index, channel -> "ch_${channel.id}_$index" }) { _, channel ->
                             ChannelCard(
                                 channel = channel,
                                 epgProgram = repository.epgRepository.getCurrentProgram(channel.name),
@@ -990,7 +1025,7 @@ fun FavoritesQuickBar(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp)
         ) {
-            items(favorites, key = { "fav_bar_${it.id}" }) { channel ->
+            itemsIndexed(favorites, key = { index, channel -> "fav_bar_${channel.id}_$index" }) { _, channel ->
                 FavoriteQuickCard(
                     channel = channel,
                     onClick = { onChannelClick(channel) }
@@ -2092,7 +2127,7 @@ fun HiddenChannelsDialog(
                     modifier = Modifier.fillMaxWidth().heightIn(max = 340.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(hiddenList, key = { it.id }) { ch ->
+                    itemsIndexed(hiddenList, key = { index, ch -> "hidden_${ch.id}_$index" }) { _, ch ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()

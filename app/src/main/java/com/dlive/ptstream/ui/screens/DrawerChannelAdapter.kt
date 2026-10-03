@@ -40,6 +40,7 @@ class DrawerChannelAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        if (position !in channels.indices) return
         val channel = channels[position]
         val isCurrent = channel.id == activeChannelId
 
@@ -133,6 +134,8 @@ class DrawerChannelAdapter(
     fun updateChannels(newChannels: List<Channel>, newActiveId: String) {
         this.channels = newChannels
         this.activeChannelId = newActiveId
-        notifyDataSetChanged()
+        try {
+            notifyDataSetChanged()
+        } catch (_: Exception) {}
     }
 }
