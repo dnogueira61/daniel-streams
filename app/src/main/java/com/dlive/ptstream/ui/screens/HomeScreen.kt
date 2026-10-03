@@ -654,7 +654,7 @@ fun HomeScreen(
                                         .padding(horizontal = 12.dp, vertical = 6.dp),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    items(availableLeagues) { (leagueName, count) ->
+                                    itemsIndexed(availableLeagues, key = { idx, item -> "league_${item.first}_$idx" }) { _, (leagueName, count) ->
                                         val isSelected = selectedLeagueFilter == leagueName
                                         FilterChip(
                                             selected = isSelected,
@@ -690,7 +690,7 @@ fun HomeScreen(
                                     if (selectedLeagueFilter == "Todas") {
                                         // Agrupamento por cada liga com cabeçalho
                                         leagueGroups.forEach { (leagueName, eventsInLeague) ->
-                                            item(key = "header_${leagueName}") {
+                                            item(key = "hdr_${leagueName.hashCode()}") {
                                                 Row(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
@@ -712,7 +712,7 @@ fun HomeScreen(
                                                 }
                                             }
 
-                                            itemsIndexed(eventsInLeague, key = { index, event -> "ev_${event.id}_$index" }) { _, event ->
+                                            itemsIndexed(eventsInLeague, key = { index, event -> "ev_${leagueName.hashCode()}_${event.id}_$index" }) { _, event ->
                                                 val matchedChannels = remember(event.id) {
                                                     SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
                                                 }
@@ -740,7 +740,7 @@ fun HomeScreen(
                                     } else {
                                         // Apenas a liga selecionada
                                         val eventsInLeague = leagueGroups[selectedLeagueFilter] ?: emptyList()
-                                        item(key = "header_single_${selectedLeagueFilter}") {
+                                        item(key = "hdr_flt_${selectedLeagueFilter.hashCode()}") {
                                             Row(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
@@ -762,7 +762,7 @@ fun HomeScreen(
                                             }
                                         }
 
-                                        itemsIndexed(eventsInLeague, key = { index, event -> "ev_filtered_${event.id}_$index" }) { _, event ->
+                                        itemsIndexed(eventsInLeague, key = { index, event -> "ev_flt_${selectedLeagueFilter.hashCode()}_${event.id}_$index" }) { _, event ->
                                             val matchedChannels = remember(event.id) {
                                                 SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
                                             }
@@ -1095,18 +1095,20 @@ fun LiveEventCard(
                         .background(BorderDark.copy(alpha = 0.6f))
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(
+                LazyRow(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text(
-                        text = "📺 Na TV:",
-                        color = Color(0xFF38BDF8),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    broadcastingChannels.forEach { channel ->
+                    item {
+                        Text(
+                            text = "📺 Na TV:",
+                            color = Color(0xFF38BDF8),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    itemsIndexed(broadcastingChannels, key = { bIdx, bCh -> "tv_pill_${bCh.id}_$bIdx" }) { _, channel ->
                         TvChannelPill(
                             channel = channel,
                             onClick = { onChannelClick(channel) }
@@ -1124,17 +1126,18 @@ fun TvChannelPill(
     onClick: () -> Unit
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(6.dp),
-        color = if (isFocused) Color(0xFF38BDF8) else if (channel.isPortuguese) Color(0x33E50914) else SurfaceVariantDark,
-        border = BorderStroke(1.dp, if (isFocused) Color.White else if (channel.isPortuguese) RedPrimary.copy(alpha = 0.6f) else BorderDark),
+    Box(
         modifier = Modifier
+            .clip(RoundedCornerShape(6.dp))
+            .background(if (isFocused) Color(0xFF38BDF8) else if (channel.isPortuguese) Color(0x33E50914) else SurfaceVariantDark)
+            .border(1.dp, if (isFocused) Color.White else if (channel.isPortuguese) RedPrimary.copy(alpha = 0.6f) else BorderDark, RoundedCornerShape(6.dp))
             .onFocusChanged { isFocused = it.isFocused }
             .focusable()
+            .clickable { onClick() }
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        contentAlignment = Alignment.Center
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
