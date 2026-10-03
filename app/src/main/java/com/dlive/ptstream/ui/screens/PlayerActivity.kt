@@ -54,6 +54,10 @@ import android.content.res.ColorStateList
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.app.Dialog
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
+import android.os.PowerManager
+import android.view.WindowManager
 import java.io.ByteArrayInputStream
 import java.lang.ref.WeakReference
 import java.net.HttpURLConnection
@@ -117,6 +121,24 @@ class PlayerActivity : ComponentActivity() {
 
     private enum class GestureMode {
         NONE, VOLUME, BRIGHTNESS
+    }
+
+    private var isActivityResumed = false
+    private var isScreenOffReceiverRegistered = false
+    private val screenStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                Intent.ACTION_SCREEN_OFF -> {
+                    pauseMediaPlayback()
+                }
+                Intent.ACTION_SCREEN_ON -> {
+                    val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager
+                    if (powerManager?.isInteractive == true && (isInPictureInPictureMode || isActivityResumed)) {
+                        resumeMediaPlayback()
+                    }
+                }
+            }
+        }
     }
 
     // Drawer Views
@@ -235,6 +257,15 @@ class PlayerActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         activeInstance = WeakReference(this)
         setContentView(R.layout.activity_player)
+
+        val screenFilter = IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_OFF)
+            addAction(Intent.ACTION_SCREEN_ON)
+        }
+        try {
+            registerReceiver(screenStateReceiver, screenFilter)
+            isScreenOffReceiverRegistered = true
+        } catch (_: Exception) {}
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -2019,6 +2050,12 @@ class PlayerActivity : ComponentActivity() {
 
     fun enterPipMode() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager
+            if (powerManager?.isInteractive == false) {
+                // Ecrã desligado - pausar vídeo e não gastar bateria em segundo plano
+                pauseMediaPlayback()
+                return
+            }
             try {
                 if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     drawerLayout.closeDrawer(GravityCompat.START)
@@ -2580,25 +2617,94 @@ class PlayerActivity : ComponentActivity() {
         handleBackOrPip()
     }
 
+    private fun pauseMediaPlayback() {
+        try {
+            val pauseJs = """
+                (function() {
+                    try {
+                        document.querySelectorAll('video, audio').forEach(function(v) {
+                            try { v.pause(); } catch(e) {}
+                        });
+                        var frames = document.querySelectorAll('iframe');
+                        for (var i = 0; i < frames.length; i++) {
+                            try {
+                                frames[i].contentWindow.postMessage('PAUSE_PLAYBACK', '*');
+                                var fdoc = frames[i].contentDocument || frames[i].contentWindow.document;
+                                if (fdoc) {
+                                    fdoc.querySelectorAll('video, audio').forEach(function(v) {
+                                        try { v.pause(); } catch(e) {}
+                                    });
+                                }
+                            } catch(e) {}
+                        }
+                    } catch(e) {}
+                })();
+            """.trimIndent()
+            webView.evaluateJavascript(pauseJs, null)
+            webView.onPause()
+            webView.pauseTimers()
+        } catch (_: Exception) {}
+    }
+
+    private fun resumeMediaPlayback() {
+        try {
+            webView.onResume()
+            webView.resumeTimers()
+            val resumeJs = """
+                (function() {
+                    try {
+                        document.querySelectorAll('video').forEach(function(v) {
+                            try { v.play().catch(function(){}); } catch(e) {}
+                        });
+                        var frames = document.querySelectorAll('iframe');
+                        for (var i = 0; i < frames.length; i++) {
+                            try {
+                                frames[i].contentWindow.postMessage('RESUME_PLAYBACK', '*');
+                                var fdoc = frames[i].contentDocument || frames[i].contentWindow.document;
+                                if (fdoc) {
+                                    fdoc.querySelectorAll('video').forEach(function(v) {
+                                        try { v.play().catch(function(){}); } catch(e) {}
+                                    });
+                                }
+                            } catch(e) {}
+                        }
+                    } catch(e) {}
+                })();
+            """.trimIndent()
+            webView.evaluateJavascript(resumeJs, null)
+        } catch (_: Exception) {}
+    }
+
     override fun onResume() {
         super.onResume()
-        webView.resumeTimers()
+        isActivityResumed = true
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        resumeMediaPlayback()
     }
 
     override fun onPause() {
         super.onPause()
-        webView.pauseTimers()
+        isActivityResumed = false
+        if (!isInPictureInPictureMode) {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            pauseMediaPlayback()
+        }
     }
 
     override fun onStop() {
         super.onStop()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInPictureInPictureMode) {
-            webView.resumeTimers()
+        val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager
+        val isScreenInteractive = powerManager?.isInteractive ?: true
+        if (!isScreenInteractive || !isInPictureInPictureMode) {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            pauseMediaPlayback()
         }
     }
 
     fun cleanupAndFinish() {
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         try {
+            pauseMediaPlayback()
             webView.stopLoading()
             webView.loadUrl("about:blank")
         } catch (_: Exception) {}
@@ -2613,12 +2719,21 @@ class PlayerActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        if (isScreenOffReceiverRegistered) {
+            try {
+                unregisterReceiver(screenStateReceiver)
+            } catch (_: Exception) {}
+            isScreenOffReceiverRegistered = false
+        }
         if (activeInstance?.get() == this) {
             activeInstance = null
         }
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         handler.removeCallbacksAndMessages(null)
         try {
+            pauseMediaPlayback()
             webView.stopLoading()
+            webView.loadUrl("about:blank")
             webView.destroy()
         } catch (_: Exception) {}
         super.onDestroy()

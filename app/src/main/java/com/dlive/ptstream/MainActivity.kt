@@ -25,7 +25,9 @@ class MainActivity : ComponentActivity() {
 
         channelRepository = ChannelRepository(this)
         channelRepository.syncChannelsFromWeb(lifecycleScope)
-        channelRepository.epgRepository.syncEpgFromWeb(lifecycleScope)
+        if (channelRepository.epgRepository.getProgramsCount() == 0 || channelRepository.epgRepository.isCacheStale()) {
+            channelRepository.epgRepository.syncEpgFromWeb(lifecycleScope)
+        }
 
         val dontResume = intent.getBooleanExtra("EXTRA_DONT_AUTO_RESUME", false)
         if (!dontResume && !hasAutoResumedOnLaunch && savedInstanceState == null && channelRepository.isAutoResumeEnabled()) {

@@ -262,8 +262,13 @@ class ChannelRepository(private val context: Context) {
     /**
      * Sincroniza canais online a partir do repositório GitHub e deteta domínios
      */
-    fun syncChannelsFromWeb(scope: CoroutineScope, onFinished: ((Boolean) -> Unit)? = null) {
+    fun syncChannelsFromWeb(scope: CoroutineScope, force: Boolean = false, onFinished: ((Boolean) -> Unit)? = null) {
         scope.launch(Dispatchers.IO) {
+            val lastSync = prefs.getLong("last_channels_sync_time", 0L)
+            if (!force && System.currentTimeMillis() - lastSync < 3 * 3600 * 1000L) {
+                withContext(Dispatchers.Main) { onFinished?.invoke(true) }
+                return@launch
+            }
             var success = false
             try {
                 autoDetectWorkingDomains()
@@ -285,6 +290,7 @@ class ChannelRepository(private val context: Context) {
                 }
                 loadChannels()
                 success = true
+                prefs.edit().putLong("last_channels_sync_time", System.currentTimeMillis()).apply()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
