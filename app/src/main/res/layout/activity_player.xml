@@ -93,6 +93,18 @@
                     android:maxLines="1" />
             </LinearLayout>
 
+            <!-- Digital Clock (Lisbon time) -->
+            <TextView
+                android:id="@+id/tvPlayerClock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:text="--:--"
+                android:textColor="#38BDF8"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
             <!-- Quick Server Selector Button -->
             <LinearLayout
                 android:id="@+id/btnServerSelect"
@@ -230,6 +242,18 @@
                 android:textStyle="bold"
                 android:maxLines="1"
                 android:ellipsize="end" />
+
+            <!-- Digital Clock (Lisbon time) in Landscape -->
+            <TextView
+                android:id="@+id/tvLandscapeClock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:text="--:--"
+                android:textColor="#38BDF8"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <!-- Landscape Server Selector Button -->
             <LinearLayout

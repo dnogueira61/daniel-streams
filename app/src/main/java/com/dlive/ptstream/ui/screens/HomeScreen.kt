@@ -18,7 +18,13 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -68,7 +74,7 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
 
     val configuration = LocalConfiguration.current
-    val isTabletOrLandscape = configuration.screenWidthDp >= 600
+    val isTabletOrLandscape = configuration.screenWidthDp >= 600 || repository.isTv()
 
     val defaultTabPref = remember { repository.getDefaultTab() }
     val initialTab = remember {
@@ -97,6 +103,10 @@ fun HomeScreen(
     var gamesSubFilter by remember { mutableStateOf("Canais") }
     var selectedLeagueFilter by remember { mutableStateOf("Todas") }
     var refreshKey by remember { mutableStateOf(0) }
+    val prefViewMode = remember(refreshKey) { repository.getChannelViewMode() }
+    val showClock = remember(refreshKey) { repository.isShowClockEnabled() }
+    val isSplitLayout = if (prefViewMode == "SPLIT_LIST") true else if (prefViewMode == "GRID") false else isTabletOrLandscape
+    val isGridLayout = prefViewMode == "GRID"
     var showSettingsDialog by remember { mutableStateOf(false) }
 
     var focusedOrSelectedChannel by remember { mutableStateOf<Channel?>(null) }
@@ -207,6 +217,10 @@ fun HomeScreen(
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (showClock) {
+                                DigitalClock()
+                                Spacer(modifier = Modifier.width(6.dp))
+                            }
                             var searchFocused by remember { mutableStateOf(false) }
                             var settingsFocused by remember { mutableStateOf(false) }
                             IconButton(
@@ -543,7 +557,28 @@ fun HomeScreen(
                         // Sub-tab 1: All top sports TV channels
                         if (sportsChannels.isEmpty()) {
                             EmptyStateView(tab = selectedTab, query = searchQuery)
-                        } else if (isTabletOrLandscape) {
+                        } else if (isGridLayout) {
+                            LazyVerticalGrid(
+                                columns = GridCells.Adaptive(minSize = if (isTabletOrLandscape) 200.dp else 160.dp),
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                itemsIndexed(sportsChannels, key = { index, ch -> "sp_grid_${ch.id}_$index" }) { _, channel ->
+                                    ChannelGridCard(
+                                        channel = channel,
+                                        epgProgram = repository.epgRepository.getCurrentProgram(channel.name),
+                                        onPlayClick = { onChannelClick(channel, null) },
+                                        onToggleFavorite = {
+                                            repository.toggleFavorite(channel.id)
+                                            refreshKey++
+                                        },
+                                        onShowDetails = { selectedChannelForSheet = channel }
+                                    )
+                                }
+                            }
+                        } else if (isSplitLayout) {
                             val activeChannel = focusedOrSelectedChannel ?: sportsChannels.firstOrNull()
                             Row(
                                 modifier = Modifier
@@ -796,7 +831,42 @@ fun HomeScreen(
                 // Regular Channels List (Portugal & Todos)
                 if (channels.isEmpty()) {
                     EmptyStateView(tab = selectedTab, query = searchQuery)
-                } else if (isTabletOrLandscape) {
+                } else if (isGridLayout) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = if (isTabletOrLandscape) 200.dp else 160.dp),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        if (searchQuery.isBlank() && selectedCategory == "Todos" && selectedTab == TabFilter.PORTUGAL) {
+                            if (favChannels.isNotEmpty()) {
+                                item(span = { GridItemSpan(maxLineSpan) }) {
+                                    FavoritesQuickBar(
+                                        favorites = favChannels,
+                                        onChannelClick = { onChannelClick(it, null) }
+                                    )
+                                }
+                            }
+                        }
+                        itemsIndexed(channels, key = { index, channel -> "ch_grid_${channel.id}_$index" }) { _, channel ->
+                            ChannelGridCard(
+                                channel = channel,
+                                epgProgram = repository.epgRepository.getCurrentProgram(channel.name),
+                                onPlayClick = {
+                                    onChannelClick(channel, null)
+                                },
+                                onShowDetails = {
+                                    selectedChannelForSheet = channel
+                                },
+                                onToggleFavorite = {
+                                    repository.toggleFavorite(channel.id)
+                                    refreshKey++
+                                }
+                            )
+                        }
+                    }
+                } else if (isSplitLayout) {
                     val activeChannel = focusedOrSelectedChannel ?: channels.firstOrNull()
                     Row(
                         modifier = Modifier
@@ -1095,20 +1165,20 @@ fun LiveEventCard(
                         .background(BorderDark.copy(alpha = 0.6f))
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    item {
-                        Text(
-                            text = "📺 Na TV:",
-                            color = Color(0xFF38BDF8),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    itemsIndexed(broadcastingChannels, key = { bIdx, bCh -> "tv_pill_${bCh.id}_$bIdx" }) { _, channel ->
+                    Text(
+                        text = "📺 Na TV:",
+                        color = Color(0xFF38BDF8),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    broadcastingChannels.forEachIndexed { bIdx, channel ->
                         TvChannelPill(
                             channel = channel,
                             onClick = { onChannelClick(channel) }
@@ -1532,6 +1602,24 @@ fun SplitChannelRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                if (epgProgram != null) {
+                    Spacer(modifier = Modifier.height(3.dp))
+                    val progress = epgProgram.getProgress()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .height(2.5.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(Color(0xFF2D3243))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(progress)
+                                .fillMaxHeight()
+                                .background(Color(0xFF84CC16))
+                        )
+                    }
+                }
             }
 
             if (channel.isFavorite) {
@@ -1763,6 +1851,179 @@ fun ChannelCard(
 }
 
 @Composable
+fun DigitalClock(modifier: Modifier = Modifier) {
+    var currentTime by remember { mutableStateOf("") }
+    LaunchedEffect(Unit) {
+        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault()).apply {
+            timeZone = TimeZone.getTimeZone("Europe/Lisbon")
+        }
+        while (true) {
+            currentTime = sdf.format(Date())
+            kotlinx.coroutines.delay(1000L)
+        }
+    }
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(8.dp),
+        color = Color(0x331E2230),
+        border = BorderStroke(1.dp, Color(0xFF2D3748))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "🕒 $currentTime",
+                color = Color(0xFF38BDF8),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+fun ChannelGridCard(
+    channel: Channel,
+    epgProgram: EpgProgram? = null,
+    onPlayClick: () -> Unit,
+    onToggleFavorite: () -> Unit,
+    onShowDetails: (() -> Unit)? = null
+) {
+    val theme = LocalCustomColors.current
+    var isFocused by remember { mutableStateOf(false) }
+    val localLogo = ChannelLogoHelper.getLocalLogoRes(channel.name)
+    val onlineLogo = channel.logoUrl ?: ChannelLogoHelper.getLogoUrl(channel.name)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .onFocusChanged { isFocused = it.isFocused }
+            .focusable()
+            .clickable { onPlayClick() },
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isFocused) theme.surfaceVariant else theme.surface
+        ),
+        border = if (isFocused) {
+            BorderStroke(2.dp, theme.primary)
+        } else {
+            BorderStroke(1.dp, theme.border)
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(width = 54.dp, height = 38.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(theme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (onlineLogo != null) {
+                        AsyncImage(
+                            model = onlineLogo,
+                            contentDescription = channel.name,
+                            modifier = Modifier.fillMaxSize().padding(3.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    } else if (localLogo != null) {
+                        Image(
+                            painter = painterResource(id = localLogo),
+                            contentDescription = channel.name,
+                            modifier = Modifier.fillMaxSize().padding(3.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    } else {
+                        Text(
+                            text = channel.name.take(3).uppercase(),
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (channel.isFavorite) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Favorito",
+                            tint = AccentGold,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                    }
+                    if (onShowDetails != null) {
+                        IconButton(
+                            onClick = onShowDetails,
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = "Detalhes",
+                                tint = theme.textSecondary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = channel.name,
+                color = if (isFocused) Color.White else theme.textPrimary,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            val progTitle = epgProgram?.title ?: channel.category
+            Text(
+                text = progTitle,
+                color = if (epgProgram != null) theme.primary else theme.textSecondary,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            if (epgProgram != null) {
+                Spacer(modifier = Modifier.height(4.dp))
+                val progress = epgProgram.getProgress()
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.5.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(Color(0xFF2D3243))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(progress)
+                            .fillMaxHeight()
+                            .background(Color(0xFF84CC16))
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun TagBadge(text: String, color: Color) {
     Box(
         modifier = Modifier
@@ -1838,6 +2099,9 @@ fun SettingsDialog(
     var themeMode by remember { mutableStateOf(repository.getThemeMode()) }
     var accentColor by remember { mutableStateOf(repository.getAccentColor()) }
     var defaultTab by remember { mutableStateOf(repository.getDefaultTab()) }
+    var channelViewMode by remember { mutableStateOf(repository.getChannelViewMode()) }
+    var showClockSetting by remember { mutableStateOf(repository.isShowClockEnabled()) }
+    var autoPip by remember { mutableStateOf(repository.isAutoPipOnBack()) }
 
     var isSyncingChannels by remember { mutableStateOf(false) }
     var syncChannelsMsg by remember { mutableStateOf<String?>(null) }
@@ -1960,6 +2224,71 @@ fun SettingsDialog(
                     }
                 }
 
+                // Modo de Visualização dos Canais
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text("Modo de Visualização dos Canais:", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    val viewModes = listOf(
+                        Pair("AUTO", "Automático"),
+                        Pair("SPLIT_LIST", "Lista com EPG"),
+                        Pair("GRID", "Grelha")
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        viewModes.forEach { (code, label) ->
+                            val isSelected = channelViewMode.equals(code, ignoreCase = true)
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (isSelected) Color(0xFF2563EB) else SurfaceVariantDark)
+                                    .border(
+                                        if (isSelected) 2.dp else 1.dp,
+                                        if (isSelected) Color(0xFF38BDF8) else BorderDark,
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .clickable {
+                                        channelViewMode = code
+                                        repository.setChannelViewMode(code)
+                                        onChannelsSynced()
+                                    }
+                                    .padding(vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = label,
+                                    color = if (isSelected) Color.White else TextSecondary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Relógio Digital no Ecrã
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                        Text("Relógio no Ecrã (Hora Lisboa)", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Exibe a hora atual de Lisboa/Londres na barra superior.", color = TextSecondary, fontSize = 11.sp)
+                    }
+                    Switch(
+                        checked = showClockSetting,
+                        onCheckedChange = { enabled ->
+                            showClockSetting = enabled
+                            repository.setShowClockEnabled(enabled)
+                            onChannelsSynced()
+                        },
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF38BDF8))
+                    )
+                }
+
                 Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderDark))
 
                 // SEÇÃO: INICIALIZAÇÃO
@@ -2049,6 +2378,39 @@ fun SettingsDialog(
                         },
                         colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF38BDF8))
                     )
+                }
+
+                if (!repository.isTv()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                            Text("Modo PiP ao Premir Voltar", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                            Text("Minimiza para janela flutuante em vez de sair.", color = TextSecondary, fontSize = 11.sp)
+                        }
+                        Switch(
+                            checked = autoPip,
+                            onCheckedChange = { enabled ->
+                                autoPip = enabled
+                                repository.setAutoPipOnBack(enabled)
+                            },
+                            colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF38BDF8))
+                        )
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "📺 Comando TV: O botão Voltar sai do reprodutor e regressa aos canais.",
+                            color = Color(0xFF38BDF8),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
 
                 Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderDark))

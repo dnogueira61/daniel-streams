@@ -58,6 +58,10 @@ import android.content.BroadcastReceiver
 import android.content.IntentFilter
 import android.os.PowerManager
 import android.view.WindowManager
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import java.io.ByteArrayInputStream
 import java.lang.ref.WeakReference
 import java.net.HttpURLConnection
@@ -163,6 +167,41 @@ class PlayerActivity : ComponentActivity() {
     private lateinit var repository: ChannelRepository
     private var currentDrawerTab = TabFilter.PORTUGAL
     private var currentDrawerCategory: String = "Todos"
+
+    private var tvPlayerClock: TextView? = null
+    private var tvLandscapeClock: TextView? = null
+
+    private val isTv: Boolean
+        get() = repository.isTv()
+
+    private val clockTimeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault()).apply {
+        timeZone = TimeZone.getTimeZone("Europe/Lisbon")
+    }
+
+    private val clockTickRunnable = object : Runnable {
+        override fun run() {
+            updateClockDisplay()
+            handler.postDelayed(this, 1000L)
+        }
+    }
+
+    private fun updateClockDisplay() {
+        val show = repository.isShowClockEnabled()
+        if (!show) {
+            tvPlayerClock?.visibility = View.GONE
+            tvLandscapeClock?.visibility = View.GONE
+            return
+        }
+        val timeStr = clockTimeFormatter.format(Date())
+        tvPlayerClock?.apply {
+            text = timeStr
+            visibility = View.VISIBLE
+        }
+        tvLandscapeClock?.apply {
+            text = timeStr
+            visibility = View.VISIBLE
+        }
+    }
 
     private var customViewCallback: WebChromeClient.CustomViewCallback? = null
     private var customView: View? = null
@@ -354,6 +393,10 @@ class PlayerActivity : ComponentActivity() {
 
         tvChannelTitle.text = channelName
         tvLandscapeTitle.text = channelName
+
+        tvPlayerClock = findViewById(R.id.tvPlayerClock)
+        tvLandscapeClock = findViewById(R.id.tvLandscapeClock)
+        updateClockDisplay()
 
         // Server Selector Badges
         btnServerSelect.setOnClickListener {
@@ -2134,15 +2177,16 @@ class PlayerActivity : ComponentActivity() {
                 enterPictureInPictureMode(builder.build())
             } catch (e: Exception) {
                 e.printStackTrace()
-                Toast.makeText(this, "Não foi possível ativar PiP", Toast.LENGTH_SHORT).show()
+                cleanupAndFinish()
             }
         } else {
-            Toast.makeText(this, "PiP requer Android 8.0+", Toast.LENGTH_SHORT).show()
+            cleanupAndFinish()
         }
     }
 
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
+        if (isTv) return
         playerHeader.visibility = View.GONE
         landscapeOverlay.visibility = View.GONE
         osdBanner.visibility = View.GONE
@@ -2189,7 +2233,7 @@ class PlayerActivity : ComponentActivity() {
             return
         }
 
-        if (repository.isAutoPipOnBack() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (!isTv && repository.isAutoPipOnBack() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             enterPipMode()
         } else {
             cleanupAndFinish()
@@ -2231,6 +2275,41 @@ class PlayerActivity : ComponentActivity() {
             setPadding(0, 10, 0, 14)
         }
         dialogView.addView(swAutoResume)
+
+        // 4. Digital Clock
+        val swClock = Switch(this).apply {
+            text = "🕒 Mostrar Relógio no Ecrã (Lisboa)"
+            setTextColor(Color.WHITE)
+            isChecked = repository.isShowClockEnabled()
+            setPadding(0, 10, 0, 14)
+        }
+        swClock.setOnCheckedChangeListener { _, isChecked ->
+            repository.setShowClockEnabled(isChecked)
+            updateClockDisplay()
+        }
+        dialogView.addView(swClock)
+
+        // 5. Back Button / PiP
+        if (!isTv) {
+            val swPip = Switch(this).apply {
+                text = "📱 Ativar PiP ao Premir Voltar"
+                setTextColor(Color.WHITE)
+                isChecked = repository.isAutoPipOnBack()
+                setPadding(0, 10, 0, 14)
+            }
+            swPip.setOnCheckedChangeListener { _, isChecked ->
+                repository.setAutoPipOnBack(isChecked)
+            }
+            dialogView.addView(swPip)
+        } else {
+            val tvTvBack = TextView(this).apply {
+                text = "📺 Comando TV: O botão Voltar sai do reprodutor e regressa aos canais."
+                setTextColor(Color.parseColor("#38BDF8"))
+                textSize = 12f
+                setPadding(0, 8, 0, 12)
+            }
+            dialogView.addView(tvTvBack)
+        }
 
         // 3. TimStreams Base Domain
         val tvTimstTitle = TextView(this).apply {
@@ -2737,11 +2816,13 @@ class PlayerActivity : ComponentActivity() {
         isActivityResumed = true
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         resumeMediaPlayback()
+        handler.post(clockTickRunnable)
     }
 
     override fun onPause() {
         super.onPause()
         isActivityResumed = false
+        handler.removeCallbacks(clockTickRunnable)
         if (!isInPictureInPictureMode) {
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             pauseMediaPlayback()

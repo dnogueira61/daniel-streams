@@ -45,6 +45,8 @@ class ChannelRepository(private val context: Context) {
     private val PREF_THEME_MODE = "pref_theme_mode"
     private val PREF_ACCENT_COLOR = "pref_accent_color"
     private val PREF_DEFAULT_TAB = "pref_default_tab"
+    private val PREF_CHANNEL_VIEW_MODE = "pref_channel_view_mode"
+    private val PREF_SHOW_CLOCK = "pref_show_clock"
     private val CACHE_FILE_NAME = "channels_cache.json"
 
     private var cachedChannels: List<Channel> = emptyList()
@@ -140,8 +142,27 @@ class ChannelRepository(private val context: Context) {
         return cachedChannels.filter { hiddenIds.contains(it.id) }
     }
 
-    fun isAutoPipOnBack(): Boolean = prefs.getBoolean(PREF_AUTO_PIP_ON_BACK, true)
+    fun isTv(): Boolean {
+        val uiModeManager = context.getSystemService(Context.UI_MODE_SERVICE) as? android.app.UiModeManager
+        return context.packageManager.hasSystemFeature("android.software.leanback") ||
+                context.packageManager.hasSystemFeature("android.hardware.type.television") ||
+                uiModeManager?.currentModeType == android.content.res.Configuration.UI_MODE_TYPE_TELEVISION
+    }
+
+    fun isAutoPipOnBack(): Boolean {
+        if (isTv()) return false
+        return prefs.getBoolean(PREF_AUTO_PIP_ON_BACK, true)
+    }
     fun setAutoPipOnBack(enabled: Boolean) = prefs.edit().putBoolean(PREF_AUTO_PIP_ON_BACK, enabled).apply()
+
+    fun getChannelViewMode(): String = prefs.getString(PREF_CHANNEL_VIEW_MODE, "AUTO") ?: "AUTO"
+    fun setChannelViewMode(mode: String) = prefs.edit().putString(PREF_CHANNEL_VIEW_MODE, mode).apply()
+
+    fun isShowClockEnabled(): Boolean {
+        val defaultVal = isTv()
+        return prefs.getBoolean(PREF_SHOW_CLOCK, defaultVal)
+    }
+    fun setShowClockEnabled(enabled: Boolean) = prefs.edit().putBoolean(PREF_SHOW_CLOCK, enabled).apply()
 
     fun isAutoUnmuteEnabled(): Boolean = prefs.getBoolean(PREF_AUTO_UNMUTE, true)
     fun setAutoUnmuteEnabled(enabled: Boolean) = prefs.edit().putBoolean(PREF_AUTO_UNMUTE, enabled).apply()
