@@ -1112,7 +1112,7 @@ fun LiveEventCard(
                             TagBadge(text = event.genreName, color = if (event.isSoccer) RedPrimary else AccentGreen)
                             if (event.time.isNotBlank()) {
                                 Spacer(modifier = Modifier.width(6.dp))
-                                TagBadge(text = event.time, color = TextSecondary)
+                                TagBadge(text = event.time, color = if (event.time.startsWith("🔴")) RedPrimary else TextSecondary)
                             }
                             if (event.viewers > 0) {
                                 Spacer(modifier = Modifier.width(6.dp))

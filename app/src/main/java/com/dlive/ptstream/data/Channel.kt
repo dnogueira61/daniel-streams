@@ -61,7 +61,8 @@ data class LiveEvent(
     val time: String = "",
     val viewers: Int = 0,
     val streams: List<EventStream> = emptyList(),
-    val isSoccer: Boolean = true
+    val isSoccer: Boolean = true,
+    val startTimestamp: Long = 0L
 )
 
 data class EventStream(

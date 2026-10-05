@@ -16,6 +16,7 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -452,7 +453,10 @@ class ChannelRepository(private val context: Context) {
                             val logo = ev.get("logo")?.asString
                             val genreId = ev.get("genre")?.asInt ?: 1
                             val genreName = genreMap[genreId] ?: "⚽ Futebol"
-                            val time = ev.get("time")?.asString ?: ""
+                            val timeStr = ev.get("time")?.asString ?: ""
+                            val rawTs = ev.get("timestamp")?.asLong ?: 0L
+                            val startMs = if (rawTs > 0L) (if (rawTs in 1..99999999999L) rawTs * 1000L else rawTs) else parseTimeToTimestamp(timeStr)
+                            val timeDisplay = if (startMs > 0L) formatMatchTime(startMs) else formatEventTime(timeStr)
                             val viewers = ev.get("viewers")?.asInt ?: 0
 
                             val streamsList = mutableListOf<EventStream>()
@@ -486,10 +490,11 @@ class ChannelRepository(private val context: Context) {
                                     logo = logo,
                                     genre = genreId,
                                     genreName = genreName,
-                                    time = formatEventTime(time),
+                                    time = timeDisplay,
                                     viewers = viewers,
                                     streams = streamsList,
-                                    isSoccer = isSoccer
+                                    isSoccer = isSoccer,
+                                    startTimestamp = startMs
                                 )
                             )
                         }
@@ -518,6 +523,9 @@ class ChannelRepository(private val context: Context) {
                             val title = obj.get("title")?.asString ?: continue
                             val category = obj.get("category")?.asString ?: "sports"
                             val isLive = obj.get("live")?.asBoolean ?: false
+                            val dateRaw = obj.get("date")?.asLong ?: 0L
+                            val startMs = if (dateRaw in 1..99999999999L) dateRaw * 1000L else dateRaw
+                            val timeDisplay = formatMatchTime(startMs, isLive)
 
                             val genreName = when (category.lowercase()) {
                                 "football", "soccer" -> "⚽ Futebol"
@@ -546,7 +554,13 @@ class ChannelRepository(private val context: Context) {
                                 // Add NTV streams as additional options
                                 val existing = eventsList[existingIndex]
                                 val combinedStreams = existing.streams + ntvStreams
-                                eventsList[existingIndex] = existing.copy(streams = combinedStreams)
+                                val bestTs = if (existing.startTimestamp > 0L) existing.startTimestamp else startMs
+                                val bestTime = if (existing.time.isNotBlank() && existing.time != "Hoje" && existing.time != "24/7") existing.time else timeDisplay
+                                eventsList[existingIndex] = existing.copy(
+                                    streams = combinedStreams,
+                                    startTimestamp = bestTs,
+                                    time = bestTime
+                                )
                             } else {
                                 val isSoccer = category.lowercase() in listOf("football", "soccer") ||
                                         title.contains(" vs ", ignoreCase = true) && !title.contains("at", ignoreCase = true)
@@ -558,10 +572,11 @@ class ChannelRepository(private val context: Context) {
                                         logo = null,
                                         genre = if (isSoccer) 1 else 99,
                                         genreName = genreName,
-                                        time = if (isLive) "🔴 EM DIRETO" else "Hoje",
+                                        time = timeDisplay,
                                         viewers = if (isLive) 500 else 100,
                                         streams = ntvStreams,
-                                        isSoccer = isSoccer
+                                        isSoccer = isSoccer,
+                                        startTimestamp = startMs
                                     )
                                 )
                             }
@@ -625,10 +640,20 @@ class ChannelRepository(private val context: Context) {
                             n1.contains(n2) || n2.contains(n1)
                         }
 
+                        val dateRaw = obj.get("date")?.asLong ?: 0L
+                        val startMs = if (dateRaw in 1..99999999999L) dateRaw * 1000L else dateRaw
+                        val timeDisplay = formatMatchTime(startMs)
+
                         if (existingIndex >= 0) {
                             val existing = eventsList[existingIndex]
                             val combined = existing.streams + streamedStreams
-                            eventsList[existingIndex] = existing.copy(streams = combined)
+                            val bestTs = if (existing.startTimestamp > 0L) existing.startTimestamp else startMs
+                            val bestTime = if (existing.time.isNotBlank() && existing.time != "Hoje" && existing.time != "24/7") existing.time else timeDisplay
+                            eventsList[existingIndex] = existing.copy(
+                                streams = combined,
+                                startTimestamp = bestTs,
+                                time = bestTime
+                            )
                         } else {
                             eventsList.add(
                                 LiveEvent(
@@ -637,10 +662,11 @@ class ChannelRepository(private val context: Context) {
                                     logo = poster,
                                     genre = if (isSoccer) 1 else 99,
                                     genreName = genreName,
-                                    time = "Hoje",
+                                    time = timeDisplay,
                                     viewers = 250,
                                     streams = streamedStreams,
-                                    isSoccer = isSoccer
+                                    isSoccer = isSoccer,
+                                    startTimestamp = startMs
                                 )
                             )
                         }
@@ -691,6 +717,10 @@ class ChannelRepository(private val context: Context) {
                                 else -> if (league.isNotBlank()) "🏆 $league" else "🏆 Desporto"
                             }
 
+                            val dateRaw = obj.get("match_timestamp")?.asLong ?: 0L
+                            val startMs = if (dateRaw in 1..99999999999L) dateRaw * 1000L else dateRaw
+                            val timeDisplay = formatMatchTime(startMs)
+
                             val existingIndex = eventsList.indexOfFirst {
                                 val n1 = it.name.lowercase().replace(" ", "").replace("@", "vs").replace("-", "vs").replace(".", "")
                                 val n2 = name.lowercase().replace(" ", "").replace("@", "vs").replace("-", "vs").replace(".", "")
@@ -699,7 +729,13 @@ class ChannelRepository(private val context: Context) {
 
                             if (existingIndex >= 0) {
                                 val existing = eventsList[existingIndex]
-                                eventsList[existingIndex] = existing.copy(streams = existing.streams + streamList)
+                                val bestTs = if (existing.startTimestamp > 0L) existing.startTimestamp else startMs
+                                val bestTime = if (existing.time.isNotBlank() && existing.time != "Hoje" && existing.time != "24/7") existing.time else timeDisplay
+                                eventsList[existingIndex] = existing.copy(
+                                    streams = existing.streams + streamList,
+                                    startTimestamp = bestTs,
+                                    time = bestTime
+                                )
                             } else {
                                 eventsList.add(
                                     LiveEvent(
@@ -708,10 +744,11 @@ class ChannelRepository(private val context: Context) {
                                         logo = thumb,
                                         genre = if (isSoccer) 1 else 99,
                                         genreName = genreName,
-                                        time = "🔴 Ao Vivo",
+                                        time = timeDisplay,
                                         viewers = 350,
                                         streams = streamList,
-                                        isSoccer = isSoccer
+                                        isSoccer = isSoccer,
+                                        startTimestamp = startMs
                                     )
                                 )
                             }
@@ -748,6 +785,9 @@ class ChannelRepository(private val context: Context) {
                                 val sourceTag = sObj.get("source_tag")?.asString ?: "Stream"
                                 val poster = sObj.get("poster")?.asString
                                 val id = sObj.get("id")?.asString ?: sName.hashCode().toString()
+                                val dateRaw = sObj.get("starts_at")?.asLong ?: 0L
+                                val startMs = if (dateRaw in 1..99999999999L) dateRaw * 1000L else if (dateRaw < 0L) 0L else dateRaw
+                                val timeDisplay = formatMatchTime(startMs)
 
                                 val isSoccer = catName.contains("football", ignoreCase = true) ||
                                         catName.contains("soccer", ignoreCase = true) ||
@@ -775,8 +815,14 @@ class ChannelRepository(private val context: Context) {
 
                                 if (existingIndex >= 0) {
                                     val existing = eventsList[existingIndex]
+                                    val bestTs = if (existing.startTimestamp > 0L) existing.startTimestamp else startMs
+                                    val bestTime = if (existing.time.isNotBlank() && existing.time != "Hoje" && existing.time != "24/7") existing.time else timeDisplay
                                     if (existing.streams.none { it.url == iframe }) {
-                                        eventsList[existingIndex] = existing.copy(streams = existing.streams + listOf(ppvStream))
+                                        eventsList[existingIndex] = existing.copy(
+                                            streams = existing.streams + listOf(ppvStream),
+                                            startTimestamp = bestTs,
+                                            time = bestTime
+                                        )
                                     }
                                 } else {
                                     eventsList.add(
@@ -786,10 +832,11 @@ class ChannelRepository(private val context: Context) {
                                             logo = poster,
                                             genre = if (isSoccer) 1 else 99,
                                             genreName = genreName,
-                                            time = if (tag.isNotBlank()) tag else "Ao Vivo",
+                                            time = timeDisplay,
                                             viewers = 200,
                                             streams = listOf(ppvStream),
-                                            isSoccer = isSoccer
+                                            isSoccer = isSoccer,
+                                            startTimestamp = startMs
                                         )
                                     )
                                 }
@@ -801,14 +848,96 @@ class ChannelRepository(private val context: Context) {
                 e.printStackTrace()
             }
 
-            // Prioritize soccer, then sort by viewers descending
-            eventsList.sortWith(compareBy({ !it.isSoccer }, { -it.viewers }))
-            liveEvents = eventsList
-            sharedLiveEvents = eventsList
+            val nowMs = System.currentTimeMillis()
+            // Filter out matches that ended more than 10 hours ago
+            val validEvents = eventsList.filter {
+                if (it.startTimestamp > 0L) {
+                    (nowMs - it.startTimestamp) < (10 * 3600 * 1000L)
+                } else {
+                    true
+                }
+            }
+
+            // Sort chronologically by start hour:
+            // 1. Matches with scheduled start time sorted ascending (today's live & upcoming matches first)
+            // 2. Continuous 24/7 streams placed at the end
+            val sortedEvents = validEvents.sortedWith { a, b ->
+                val aTs = a.startTimestamp
+                val bTs = b.startTimestamp
+                when {
+                    aTs == 0L && bTs == 0L -> compareBy<LiveEvent>({ !it.isSoccer }, { -it.viewers }).compare(a, b)
+                    aTs == 0L -> 1
+                    bTs == 0L -> -1
+                    aTs != bTs -> aTs.compareTo(bTs)
+                    else -> compareBy<LiveEvent>({ !it.isSoccer }, { -it.viewers }).compare(a, b)
+                }
+            }
+
+            liveEvents = sortedEvents
+            sharedLiveEvents = sortedEvents
 
             withContext(Dispatchers.Main) {
-                onResult(eventsList)
+                onResult(sortedEvents)
             }
+        }
+    }
+
+    fun formatMatchTime(startMs: Long, isLive: Boolean = false): String {
+        if (startMs <= 0L) return "24/7"
+        return try {
+            val lisbonTz = TimeZone.getTimeZone("Europe/Lisbon")
+            val now = System.currentTimeMillis()
+            val eventDate = Date(startMs)
+
+            val lisbonDateFmt = SimpleDateFormat("yyyyMMdd", Locale.US).apply { timeZone = lisbonTz }
+            val eventDay = lisbonDateFmt.format(eventDate)
+            val today = lisbonDateFmt.format(Date(now))
+            val tomorrow = lisbonDateFmt.format(Date(now + 86400000L))
+
+            val lisbonTimeFmt = SimpleDateFormat("HH:mm", Locale.getDefault()).apply { timeZone = lisbonTz }
+            val timeFormatted = lisbonTimeFmt.format(eventDate)
+
+            val isRunning = isLive || (now in startMs..(startMs + (2.5 * 3600 * 1000).toLong()))
+
+            when (eventDay) {
+                today -> if (isRunning) "🔴 $timeFormatted" else timeFormatted
+                tomorrow -> "Amanhã $timeFormatted"
+                else -> {
+                    val displayDateFmt = SimpleDateFormat("dd/MM", Locale.getDefault()).apply { timeZone = lisbonTz }
+                    "${displayDateFmt.format(eventDate)} $timeFormatted"
+                }
+            }
+        } catch (_: Exception) {
+            if (isLive) "🔴 Em Direto" else "Hoje"
+        }
+    }
+
+    private fun parseTimeToTimestamp(rawTime: String): Long {
+        if (rawTime.isBlank()) return 0L
+        return try {
+            val utcTz = TimeZone.getTimeZone("UTC")
+            val cleanStr = rawTime.trim().replace("Z", "")
+            val parsedDate: Date? = if (cleanStr.contains("T")) {
+                val pattern = if (cleanStr.length >= 19) "yyyy-MM-dd'T'HH:mm:ss" else "yyyy-MM-dd'T'HH:mm"
+                SimpleDateFormat(pattern, Locale.US).apply { timeZone = utcTz }.parse(cleanStr)
+            } else if (cleanStr.contains(" ")) {
+                val pattern = if (cleanStr.length >= 19) "yyyy-MM-dd HH:mm:ss" else "yyyy-MM-dd HH:mm"
+                SimpleDateFormat(pattern, Locale.US).apply { timeZone = utcTz }.parse(cleanStr)
+            } else if (cleanStr.contains(":")) {
+                val lisbonTz = TimeZone.getTimeZone("Europe/Lisbon")
+                val cal = Calendar.getInstance(lisbonTz)
+                val parts = cleanStr.split(":")
+                cal.set(Calendar.HOUR_OF_DAY, parts[0].trim().toInt())
+                cal.set(Calendar.MINUTE, parts[1].trim().toInt())
+                cal.set(Calendar.SECOND, 0)
+                cal.set(Calendar.MILLISECOND, 0)
+                cal.time
+            } else {
+                null
+            }
+            parsedDate?.time ?: 0L
+        } catch (_: Exception) {
+            0L
         }
     }
 
