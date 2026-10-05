@@ -101,7 +101,8 @@ fun HomeScreen(
     }
     var selectedCategory by remember { mutableStateOf("Todos") }
     var gamesSubFilter by remember { mutableStateOf("Canais") }
-    var selectedLeagueFilter by remember { mutableStateOf("Todas") }
+    var selectedLeagueFilter by remember { mutableStateOf("Todos") }
+    var selectedFootballLeague by remember { mutableStateOf("Todas") }
     var refreshKey by remember { mutableStateOf(0) }
     val prefViewMode = remember(refreshKey) { repository.getChannelViewMode() }
     val showClock = remember(refreshKey) { repository.isShowClockEnabled() }
@@ -651,12 +652,34 @@ fun HomeScreen(
                     } else {
                         // Sub-tab 2: Live matches for today (StreamFC style: Matchday by Leagues + Game-to-Channel Mapping)
                         val allCachedChannels = remember(refreshKey, channelsVersion) { repository.getAllCachedChannels() }
-                        val leagueGroups = remember(filteredEvents) {
-                            filteredEvents.groupBy { SportsMatchHelper.getCompetitionCategory(it) }
+
+                        val soccerEvents = remember(filteredEvents) {
+                            filteredEvents.filter { SportsMatchHelper.isSoccerEvent(it) }
                         }
-                        val availableLeagues = remember(leagueGroups, filteredEvents.size) {
-                            listOf("Todas" to filteredEvents.size) + leagueGroups.map { it.key to it.value.size }
+                        val nonSoccerEvents = remember(filteredEvents) {
+                            filteredEvents.filter { !SportsMatchHelper.isSoccerEvent(it) }
                         }
+                        val sportsGroups = remember(nonSoccerEvents) {
+                            nonSoccerEvents.groupBy { SportsMatchHelper.getSportCategory(it) }
+                        }
+                        val footballLeagueGroups = remember(soccerEvents) {
+                            soccerEvents.groupBy { SportsMatchHelper.getSoccerLeague(it) }
+                        }
+
+                        // Subseparadores principais: Todos, Futebol e outras modalidades desportivas
+                        val availableSubFilters = remember(filteredEvents.size, soccerEvents.size, sportsGroups) {
+                            val list = mutableListOf<Pair<String, Int>>()
+                            list.add("Todos" to filteredEvents.size)
+                            if (soccerEvents.isNotEmpty()) {
+                                list.add("Futebol" to soccerEvents.size)
+                            }
+                            sportsGroups.forEach { (cat, evs) ->
+                                list.add(cat to evs.size)
+                            }
+                            list
+                        }
+
+                        val currentMainFilter = if (availableSubFilters.any { it.first == selectedLeagueFilter }) selectedLeagueFilter else "Todos"
 
                         if (isLoadingEvents && filteredEvents.isEmpty()) {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -682,21 +705,29 @@ fun HomeScreen(
                             }
                         } else {
                             Column(modifier = Modifier.fillMaxSize()) {
-                                // Barra de Filtros de Competição / Ligas
+                                // Barra de Subseparadores: Todos, Futebol, Motores, etc.
                                 LazyRow(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(horizontal = 12.dp, vertical = 6.dp),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    itemsIndexed(availableLeagues, key = { idx, item -> "league_${item.first}_$idx" }) { _, (leagueName, count) ->
-                                        val isSelected = selectedLeagueFilter == leagueName
+                                    itemsIndexed(availableSubFilters, key = { idx, item -> "sub_${item.first}_$idx" }) { _, (filterName, count) ->
+                                        val isSelected = currentMainFilter == filterName
                                         FilterChip(
                                             selected = isSelected,
-                                            onClick = { selectedLeagueFilter = leagueName },
+                                            onClick = {
+                                                selectedLeagueFilter = filterName
+                                                selectedFootballLeague = "Todas"
+                                            },
                                             label = {
+                                                val labelText = when (filterName) {
+                                                    "Todos" -> "🔥 Todos ($count)"
+                                                    "Futebol" -> "⚽ Futebol ($count)"
+                                                    else -> "$filterName ($count)"
+                                                }
                                                 Text(
-                                                    text = if (leagueName == "Todas") "⚽ Todas ($count)" else "$leagueName ($count)",
+                                                    text = labelText,
                                                     fontSize = 11.sp,
                                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                                 )
@@ -717,15 +748,144 @@ fun HomeScreen(
                                     }
                                 }
 
+                                // Se selecionado Futebol, exibir chips rápidos para cada Liga
+                                if (currentMainFilter == "Futebol" && footballLeagueGroups.size > 1) {
+                                    val availableFootballLeagues = remember(footballLeagueGroups, soccerEvents.size) {
+                                        listOf("Todas" to soccerEvents.size) + footballLeagueGroups.map { it.key to it.value.size }
+                                    }
+                                    LazyRow(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 12.dp, vertical = 2.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        itemsIndexed(availableFootballLeagues, key = { idx, item -> "fb_chip_${item.first}_$idx" }) { _, (lgName, lgCount) ->
+                                            val isLgSelected = selectedFootballLeague == lgName
+                                            FilterChip(
+                                                selected = isLgSelected,
+                                                onClick = { selectedFootballLeague = lgName },
+                                                label = {
+                                                    Text(
+                                                        text = if (lgName == "Todas") "Todas as Ligas ($lgCount)" else "$lgName ($lgCount)",
+                                                        fontSize = 10.sp,
+                                                        fontWeight = if (isLgSelected) FontWeight.Bold else FontWeight.Normal
+                                                    )
+                                                },
+                                                colors = FilterChipDefaults.filterChipColors(
+                                                    selectedContainerColor = RedPrimary,
+                                                    selectedLabelColor = Color.White,
+                                                    containerColor = SurfaceDark,
+                                                    labelColor = TextSecondary
+                                                ),
+                                                border = FilterChipDefaults.filterChipBorder(
+                                                    enabled = true,
+                                                    selected = isLgSelected,
+                                                    borderColor = if (isLgSelected) RedPrimary else BorderDark,
+                                                    selectedBorderColor = RedPrimary
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+
+                                val onPlayEvent: (LiveEvent) -> Unit = { event ->
+                                    PlayerActivity.closeActivePip()
+                                    val streamUrl = event.streams.firstOrNull()?.url ?: ""
+                                    val backupUrl = if (event.streams.size > 1) event.streams[1].url else null
+                                    val backupUrl2 = if (event.streams.size > 2) event.streams[2].url else null
+                                    val intent = Intent(context, PlayerActivity::class.java).apply {
+                                        putExtra("EXTRA_CHANNEL_ID", "event_${event.id}")
+                                        putExtra("EXTRA_CHANNEL_NAME", event.name)
+                                        putExtra("EXTRA_DIRECT_STREAM_URL", streamUrl)
+                                        if (backupUrl != null) putExtra("EXTRA_BACKUP_STREAM_URL", backupUrl)
+                                        if (backupUrl2 != null) putExtra("EXTRA_BACKUP_STREAM_URL2", backupUrl2)
+                                    }
+                                    context.startActivity(intent)
+                                }
+
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
                                     contentPadding = PaddingValues(12.dp),
                                     verticalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
-                                    if (selectedLeagueFilter == "Todas") {
-                                        // Agrupamento por cada liga com cabeçalho
-                                        leagueGroups.forEach { (leagueName, eventsInLeague) ->
-                                            item(key = "hdr_${leagueName.hashCode()}") {
+                                    if (currentMainFilter == "Futebol") {
+                                        // Dentro de Futebol: Sub-secções para cada Liga
+                                        if (selectedFootballLeague == "Todas") {
+                                            footballLeagueGroups.forEach { (leagueName, eventsInLeague) ->
+                                                item(key = "hdr_fb_${leagueName.hashCode()}") {
+                                                    Row(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(horizontal = 4.dp, vertical = 6.dp),
+                                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Text(
+                                                            text = leagueName,
+                                                            color = TextPrimary,
+                                                            fontSize = 14.sp,
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                        Text(
+                                                            text = "${eventsInLeague.size} jogos",
+                                                            color = TextSecondary,
+                                                            fontSize = 11.sp
+                                                        )
+                                                    }
+                                                }
+
+                                                itemsIndexed(eventsInLeague, key = { index, event -> "ev_fb_${leagueName.hashCode()}_${event.id}_$index" }) { _, event ->
+                                                    val matchedChannels = remember(event.id) {
+                                                        SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
+                                                    }
+                                                    LiveEventCard(
+                                                        event = event,
+                                                        broadcastingChannels = matchedChannels,
+                                                        onPlayClick = { onPlayEvent(event) },
+                                                        onChannelClick = { ch -> onChannelClick(ch, null) }
+                                                    )
+                                                }
+                                            }
+                                        } else {
+                                            val eventsInLeague = footballLeagueGroups[selectedFootballLeague] ?: emptyList()
+                                            item(key = "hdr_fb_single_${selectedFootballLeague.hashCode()}") {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 4.dp, vertical = 6.dp),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        text = selectedFootballLeague,
+                                                        color = TextPrimary,
+                                                        fontSize = 14.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                    Text(
+                                                        text = "${eventsInLeague.size} jogos",
+                                                        color = TextSecondary,
+                                                        fontSize = 11.sp
+                                                    )
+                                                }
+                                            }
+
+                                            itemsIndexed(eventsInLeague, key = { index, event -> "ev_fb_s_${selectedFootballLeague.hashCode()}_${event.id}_$index" }) { _, event ->
+                                                val matchedChannels = remember(event.id) {
+                                                    SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
+                                                }
+                                                LiveEventCard(
+                                                    event = event,
+                                                    broadcastingChannels = matchedChannels,
+                                                    onPlayClick = { onPlayEvent(event) },
+                                                    onChannelClick = { ch -> onChannelClick(ch, null) }
+                                                )
+                                            }
+                                        }
+                                    } else if (currentMainFilter == "Todos") {
+                                        // Todos: Ligas de Futebol primeiro em sub-secções, seguidas de outras modalidades
+                                        footballLeagueGroups.forEach { (leagueName, eventsInLeague) ->
+                                            item(key = "hdr_all_fb_${leagueName.hashCode()}") {
                                                 Row(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
@@ -747,35 +907,58 @@ fun HomeScreen(
                                                 }
                                             }
 
-                                            itemsIndexed(eventsInLeague, key = { index, event -> "ev_${leagueName.hashCode()}_${event.id}_$index" }) { _, event ->
+                                            itemsIndexed(eventsInLeague, key = { index, event -> "ev_all_fb_${leagueName.hashCode()}_${event.id}_$index" }) { _, event ->
                                                 val matchedChannels = remember(event.id) {
                                                     SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
                                                 }
                                                 LiveEventCard(
                                                     event = event,
                                                     broadcastingChannels = matchedChannels,
-                                                    onPlayClick = {
-                                                        PlayerActivity.closeActivePip()
-                                                        val streamUrl = event.streams.firstOrNull()?.url ?: ""
-                                                        val backupUrl = if (event.streams.size > 1) event.streams[1].url else null
-                                                        val backupUrl2 = if (event.streams.size > 2) event.streams[2].url else null
-                                                        val intent = Intent(context, PlayerActivity::class.java).apply {
-                                                            putExtra("EXTRA_CHANNEL_ID", "event_${event.id}")
-                                                            putExtra("EXTRA_CHANNEL_NAME", event.name)
-                                                            putExtra("EXTRA_DIRECT_STREAM_URL", streamUrl)
-                                                            if (backupUrl != null) putExtra("EXTRA_BACKUP_STREAM_URL", backupUrl)
-                                                            if (backupUrl2 != null) putExtra("EXTRA_BACKUP_STREAM_URL2", backupUrl2)
-                                                        }
-                                                        context.startActivity(intent)
-                                                    },
+                                                    onPlayClick = { onPlayEvent(event) },
+                                                    onChannelClick = { ch -> onChannelClick(ch, null) }
+                                                )
+                                            }
+                                        }
+
+                                        sportsGroups.forEach { (sportName, eventsInSport) ->
+                                            item(key = "hdr_all_sp_${sportName.hashCode()}") {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 4.dp, vertical = 6.dp),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        text = sportName,
+                                                        color = TextPrimary,
+                                                        fontSize = 14.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                    Text(
+                                                        text = "${eventsInSport.size} eventos",
+                                                        color = TextSecondary,
+                                                        fontSize = 11.sp
+                                                    )
+                                                }
+                                            }
+
+                                            itemsIndexed(eventsInSport, key = { index, event -> "ev_all_sp_${sportName.hashCode()}_${event.id}_$index" }) { _, event ->
+                                                val matchedChannels = remember(event.id) {
+                                                    SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
+                                                }
+                                                LiveEventCard(
+                                                    event = event,
+                                                    broadcastingChannels = matchedChannels,
+                                                    onPlayClick = { onPlayEvent(event) },
                                                     onChannelClick = { ch -> onChannelClick(ch, null) }
                                                 )
                                             }
                                         }
                                     } else {
-                                        // Apenas a liga selecionada
-                                        val eventsInLeague = leagueGroups[selectedLeagueFilter] ?: emptyList()
-                                        item(key = "hdr_flt_${selectedLeagueFilter.hashCode()}") {
+                                        // Modalidade desportiva específica selecionada
+                                        val eventsInSport = sportsGroups[currentMainFilter] ?: emptyList()
+                                        item(key = "hdr_sp_single_${currentMainFilter.hashCode()}") {
                                             Row(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
@@ -784,40 +967,27 @@ fun HomeScreen(
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
                                                 Text(
-                                                    text = selectedLeagueFilter,
+                                                    text = currentMainFilter,
                                                     color = TextPrimary,
                                                     fontSize = 14.sp,
                                                     fontWeight = FontWeight.Bold
                                                 )
                                                 Text(
-                                                    text = "${eventsInLeague.size} jogos",
+                                                    text = "${eventsInSport.size} eventos",
                                                     color = TextSecondary,
                                                     fontSize = 11.sp
                                                 )
                                             }
                                         }
 
-                                        itemsIndexed(eventsInLeague, key = { index, event -> "ev_flt_${selectedLeagueFilter.hashCode()}_${event.id}_$index" }) { _, event ->
+                                        itemsIndexed(eventsInSport, key = { index, event -> "ev_sp_s_${currentMainFilter.hashCode()}_${event.id}_$index" }) { _, event ->
                                             val matchedChannels = remember(event.id) {
                                                 SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
                                             }
                                             LiveEventCard(
                                                 event = event,
                                                 broadcastingChannels = matchedChannels,
-                                                onPlayClick = {
-                                                    PlayerActivity.closeActivePip()
-                                                    val streamUrl = event.streams.firstOrNull()?.url ?: ""
-                                                    val backupUrl = if (event.streams.size > 1) event.streams[1].url else null
-                                                    val backupUrl2 = if (event.streams.size > 2) event.streams[2].url else null
-                                                    val intent = Intent(context, PlayerActivity::class.java).apply {
-                                                        putExtra("EXTRA_CHANNEL_ID", "event_${event.id}")
-                                                        putExtra("EXTRA_CHANNEL_NAME", event.name)
-                                                        putExtra("EXTRA_DIRECT_STREAM_URL", streamUrl)
-                                                        if (backupUrl != null) putExtra("EXTRA_BACKUP_STREAM_URL", backupUrl)
-                                                        if (backupUrl2 != null) putExtra("EXTRA_BACKUP_STREAM_URL2", backupUrl2)
-                                                    }
-                                                    context.startActivity(intent)
-                                                },
+                                                onPlayClick = { onPlayEvent(event) },
                                                 onChannelClick = { ch -> onChannelClick(ch, null) }
                                             )
                                         }

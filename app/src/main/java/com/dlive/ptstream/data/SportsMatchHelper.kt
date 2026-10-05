@@ -5,7 +5,51 @@ object SportsMatchHelper {
     /**
      * Categoriza qualquer evento desportivo na respetiva liga ou competição oficial.
      */
-    fun getCompetitionCategory(event: LiveEvent): String {
+    /**
+     * Verifica se o evento é uma partida ou transmissão de futebol.
+     */
+    fun isSoccerEvent(event: LiveEvent): Boolean {
+        if (event.genre in listOf(2, 3, 6, 7, 8, 9, 10, 11)) return false
+        val n = event.name.lowercase()
+        if (containsAny(n, "formula 1", "formula 2", "motogp", "moto2", "moto3", "nascar", "indycar", "rally", "wrc", "f1",
+                "ufc", "bellator", "mma", "wwe", "boxing", "boxe", "boxen",
+                "nba", "euroleague", "basketball", "basquete",
+                "atp", "wta", "tennis", "ténis", "wimbledon", "roland garros", "us open", "australian open",
+                "nfl", "nhl", "mlb", "baseball", "basebol", "golf", "golfe", "darts", "snooker")) {
+            return false
+        }
+        return event.isSoccer || event.genre == 1 ||
+                event.genreName.contains("futebol", ignoreCase = true) ||
+                event.genreName.contains("soccer", ignoreCase = true) ||
+                event.genreName.contains("football", ignoreCase = true) ||
+                containsAny(n, " vs ", " v ", " - ", " fc", "fc ", " cf", "cf ", "sporting", "benfica", "porto", "braga",
+                    "real madrid", "barcelona", "liverpool", "arsenal", "man city", "chelsea", "juventus", "milan", "inter",
+                    "bayern", "dortmund", "psg", "united", "city", "athletic", "atletico", "cup", "liga", "league")
+    }
+
+    /**
+     * Categoria macro desportiva (Futebol, Motores, Basquetebol, Ténis, Combate, etc.)
+     */
+    fun getSportCategory(event: LiveEvent): String {
+        return try {
+            val n = event.name.lowercase()
+            when {
+                isSoccerEvent(event) -> "⚽ Futebol"
+                event.genre == 2 || containsAny(n, "f1", "formula 1", "formula 2", "motogp", "moto2", "moto3", "nascar", "indycar", "rally", "wrc") -> "🏎️ Motores (F1 & MotoGP)"
+                event.genre == 7 || containsAny(n, "nba", "euroleague", "basketball", "basquete", "lakers", "warriors", "celtics", "bulls") -> "🏀 Basquetebol (NBA)"
+                event.genre == 10 || containsAny(n, "atp", "wta", "tennis", "ténis", "wimbledon", "roland garros", "us open", "australian open") -> "🎾 Ténis (ATP/WTA)"
+                event.genre in listOf(3, 6) || containsAny(n, "ufc", "mma", "boxing", "boxe", "wwe", "bellator") -> "🥊 Desportos de Combate"
+                else -> "🏆 Outros Desportos"
+            }
+        } catch (_: Throwable) {
+            "🏆 Outros Desportos"
+        }
+    }
+
+    /**
+     * Detecta a liga ou competição específica para um jogo de futebol.
+     */
+    fun getSoccerLeague(event: LiveEvent): String {
         return try {
             val n = event.name.lowercase()
             when {
@@ -13,46 +57,103 @@ object SportsMatchHelper {
                 containsAny(n, "benfica", "porto", "sporting", "braga", "vitória", "vitoria", "guimarães", "guimaraes",
                     "liga portugal", "taça de portugal", "taça da liga", "taca de portugal", "estoril", "famalicão", "famalicao",
                     "gil vicente", "boavista", "rio ave", "moreirense", "farense", "santa clara", "nacional", "estrela amadora",
-                    "casa pia", "arouca", "portimonense", "chaves", "vizela", "leixões", "marítimo", "penafiel") -> "🇵🇹 Liga Portugal"
+                    "casa pia", "arouca", "portimonense", "chaves", "vizela", "leixões", "marítimo", "penafiel", "alverca",
+                    "feirense", "tondela", "academico viseu", "felgueiras") -> "🇵🇹 Liga Portugal"
 
-                // 2. UEFA Champions League, Europa League & Conference League
-                containsAny(n, "champions league", "europa league", "conference league", "uefa", "super cup", "nations league") -> "🇪🇺 UEFA Champions & Europa"
+                // 2. Seleções & Liga das Nações / Amigáveis Internacionais
+                containsAny(n, "nations league", "liga das nações", "qualificação euro", "copa america", "world cup",
+                    "euro 20", "amigável", "amigavel", "friendly", "france vs", "italy vs", "spain vs", "germany vs",
+                    "england vs", "portugal vs", "brazil vs", "argentina vs", "belgium vs", "netherlands vs",
+                    "croatia vs", "poland vs", "sweden vs", "denmark vs", "switzerland vs", "austria vs", "ukraine vs",
+                    "norway vs", "serbia vs", "turkey vs", "türkiye", "cyprus vs", "latvia", "bosnia", "liechtenstein",
+                    "montenegro", "armenia", "georgia", "romania", "hungary", "kazakhstan", "faroe islands") -> "🌍 Seleções & Liga das Nações"
 
-                // 3. Premier League Inglesa
+                // 3. UEFA Champions League, Europa League & Conference League
+                containsAny(n, "champions league", "europa league", "conference league", "uefa super cup", "super cup") -> "🇪🇺 UEFA Champions & Europa"
+
+                // 4. Premier League Inglesa
                 containsAny(n, "premier league", "arsenal", "liverpool", "manchester city", "man city", "manchester united",
                     "man utd", "chelsea", "tottenham", "newcastle", "aston villa", "everton", "west ham", "brighton",
-                    "fa cup", "carabao cup", "efl cup", "wolves", "brentford") -> "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League"
+                    "wolves", "brentford", "crystal palace", "fulham", "bournemouth", "nottingham forest", "ipswich",
+                    "southampton", "leicester", "fa cup", "carabao cup", "efl cup") -> "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League"
 
-                // 4. La Liga Espanhola
+                // 5. La Liga Espanhola
                 containsAny(n, "la liga", "laliga", "real madrid", "barcelona", "atlético madrid", "atletico madrid",
-                    "sevilla", "valencia", "athletic bilbao", "betis", "villarreal", "copa del rey", "real sociedade", "girona") -> "🇪🇸 La Liga"
+                    "sevilla", "valencia", "athletic bilbao", "athletic club", "betis", "villarreal", "copa del rey",
+                    "real sociedade", "girona", "rayo vallecano", "celta", "mallorca", "osasuna", "las palmas",
+                    "alaves", "alavés", "leganes", "leganés", "espanyol", "valladolid", "getafe") -> "🇪🇸 La Liga"
 
-                // 5. Serie A Italiana
-                containsAny(n, "serie a", "juventus", "inter", "milan", "napoli", "roma", "lazio", "atalanta", "fiorentina", "coppa italia") -> "🇮🇹 Serie A"
+                // 6. Serie A Italiana
+                containsAny(n, "serie a", "juventus", "inter", "milan", "napoli", "roma", "lazio", "atalanta", "fiorentina",
+                    "torino", "udinese", "bologna", "monza", "genoa", "verona", "parma", "como", "empoli", "cagliari",
+                    "venezia", "lecce", "coppa italia") -> "🇮🇹 Serie A"
 
-                // 6. Bundesliga Alemã
-                containsAny(n, "bundesliga", "bayern", "dortmund", "leverkusen", "leipzig", "frankfurt", "stuttgart", "dfb pokal") -> "🇩🇪 Bundesliga"
+                // 7. Bundesliga Alemã
+                containsAny(n, "bundesliga", "bayern", "dortmund", "leverkusen", "leipzig", "frankfurt", "stuttgart",
+                    "hoffenheim", "wolfsburg", "freiburg", "augsburg", "bremen", "monchengladbach", "mönchengladbach",
+                    "mainz", "st. pauli", "heidenheim", "bochum", "holstein kiel", "dfb pokal") -> "🇩🇪 Bundesliga"
 
-                // 7. Ligue 1 Francesa
-                containsAny(n, "ligue 1", "psg", "paris saint", "marseille", "monaco", "lyon", "lille") -> "🇫🇷 Ligue 1"
+                // 8. Ligue 1 Francesa
+                containsAny(n, "ligue 1", "psg", "paris saint", "marseille", "monaco", "lyon", "lille", "lens", "rennes",
+                    "nice", "strasbourg", "reims", "nantes", "auxerre", "brest", "le havre", "montpellier", "toulouse",
+                    "saint-etienne", "angers") -> "🇫🇷 Ligue 1"
 
-                // 8. Motores (F1, MotoGP, etc.)
-                event.genre == 2 || containsAny(n, "f1", "formula 1", "formula 2", "motogp", "moto2", "moto3", "nascar", "indycar", "rally", "wrc") -> "🏎️ Motores (F1 & MotoGP)"
+                // 9. Eredivisie (Países Baixos)
+                containsAny(n, "eredivisie", "psv", "feyenoord", "ajax", "alkmaar", "az alkmaar", "twente", "utrecht",
+                    "heerenveen", "sparta rotterdam", "go ahead eagles", "nec nijmegen", "groningen", "willem", "heracles",
+                    "fortuna sittard", "pec zwolle", "nac breda", "almere", "rkc waalwijk") -> "🇳🇱 Eredivisie (Países Baixos)"
 
-                // 9. Basquetebol / NBA
-                event.genre == 7 || containsAny(n, "nba", "euroleague", "basketball", "basquete", "lakers", "warriors", "celtics", "bulls") -> "🏀 Basquetebol (NBA)"
+                // 10. Liga Belga (Jupiler Pro League)
+                containsAny(n, "belgian", "jupiler", "anderlecht", "club brugge", "cercle brugge", "gent", "genk",
+                    "union sg", "saint-gilloise", "antwerp", "standard liège", "charleroi", "lommel", "waasland",
+                    "kortrijk", "westerlo", "mechelen", "dender", "beerschot", "sint-truiden", "oud-heverlee", "louvière") -> "🇧🇪 Liga Belga (Jupiler Pro)"
 
-                // 10. Ténis (ATP, WTA, Grand Slams)
-                event.genre == 10 || containsAny(n, "atp", "wta", "tennis", "ténis", "wimbledon", "roland garros", "us open", "australian open") -> "🎾 Ténis (ATP/WTA)"
+                // 11. Liga MX (México)
+                containsAny(n, "liga mx", "puebla", "león", "leon", "tigres", "toluca", "cruz azul", "pumas", "américa",
+                    "america", "chivas", "guadalajara", "monterrey", "pachuca", "santos laguna", "atlas", "necaxa",
+                    "querétaro", "mazatlán", "mazatlan", "tijuana", "juárez", "juarez", "san luis") -> "🇲🇽 Liga MX (México)"
 
-                // 11. Desportos de Combate / Artes Marciais
-                event.genre in listOf(3, 6) || containsAny(n, "ufc", "mma", "boxing", "boxe", "wwe", "bellator") -> "🥊 Desportos de Combate"
+                // 12. MLS (Estados Unidos)
+                containsAny(n, "mls", "major league soccer", "chicago fire", "vancouver whitecaps", "inter miami",
+                    "la galaxy", "lafc", "sounders", "red bulls", "nycfc", "atlanta united", "orlando city", "columbus crew",
+                    "portland timbers", "austin fc", "charlotte fc", "fc cincinnati", "philadelphia union") -> "🇺🇸 MLS (Estados Unidos)"
 
-                // 12. Outros jogos de futebol
-                event.isSoccer || event.genre == 1 || n.contains(" vs ") || n.contains(" fc") || n.contains("fc ") -> "⚽ Outros Jogos de Futebol"
+                // 13. Allsvenskan (Suécia)
+                containsAny(n, "allsvenskan", "malmö", "malmo", "aik", "djurgården", "djurgarden", "hammarby", "elfsborg",
+                    "häcken", "hacken", "göteborg", "goteborg", "sirius", "kalmar", "halmstad", "brommapojkarna",
+                    "gais", "mjällby", "mjallby", "degerfors", "västerås", "vasteras") -> "🇸🇪 Allsvenskan (Suécia)"
 
-                // 13. Outros Desportos
-                else -> "🏆 Outros Desportos"
+                // 14. EFL Championship & Taças de Inglaterra
+                containsAny(n, "championship", "west brom", "birmingham", "derby county", "wrexham", "coventry", "leeds",
+                    "watford", "norwich", "sunderland", "middlesbrough", "sheffield united", "sheffield wednesday", "burnley",
+                    "luton", "stoke", "blackburn", "hull city", "bristol city", "qpr", "millwall", "swansea", "cardiff",
+                    "preston", "oxford united", "plymouth", "portsmouth") -> "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Championship (Inglaterra 2ª)"
+
+                // 15. Brasileirão & Competições Sul-Americanas
+                containsAny(n, "brasileirão", "brasileirao", "flamengo", "palmeiras", "corinthians", "são paulo", "sao paulo",
+                    "santos fc", "grêmio", "gremio", "internacional", "fluminense", "botafogo", "vasco da gama", "vasco",
+                    "cruzeiro", "bahia", "fortaleza", "athletico paranaense", "libertadores", "sudamericana") -> "🇧🇷 Brasileirão & América do Sul"
+
+                // 16. Saudi Pro League
+                containsAny(n, "saudi", "al hilal", "al nassr", "al ittihad", "al ahli", "al shabab", "al ettifaq") -> "🇸🇦 Liga Saudita"
+
+                // 17. Outras Ligas & Jogos
+                else -> "⚽ Outras Ligas & Amigáveis"
+            }
+        } catch (_: Throwable) {
+            "⚽ Outras Ligas & Amigáveis"
+        }
+    }
+
+    /**
+     * Categoriza qualquer evento desportivo na respetiva liga ou modalidade oficial.
+     */
+    fun getCompetitionCategory(event: LiveEvent): String {
+        return try {
+            if (isSoccerEvent(event)) {
+                getSoccerLeague(event)
+            } else {
+                getSportCategory(event)
             }
         } catch (_: Throwable) {
             "🏆 Outros Desportos"
