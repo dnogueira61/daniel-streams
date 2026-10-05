@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Daniel Streams - Automated Daily Stream & Domain Validator
-Runs via GitHub Actions on a cron schedule (11:30 UTC / 12:30 Lisboa)
-to detect domain changes, verify stream status, and keep channels.json up-to-date.
+Runs via GitHub Actions on a cron schedule (11:30 UTC / 12:30 Lisboa and 05:00 UTC / 06:00 Lisboa)
+to detect domain changes, verify stream status, auto-categorize offline channels into
+'Em Manutenção', restore them when online, and keep channels.json up-to-date.
 """
 
 import json
@@ -11,6 +12,7 @@ import re
 import sys
 import urllib.request
 import urllib.error
+import ssl
 from urllib.parse import urlparse
 
 CHANNELS_PATH = os.path.join(os.path.dirname(__file__), "..", "app", "src", "main", "assets", "channels.json")
@@ -31,37 +33,47 @@ TIMSTREAMS_MIRRORS = [
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-    "Referer": "https://timst.top/"
+    "Referer": "https://grandemx.org/"
 }
 
-def check_redirect(url, timeout=5):
-    """Follows HEAD/GET to detect if a domain or link was redirected (301/302)."""
-    try:
-        req = urllib.request.Request(url, headers=HEADERS, method="HEAD")
-        opener = urllib.request.build_opener(urllib.request.HTTPRedirectHandler)
-        with opener.open(req, timeout=timeout) as resp:
-            final_url = resp.geturl()
-            return final_url
-    except urllib.error.HTTPError as e:
-        if e.code in (301, 302, 307, 308):
-            loc = e.headers.get("Location")
-            if loc:
-                return loc
-        return url
-    except Exception:
-        return url
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
-def check_url_alive(url, referer=None, timeout=5):
-    """Checks if a URL returns HTTP 200/204 or is accessible."""
+def check_url_alive(url, referer=None, timeout=6):
+    """Checks if a URL returns HTTP 200/206 or is accessible."""
+    if not url:
+        return False
     h = dict(HEADERS)
     if referer:
         h["Referer"] = referer
+    elif "rtp.pt" in url:
+        h["Referer"] = "https://www.rtp.pt/"
+    elif "impresa" in url:
+        h["Referer"] = "https://sic.pt/"
+    elif "iol.pt" in url:
+        h["Referer"] = "https://tviplayer.iol.pt/"
+    elif "grandemx.org" in url:
+        h["Referer"] = "https://grandemx.org/"
+    elif "dlive" in url:
+        h["Referer"] = "https://dlive.sx/"
+
     try:
-        req = urllib.request.Request(url, headers=h, method="HEAD")
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        req = urllib.request.Request(url, headers=h)
+        with urllib.request.urlopen(req, context=ctx, timeout=timeout) as resp:
             return resp.status in range(200, 400)
     except urllib.error.HTTPError as e:
         return e.code in range(200, 400)
+    except Exception:
+        return False
+
+def check_epicsports_api():
+    """Checks whether the EpicSports decode token endpoint is functioning."""
+    try:
+        req = urllib.request.Request("https://t.epicsports-tv.com/decode.php", headers=HEADERS)
+        with urllib.request.urlopen(req, context=ctx, timeout=5) as resp:
+            data = resp.read().decode('utf-8', errors='ignore')
+            return "parsed_data" in data or '"status":"OK"' in data
     except Exception:
         return False
 
@@ -85,7 +97,7 @@ def detect_active_timstreams_domain():
                     if loc.startswith("http"):
                         p = urlparse(loc)
                         return f"{p.scheme}://{p.netloc}"
-        except Exception as e:
+        except Exception:
             continue
     return "https://grandemx.org"
 
@@ -94,7 +106,7 @@ def fetch_m3upt_tokenized_url(m3u_file):
     url = f"https://raw.githubusercontent.com/LITUATUI/M3UPT/main/M3U/{m3u_file}"
     try:
         req = urllib.request.Request(url, headers=HEADERS)
-        with urllib.request.urlopen(req, timeout=6) as resp:
+        with urllib.request.urlopen(req, context=ctx, timeout=6) as resp:
             content = resp.read().decode('utf-8')
             for line in content.splitlines():
                 line = line.strip()
@@ -122,7 +134,7 @@ def main():
 
     changes_count = 0
 
-    # 2. Update TimStreams links if needed
+    # 2. Update TimStreams links if domain changed
     for ch in channels:
         b1 = ch.get("backupStreamUrl")
         b2 = ch.get("backupStreamUrl2")
@@ -160,15 +172,75 @@ def main():
                     ch["backupStreamUrl2"] = cnn_url
                     changes_count += 1
 
-    # 4. Save channels.json if changes occurred
+    # 4. Stream Health & Auto Maintenance Categorization for Portuguese channels
+    epicsports_alive = check_epicsports_api()
+    print(f"EpicSports Token API Status: {'ONLINE' if epicsports_alive else 'OFFLINE (Broken Decode)'}")
+
+    pt_channels = [c for c in channels if c.get("isPt") or c.get("country") == "PT"]
+    print(f"Analyzing stream health for {len(pt_channels)} Portuguese channels...")
+
+    for ch in pt_channels:
+        cid = str(ch.get("id", ""))
+        name = ch.get("name", "Unknown")
+        current_cat = ch.get("category", "")
+        orig_cat = ch.get("originalCategory") or (current_cat if current_cat != "Em Manutenção" else "Desporto")
+        
+        has_working_source = False
+
+        # Check Primary (DaddyLive)
+        if cid.isdigit():
+            dl_url = f"https://dlive.sx/stream/stream-{cid}.php"
+            if check_url_alive(dl_url, "https://dlive.sx/"):
+                has_working_source = True
+
+        # Check Backup 1
+        b1 = ch.get("backupStreamUrl")
+        if not has_working_source and b1:
+            if "epicsports-tv.com" in b1:
+                if epicsports_alive:
+                    has_working_source = True
+            elif check_url_alive(b1):
+                has_working_source = True
+
+        # Check Backup 2
+        b2 = ch.get("backupStreamUrl2")
+        if not has_working_source and b2:
+            if check_url_alive(b2):
+                has_working_source = True
+
+        # State Transition Logic
+        if not has_working_source:
+            # Channel is OFFLINE -> Move to "Em Manutenção"
+            if current_cat != "Em Manutenção":
+                print(f"[OFFLINE] {name} -> Moving to 'Em Manutenção' (saved original: {orig_cat})")
+                ch["originalCategory"] = orig_cat
+                ch["category"] = "Em Manutenção"
+                changes_count += 1
+        else:
+            # Channel is ONLINE -> Restore from "Em Manutenção" if needed
+            if current_cat == "Em Manutenção":
+                restored_cat = ch.get("originalCategory", "Desporto")
+                print(f"[ONLINE] {name} -> Restored to '{restored_cat}'!")
+                ch["category"] = restored_cat
+                changes_count += 1
+
+    # 5. Sort Portuguese channels so that "Em Manutenção" stays at the bottom
+    pt_active = [c for c in channels if (c.get("isPt") or c.get("country") == "PT") and c.get("category") != "Em Manutenção"]
+    pt_maintenance = [c for c in channels if (c.get("isPt") or c.get("country") == "PT") and c.get("category") == "Em Manutenção"]
+    other_channels = [c for c in channels if not (c.get("isPt") or c.get("country") == "PT")]
+
+    sorted_channels = pt_active + pt_maintenance + other_channels
+
+    # 6. Save channels.json if changes occurred
     if changes_count > 0:
-        print(f"Applying {changes_count} changes to channels.json...")
+        print(f"Applying {changes_count} status/domain changes to channels.json...")
         with open(norm_path, "w", encoding="utf-8") as f:
-            json.dump(channels, f, indent=2, ensure_ascii=False)
+            json.dump(sorted_channels, f, indent=2, ensure_ascii=False)
         print("channels.json successfully updated!")
     else:
         print("All channels and domains are already up-to-date. No changes needed.")
 
+    print(f"Summary: {len(pt_active)} active PT channels, {len(pt_maintenance)} in maintenance.")
     print("=== Validation Finished Successfully ===")
 
 if __name__ == "__main__":
