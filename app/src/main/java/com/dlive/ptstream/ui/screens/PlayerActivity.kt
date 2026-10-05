@@ -1237,6 +1237,12 @@ class PlayerActivity : ComponentActivity() {
                         host.contains("hesgoal") ||
                         host.contains("cdnlive") ||
                         host.contains("cowedd") ||
+                        host.contains("strmfree") ||
+                        host.contains("streamfree") ||
+                        host.contains("embedindia") ||
+                        host.contains("ppv") ||
+                        host.contains("ppvservices") ||
+                        host.contains("cdn-lab") ||
                         (currentTimstHost.isNotEmpty() && host.contains(currentTimstHost)) ||
                         (currentBaseHost.isNotEmpty() && host.contains(currentBaseHost)) ||
                         host.endsWith(".cfd") ||
@@ -1666,6 +1672,8 @@ class PlayerActivity : ComponentActivity() {
                 targetDirect.contains("cdnlivetv") || targetDirect.contains("streamsports") -> "https://streamsports99.ru/"
                 targetDirect.contains("embed.st") || targetDirect.contains("streamed") -> "https://streamed.pk/"
                 targetDirect.contains("grandemx") || targetDirect.contains("exmxbxe") || targetDirect.contains("timst") -> "https://timst.top/"
+                targetDirect.contains("strmfree") || targetDirect.contains("streamfree") -> "https://strmfree.st/"
+                targetDirect.contains("ppv") || targetDirect.contains("embedindia") -> "https://ppv.st/"
                 else -> "${repository.getTimstBaseUrl()}/"
             }
             if (targetDirect.contains(".m3u8")) {

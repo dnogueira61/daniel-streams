@@ -650,6 +650,157 @@ class ChannelRepository(private val context: Context) {
                 e.printStackTrace()
             }
 
+            // Also fetch from StreamFree (strmfree.st)
+            try {
+                val sfConn = (URL("https://strmfree.st/api/v1/streams").openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 5000
+                    readTimeout = 5000
+                    setRequestProperty("User-Agent", "Mozilla/5.0")
+                }
+                if (sfConn.responseCode == HttpURLConnection.HTTP_OK) {
+                    val sfJson = sfConn.inputStream.bufferedReader().use { it.readText() }
+                    val sfRoot = JsonParser.parseString(sfJson).asJsonObject
+                    val sfStreams = sfRoot.getAsJsonArray("streams")
+                    if (sfStreams != null) {
+                        for (item in sfStreams) {
+                            val obj = item.asJsonObject
+                            val id = obj.get("id")?.asString ?: continue
+                            val name = obj.get("name")?.asString ?: continue
+                            val category = obj.get("category")?.asString ?: "soccer"
+                            val league = obj.get("league")?.asString ?: ""
+                            val thumb = obj.get("thumbnail_url")?.asString
+                            val sourcesArr = obj.getAsJsonArray("sources")
+                            val streamList = mutableListOf<EventStream>()
+                            if (sourcesArr != null) {
+                                for (i in 0 until sourcesArr.size()) {
+                                    val sUrl = sourcesArr[i].asString
+                                    val label = if (i == 0) "StreamFree (1080p)" else "StreamFree (Backup ${i + 1})"
+                                    streamList.add(EventStream(label, sUrl))
+                                }
+                            }
+                            if (streamList.isEmpty()) continue
+
+                            val isSoccer = category.equals("soccer", ignoreCase = true) || category.equals("football", ignoreCase = true)
+                            val genreName = when (category.lowercase()) {
+                                "soccer" -> "⚽ Futebol"
+                                "basketball" -> "🏀 Basquetebol"
+                                "hockey" -> "🏒 Hóquei"
+                                "combat" -> "🥊 Desportos Combate"
+                                "racing" -> "🏎️ Motores"
+                                "tennis" -> "🎾 Ténis"
+                                else -> if (league.isNotBlank()) "🏆 $league" else "🏆 Desporto"
+                            }
+
+                            val existingIndex = eventsList.indexOfFirst {
+                                val n1 = it.name.lowercase().replace(" ", "").replace("@", "vs").replace("-", "vs").replace(".", "")
+                                val n2 = name.lowercase().replace(" ", "").replace("@", "vs").replace("-", "vs").replace(".", "")
+                                n1.contains(n2) || n2.contains(n1)
+                            }
+
+                            if (existingIndex >= 0) {
+                                val existing = eventsList[existingIndex]
+                                eventsList[existingIndex] = existing.copy(streams = existing.streams + streamList)
+                            } else {
+                                eventsList.add(
+                                    LiveEvent(
+                                        id = "sf-$id",
+                                        name = name,
+                                        logo = thumb,
+                                        genre = if (isSoccer) 1 else 99,
+                                        genreName = genreName,
+                                        time = "🔴 Ao Vivo",
+                                        viewers = 350,
+                                        streams = streamList,
+                                        isSoccer = isSoccer
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            // Also fetch from PPV.ST (api.ppv.st / embedindia.st)
+            try {
+                val ppvConn = (URL("https://api.ppv.st/api/streams").openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 6000
+                    readTimeout = 6000
+                    setRequestProperty("User-Agent", "Mozilla/5.0")
+                    setRequestProperty("Referer", "https://ppv.st/")
+                }
+                if (ppvConn.responseCode == HttpURLConnection.HTTP_OK) {
+                    val ppvJson = ppvConn.inputStream.bufferedReader().use { it.readText() }
+                    val ppvRoot = JsonParser.parseString(ppvJson).asJsonObject
+                    val catArray = ppvRoot.getAsJsonArray("streams")
+                    if (catArray != null) {
+                        for (catItem in catArray) {
+                            val catObj = catItem.asJsonObject
+                            val catName = catObj.get("category")?.asString ?: "Desporto"
+                            val streamsArr = catObj.getAsJsonArray("streams") ?: continue
+
+                            for (sItem in streamsArr) {
+                                val sObj = sItem.asJsonObject
+                                val sName = sObj.get("name")?.asString ?: continue
+                                val iframe = sObj.get("iframe")?.asString ?: continue
+                                val tag = sObj.get("tag")?.asString ?: ""
+                                val sourceTag = sObj.get("source_tag")?.asString ?: "Stream"
+                                val poster = sObj.get("poster")?.asString
+                                val id = sObj.get("id")?.asString ?: sName.hashCode().toString()
+
+                                val isSoccer = catName.contains("football", ignoreCase = true) ||
+                                        catName.contains("soccer", ignoreCase = true) ||
+                                        tag.contains("league", ignoreCase = true) ||
+                                        tag.contains("liga", ignoreCase = true) ||
+                                        tag.contains("cup", ignoreCase = true)
+
+                                val genreName = when {
+                                    isSoccer -> "⚽ Futebol"
+                                    catName.contains("basket", ignoreCase = true) -> "🏀 Basquetebol"
+                                    catName.contains("combat", ignoreCase = true) || catName.contains("wrestling", ignoreCase = true) -> "🥊 Combate"
+                                    catName.contains("motor", ignoreCase = true) -> "🏎️ Motores"
+                                    catName.contains("hockey", ignoreCase = true) -> "🏒 Hóquei"
+                                    catName.contains("baseball", ignoreCase = true) -> "⚾ Basebol"
+                                    else -> "🏆 $catName"
+                                }
+
+                                val ppvStream = EventStream("PPV ($sourceTag)", iframe)
+
+                                val existingIndex = eventsList.indexOfFirst {
+                                    val n1 = it.name.lowercase().replace(" ", "").replace("@", "vs").replace("-", "vs").replace(".", "")
+                                    val n2 = sName.lowercase().replace(" ", "").replace("@", "vs").replace("-", "vs").replace(".", "")
+                                    n1.contains(n2) || n2.contains(n1)
+                                }
+
+                                if (existingIndex >= 0) {
+                                    val existing = eventsList[existingIndex]
+                                    if (existing.streams.none { it.url == iframe }) {
+                                        eventsList[existingIndex] = existing.copy(streams = existing.streams + listOf(ppvStream))
+                                    }
+                                } else {
+                                    eventsList.add(
+                                        LiveEvent(
+                                            id = "ppv-$id",
+                                            name = sName,
+                                            logo = poster,
+                                            genre = if (isSoccer) 1 else 99,
+                                            genreName = genreName,
+                                            time = if (tag.isNotBlank()) tag else "Ao Vivo",
+                                            viewers = 200,
+                                            streams = listOf(ppvStream),
+                                            isSoccer = isSoccer
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
             // Prioritize soccer, then sort by viewers descending
             eventsList.sortWith(compareBy({ !it.isSoccer }, { -it.viewers }))
             liveEvents = eventsList
