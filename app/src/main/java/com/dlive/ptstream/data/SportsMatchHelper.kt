@@ -41,7 +41,7 @@ object SportsMatchHelper {
                 event.genre in listOf(3, 6) || containsAny(n, "ufc", "mma", "boxing", "boxe", "wwe", "bellator") -> "🥊 Desportos de Combate"
                 else -> "🏆 Outros Desportos"
             }
-        } catch (_: Throwable) {
+        } catch (e: Throwable) {
             "🏆 Outros Desportos"
         }
     }
@@ -140,7 +140,7 @@ object SportsMatchHelper {
                 // 17. Outras Ligas & Jogos
                 else -> "⚽ Outras Ligas & Amigáveis"
             }
-        } catch (_: Throwable) {
+        } catch (e: Throwable) {
             "⚽ Outras Ligas & Amigáveis"
         }
     }
@@ -155,7 +155,7 @@ object SportsMatchHelper {
             } else {
                 getSportCategory(event)
             }
-        } catch (_: Throwable) {
+        } catch (e: Throwable) {
             "🏆 Outros Desportos"
         }
     }
@@ -256,6 +256,31 @@ object SportsMatchHelper {
                         findChannelByName(allChannels, "DAZN 3 Portugal")?.let { matches.add(it) }
                         findChannelByName(allChannels, "DAZN 4 Portugal")?.let { matches.add(it) }
                     }
+                    "🌍 Seleções & Liga das Nações" -> {
+                        if (nameLower.contains("portugal")) {
+                            findChannelByName(allChannels, "RTP 1 HD")?.let { matches.add(it) }
+                            findChannelByName(allChannels, "Sport TV 1 HD")?.let { matches.add(it) }
+                        } else {
+                            findChannelByName(allChannels, "Sport TV 1 HD")?.let { matches.add(it) }
+                            findChannelByName(allChannels, "Sport TV 2 HD")?.let { matches.add(it) }
+                            findChannelByName(allChannels, "Sport TV 3 HD")?.let { matches.add(it) }
+                        }
+                    }
+                    "🇫🇷 Ligue 1" -> {
+                        findChannelByName(allChannels, "Sport TV 2 HD")?.let { matches.add(it) }
+                        findChannelByName(allChannels, "Sport TV 3 HD")?.let { matches.add(it) }
+                    }
+                    "🇳🇱 Eredivisie (Países Baixos)" -> {
+                        findChannelByName(allChannels, "Sport TV 3 HD")?.let { matches.add(it) }
+                    }
+                    "🇸🇦 Liga Saudita" -> {
+                        findChannelByName(allChannels, "Sport TV 1 HD")?.let { matches.add(it) }
+                        findChannelByName(allChannels, "Sport TV 2 HD")?.let { matches.add(it) }
+                    }
+                    "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Championship (Inglaterra 2ª)" -> {
+                        findChannelByName(allChannels, "DAZN 1 Portugal")?.let { matches.add(it) }
+                        findChannelByName(allChannels, "DAZN 2 Portugal")?.let { matches.add(it) }
+                    }
                     "🏎️ Motores (F1 & MotoGP)" -> {
                         if (nameLower.contains("motogp")) {
                             findChannelByName(allChannels, "Sport TV 4 HD")?.let { matches.add(it) }
@@ -277,13 +302,155 @@ object SportsMatchHelper {
                 }
             }
 
-            // Prioridade: canais portugueses primeiro, únicos, máximo 3 canais
+            // Prioridade: canais portugueses primeiro, com Sport TV no topo!
             matches.distinctBy { it.id }
-                .sortedWith(compareBy({ !it.isPortuguese }, { it.name }))
+                .sortedWith(compareBy({ !it.isPortuguese }, { !it.name.contains("Sport TV", ignoreCase = true) }, { it.name }))
                 .take(3)
-        } catch (_: Throwable) {
+        } catch (e: Throwable) {
             emptyList()
         }
+    }
+
+    private val ptTranslations = mapOf(
+        // Países / Seleções (Europa)
+        "Sweden" to "Suécia",
+        "Romania" to "Roménia",
+        "Cyprus" to "Chipre",
+        "Latvia" to "Letónia",
+        "Italy" to "Itália",
+        "Türkiye" to "Turquia",
+        "Turkey" to "Turquia",
+        "Liechtenstein" to "Liechtenstein",
+        "Gibraltar" to "Gibraltar",
+        "Montenegro" to "Montenegro",
+        "Armenia" to "Arménia",
+        "Bosnia-Herzegovina" to "Bósnia-Herzegovina",
+        "Bosnia and Herzegovina" to "Bósnia-Herzegovina",
+        "Bosnia" to "Bósnia",
+        "Poland" to "Polónia",
+        "Northern Ireland" to "Irlanda do Norte",
+        "N.Ireland" to "Irlanda do Norte",
+        "N. Ireland" to "Irlanda do Norte",
+        "Republic of Ireland" to "Irlanda",
+        "Ireland" to "Irlanda",
+        "Georgia" to "Geórgia",
+        "Ukraine" to "Ucrânia",
+        "Hungary" to "Hungria",
+        "France" to "França",
+        "Belgium" to "Bélgica",
+        "Kazakhstan" to "Cazaquistão",
+        "Faroe Islands" to "Ilhas Faroé",
+        "Spain" to "Espanha",
+        "Switzerland" to "Suíça",
+        "Germany" to "Alemanha",
+        "Netherlands" to "Países Baixos",
+        "Holland" to "Países Baixos",
+        "Scotland" to "Escócia",
+        "Croatia" to "Croácia",
+        "Denmark" to "Dinamarca",
+        "Serbia" to "Sérvia",
+        "Austria" to "Áustria",
+        "Norway" to "Noruega",
+        "Czech Republic" to "Chéquia",
+        "Czechia" to "Chéquia",
+        "Slovakia" to "Eslováquia",
+        "Greece" to "Grécia",
+        "England" to "Inglaterra",
+        "Finland" to "Finlândia",
+        "Slovenia" to "Eslovénia",
+        "North Macedonia" to "Macedónia do Norte",
+        "Macedonia" to "Macedónia do Norte",
+        "Wales" to "País de Gales",
+        "Iceland" to "Islândia",
+        "Albania" to "Albânia",
+        "Israel" to "Israel",
+        "Estonia" to "Estónia",
+        "Azerbaijan" to "Azerbaijão",
+        "Lithuania" to "Lituânia",
+        "Kosovo" to "Kosovo",
+        "Belarus" to "Bielorrússia",
+        "Luxembourg" to "Luxemburgo",
+        "Bulgaria" to "Bulgária",
+        "Moldova" to "Moldávia",
+        "Malta" to "Malta",
+        "San Marino" to "São Marino",
+        "Andorra" to "Andorra",
+        "Portugal" to "Portugal",
+
+        // Países / Seleções (Américas)
+        "Argentina" to "Argentina",
+        "Brazil" to "Brasil",
+        "Uruguay" to "Uruguai",
+        "Colombia" to "Colômbia",
+        "Chile" to "Chile",
+        "Ecuador" to "Equador",
+        "Paraguay" to "Paraguai",
+        "Peru" to "Peru",
+        "Venezuela" to "Venezuela",
+        "Bolivia" to "Bolívia",
+        "United States" to "Estados Unidos",
+        "USA" to "EUA",
+        "Mexico" to "México",
+        "Canada" to "Canadá",
+        "Costa Rica" to "Costa Rica",
+        "Panama" to "Panamá",
+        "Jamaica" to "Jamaica",
+
+        // Países / Seleções (África e Ásia)
+        "Benin" to "Benim",
+        "Morocco" to "Marrocos",
+        "Senegal" to "Senegal",
+        "Egypt" to "Egito",
+        "Nigeria" to "Nigéria",
+        "Ivory Coast" to "Costa do Marfim",
+        "Cameroon" to "Camarões",
+        "Ghana" to "Gana",
+        "South Africa" to "África do Sul",
+        "Algeria" to "Argélia",
+        "Tunisia" to "Tunísia",
+        "Cape Verde" to "Cabo Verde",
+        "Angola" to "Angola",
+        "Mozambique" to "Moçambique",
+        "Japan" to "Japão",
+        "South Korea" to "Coreia do Sul",
+        "North Korea" to "Coreia do Norte",
+        "Australia" to "Austrália",
+        "Saudi Arabia" to "Arábia Saudita",
+        "Qatar" to "Catar",
+        "Iran" to "Irão",
+        "Iraq" to "Iraque",
+
+        // Clubes Internacionais Famosos
+        "Bayern Munich" to "Bayern Munique",
+        "Inter Milan" to "Inter de Milão",
+        "AC Milan" to "AC Milão",
+        "Athletic Bilbao" to "Athletic Bilbau",
+        "Red Star Belgrade" to "Estrela Vermelha",
+        "Napoli" to "Nápoles",
+        "Sevilla" to "Sevilha",
+        "Valencia" to "Valência",
+        "Atletico Madrid" to "Atlético de Madrid",
+        "Atlético Madrid" to "Atlético de Madrid",
+        "Marseille" to "Marselha",
+        "Lyon" to "Lyon"
+    )
+
+    /**
+     * Traduz e formata nomes de equipas, países e jogos para PT-PT (ex: Suécia - Roménia).
+     */
+    fun translateToPt(rawTitle: String): String {
+        if (rawTitle.isBlank()) return rawTitle
+        var res = rawTitle
+
+        for ((en, pt) in ptTranslations) {
+            val regex = Regex("(?i)\\b" + Regex.escape(en) + "\\b")
+            res = regex.replace(res, pt)
+        }
+
+        // Normalizar separador de jogo: " vs. ", " vs ", " v " -> " - "
+        res = res.replace(Regex("(?i)\\s+(vs\\.|vs|v)\\s+"), " - ")
+
+        return res
     }
 
     private fun findChannelByName(channels: List<Channel>, name: String): Channel? {
@@ -306,7 +473,7 @@ object SportsMatchHelper {
             clean.split("\\s+".toRegex())
                 .map { it.trim() }
                 .filter { it.length >= 3 && it !in stopwords }
-        } catch (_: Throwable) {
+        } catch (e: Throwable) {
             emptyList()
         }
     }

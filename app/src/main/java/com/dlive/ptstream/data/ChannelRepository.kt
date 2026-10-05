@@ -95,7 +95,12 @@ class ChannelRepository(private val context: Context) {
             }
         }
 
-        precomputedPtChannels = pt
+        // Ordenar canais PT: primeiro TODOS os Sport TV (ordenados: 1, 2, 3, 4, 5, 6, +), depois mantém a ordenação existente
+        val sportTv = pt.filter { it.name.contains("Sport TV", ignoreCase = true) }
+            .sortedBy { getSportTvOrder(it.name) }
+        val otherPt = pt.filter { !it.name.contains("Sport TV", ignoreCase = true) }
+        precomputedPtChannels = sportTv + otherPt
+
         precomputedAllChannels = all
         precomputedFavChannels = fav
         precomputedGamingChannels = gaming
@@ -109,6 +114,20 @@ class ChannelRepository(private val context: Context) {
         precomputedAllCategories = listOf("Todos", "Desporto") + (allCats.filter { it != "Desporto" })
 
         channelsVersion.intValue++
+    }
+
+    fun getSportTvOrder(name: String): Int {
+        val lower = name.lowercase()
+        return when {
+            lower.contains("sport tv 1") || lower.contains("sport tv1") -> 1
+            lower.contains("sport tv 2") || lower.contains("sport tv2") -> 2
+            lower.contains("sport tv 3") || lower.contains("sport tv3") -> 3
+            lower.contains("sport tv 4") || lower.contains("sport tv4") -> 4
+            lower.contains("sport tv 5") || lower.contains("sport tv5") -> 5
+            lower.contains("sport tv 6") || lower.contains("sport tv6") -> 6
+            lower.contains("sport tv +") || lower.contains("sport tv mais") || lower.contains("sport tv+") -> 7
+            else -> 8
+        }
     }
 
     fun getHiddenChannelIds(): Set<String> {
@@ -873,11 +892,15 @@ class ChannelRepository(private val context: Context) {
                 }
             }
 
-            liveEvents = sortedEvents
-            sharedLiveEvents = sortedEvents
+            val translatedEvents = sortedEvents.map {
+                it.copy(name = SportsMatchHelper.translateToPt(it.name))
+            }
+
+            liveEvents = translatedEvents
+            sharedLiveEvents = translatedEvents
 
             withContext(Dispatchers.Main) {
-                onResult(sortedEvents)
+                onResult(translatedEvents)
             }
         }
     }
@@ -1107,7 +1130,12 @@ class ChannelRepository(private val context: Context) {
         }
 
         val baseList = when (tab) {
-            TabFilter.PORTUGAL -> if (includeHidden) cachedChannels.filter { it.isPortuguese } else precomputedPtChannels
+            TabFilter.PORTUGAL -> if (includeHidden) {
+                val list = cachedChannels.filter { it.isPortuguese }
+                val sportTv = list.filter { it.name.contains("Sport TV", ignoreCase = true) }.sortedBy { getSportTvOrder(it.name) }
+                val others = list.filter { !it.name.contains("Sport TV", ignoreCase = true) }
+                sportTv + others
+            } else precomputedPtChannels
             TabFilter.LIVE_GAMES -> getTopFootballChannels(query)
             TabFilter.GAMING -> if (includeHidden) cachedChannels.filter { it.category.contains("Gaming", ignoreCase = true) } else precomputedGamingChannels
             TabFilter.TIMSTREAMS -> {

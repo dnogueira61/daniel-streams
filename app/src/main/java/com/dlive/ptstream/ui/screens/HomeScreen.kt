@@ -673,13 +673,21 @@ fun HomeScreen(
                             if (soccerEvents.isNotEmpty()) {
                                 list.add("Futebol" to soccerEvents.size)
                             }
-                            sportsGroups.forEach { (cat, evs) ->
+                            // Todas as modalidades específicas primeiro
+                            val specificSports = sportsGroups.filterKeys { !it.contains("Outros", ignoreCase = true) }
+                            specificSports.forEach { (cat, evs) ->
+                                list.add(cat to evs.size)
+                            }
+                            // "Outros desportos" SEMPRE EM ÚLTIMO
+                            val otherSports = sportsGroups.filterKeys { it.contains("Outros", ignoreCase = true) }
+                            otherSports.forEach { (cat, evs) ->
                                 list.add(cat to evs.size)
                             }
                             list
                         }
 
                         val currentMainFilter = if (availableSubFilters.any { it.first == selectedLeagueFilter }) selectedLeagueFilter else "Todos"
+                        var leagueDropdownExpanded by remember { mutableStateOf(false) }
 
                         if (isLoadingEvents && filteredEvents.isEmpty()) {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -705,7 +713,7 @@ fun HomeScreen(
                             }
                         } else {
                             Column(modifier = Modifier.fillMaxSize()) {
-                                // Barra de Subseparadores: Todos, Futebol, Motores, etc.
+                                // Barra de Subseparadores: Todos, Futebol, Motores, ..., Outros Desportos (último)
                                 LazyRow(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -719,6 +727,7 @@ fun HomeScreen(
                                             onClick = {
                                                 selectedLeagueFilter = filterName
                                                 selectedFootballLeague = "Todas"
+                                                leagueDropdownExpanded = false
                                             },
                                             label = {
                                                 val labelText = when (filterName) {
@@ -748,59 +757,139 @@ fun HomeScreen(
                                     }
                                 }
 
-                                // Se selecionado Futebol, exibir chips rápidos para cada Liga
-                                if (currentMainFilter == "Futebol" && footballLeagueGroups.size > 1) {
+                                // Dropdown de seleção de Ligas dentro do Futebol (predefinido fechado)
+                                if (currentMainFilter == "Futebol" && footballLeagueGroups.isNotEmpty()) {
                                     val availableFootballLeagues = remember(footballLeagueGroups, soccerEvents.size) {
                                         listOf("Todas" to soccerEvents.size) + footballLeagueGroups.map { it.key to it.value.size }
                                     }
-                                    LazyRow(
+                                    val currentLeagueLabel = if (selectedFootballLeague == "Todas") {
+                                        "🏆 Todas as Ligas (${soccerEvents.size} jogos)"
+                                    } else {
+                                        val count = footballLeagueGroups[selectedFootballLeague]?.size ?: 0
+                                        "$selectedFootballLeague ($count jogos)"
+                                    }
+
+                                    Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(horizontal = 12.dp, vertical = 2.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                            .padding(horizontal = 12.dp, vertical = 4.dp)
                                     ) {
-                                        itemsIndexed(availableFootballLeagues, key = { idx, item -> "fb_chip_${item.first}_$idx" }) { _, (lgName, lgCount) ->
-                                            val isLgSelected = selectedFootballLeague == lgName
-                                            FilterChip(
-                                                selected = isLgSelected,
-                                                onClick = { selectedFootballLeague = lgName },
-                                                label = {
-                                                    Text(
-                                                        text = if (lgName == "Todas") "Todas as Ligas ($lgCount)" else "$lgName ($lgCount)",
-                                                        fontSize = 10.sp,
-                                                        fontWeight = if (isLgSelected) FontWeight.Bold else FontWeight.Normal
+                                        Card(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable { leagueDropdownExpanded = !leagueDropdownExpanded },
+                                            shape = RoundedCornerShape(10.dp),
+                                            colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+                                            border = BorderStroke(1.dp, if (leagueDropdownExpanded) Color(0xFF38BDF8) else BorderDark)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier.weight(1f),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Menu,
+                                                        contentDescription = "Ligas",
+                                                        tint = Color(0xFF38BDF8),
+                                                        modifier = Modifier.size(18.dp)
                                                     )
-                                                },
-                                                colors = FilterChipDefaults.filterChipColors(
-                                                    selectedContainerColor = RedPrimary,
-                                                    selectedLabelColor = Color.White,
-                                                    containerColor = SurfaceDark,
-                                                    labelColor = TextSecondary
-                                                ),
-                                                border = FilterChipDefaults.filterChipBorder(
-                                                    enabled = true,
-                                                    selected = isLgSelected,
-                                                    borderColor = if (isLgSelected) RedPrimary else BorderDark,
-                                                    selectedBorderColor = RedPrimary
+                                                    Spacer(modifier = Modifier.width(8.dp))
+                                                    Text(
+                                                        text = currentLeagueLabel,
+                                                        color = TextPrimary,
+                                                        fontSize = 13.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis
+                                                    )
+                                                }
+                                                Icon(
+                                                    imageVector = if (leagueDropdownExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                                    contentDescription = "Expandir Ligas",
+                                                    tint = TextSecondary,
+                                                    modifier = Modifier.size(20.dp)
                                                 )
-                                            )
+                                            }
+                                        }
+
+                                        DropdownMenu(
+                                            expanded = leagueDropdownExpanded,
+                                            onDismissRequest = { leagueDropdownExpanded = false },
+                                            modifier = Modifier
+                                                .background(SurfaceDark)
+                                                .border(1.dp, BorderDark, RoundedCornerShape(8.dp))
+                                        ) {
+                                            availableFootballLeagues.forEach { (lgName, lgCount) ->
+                                                val isCurrent = selectedFootballLeague == lgName
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Row(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                                            verticalAlignment = Alignment.CenterVertically
+                                                        ) {
+                                                            Text(
+                                                                text = if (lgName == "Todas") "Todas as Ligas" else lgName,
+                                                                color = if (isCurrent) Color(0xFF38BDF8) else TextPrimary,
+                                                                fontSize = 13.sp,
+                                                                fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal
+                                                            )
+                                                            Spacer(modifier = Modifier.width(16.dp))
+                                                            Text(
+                                                                text = "$lgCount jogos",
+                                                                color = TextSecondary,
+                                                                fontSize = 11.sp
+                                                            )
+                                                        }
+                                                    },
+                                                    onClick = {
+                                                        selectedFootballLeague = lgName
+                                                        leagueDropdownExpanded = false
+                                                    },
+                                                    modifier = Modifier.background(if (isCurrent) SurfaceVariantDark else Color.Transparent)
+                                                )
+                                            }
                                         }
                                     }
                                 }
 
-                                val onPlayEvent: (LiveEvent) -> Unit = { event ->
-                                    PlayerActivity.closeActivePip()
-                                    val streamUrl = event.streams.firstOrNull()?.url ?: ""
-                                    val backupUrl = if (event.streams.size > 1) event.streams[1].url else null
-                                    val backupUrl2 = if (event.streams.size > 2) event.streams[2].url else null
-                                    val intent = Intent(context, PlayerActivity::class.java).apply {
-                                        putExtra("EXTRA_CHANNEL_ID", "event_${event.id}")
-                                        putExtra("EXTRA_CHANNEL_NAME", event.name)
-                                        putExtra("EXTRA_DIRECT_STREAM_URL", streamUrl)
-                                        if (backupUrl != null) putExtra("EXTRA_BACKUP_STREAM_URL", backupUrl)
-                                        if (backupUrl2 != null) putExtra("EXTRA_BACKUP_STREAM_URL2", backupUrl2)
+                                val onPlayEvent: (LiveEvent, List<Channel>) -> Unit = { event, matchedChannels ->
+                                    // 1. Prioridade máxima: canal PT oficial (Sport TV primeiro, depois DAZN/outros canais PT)
+                                    val sportTvChannel = matchedChannels.firstOrNull { it.isPortuguese && it.name.contains("Sport TV", ignoreCase = true) }
+                                    val anyPtChannel = sportTvChannel ?: matchedChannels.firstOrNull { it.isPortuguese }
+
+                                    if (anyPtChannel != null) {
+                                        onChannelClick(anyPtChannel, null)
+                                    } else {
+                                        // 2. Se não houver canal PT matched, verificar se existe stream com Sport TV / PT no nome
+                                        val ptStream = event.streams.firstOrNull {
+                                            it.name.contains("Sport TV", ignoreCase = true) ||
+                                            it.name.contains("DAZN PT", ignoreCase = true) ||
+                                            it.name.contains("PT", ignoreCase = true) ||
+                                            it.name.contains("Português", ignoreCase = true) ||
+                                            it.name.contains("Portuguese", ignoreCase = true)
+                                        }
+
+                                        PlayerActivity.closeActivePip()
+                                        val streamUrl = ptStream?.url ?: event.streams.firstOrNull()?.url ?: ""
+                                        val otherStreams = event.streams.filter { it.url != streamUrl }
+                                        val backupUrl = otherStreams.firstOrNull()?.url
+                                        val backupUrl2 = if (otherStreams.size > 1) otherStreams[1].url else null
+                                        val intent = Intent(context, PlayerActivity::class.java).apply {
+                                            putExtra("EXTRA_CHANNEL_ID", "event_${event.id}")
+                                            putExtra("EXTRA_CHANNEL_NAME", SportsMatchHelper.translateToPt(event.name))
+                                            putExtra("EXTRA_DIRECT_STREAM_URL", streamUrl)
+                                            if (backupUrl != null) putExtra("EXTRA_BACKUP_STREAM_URL", backupUrl)
+                                            if (backupUrl2 != null) putExtra("EXTRA_BACKUP_STREAM_URL2", backupUrl2)
+                                        }
+                                        context.startActivity(intent)
                                     }
-                                    context.startActivity(intent)
                                 }
 
                                 LazyColumn(
@@ -841,7 +930,7 @@ fun HomeScreen(
                                                     LiveEventCard(
                                                         event = event,
                                                         broadcastingChannels = matchedChannels,
-                                                        onPlayClick = { onPlayEvent(event) },
+                                                        onPlayClick = { onPlayEvent(event, matchedChannels) },
                                                         onChannelClick = { ch -> onChannelClick(ch, null) }
                                                     )
                                                 }
@@ -877,13 +966,13 @@ fun HomeScreen(
                                                 LiveEventCard(
                                                     event = event,
                                                     broadcastingChannels = matchedChannels,
-                                                    onPlayClick = { onPlayEvent(event) },
+                                                    onPlayClick = { onPlayEvent(event, matchedChannels) },
                                                     onChannelClick = { ch -> onChannelClick(ch, null) }
                                                 )
                                             }
                                         }
                                     } else if (currentMainFilter == "Todos") {
-                                        // Todos: Ligas de Futebol primeiro em sub-secções, seguidas de outras modalidades
+                                        // Todos: Ligas de Futebol primeiro em sub-secções, seguidas de outras modalidades (Outros Desportos por último)
                                         footballLeagueGroups.forEach { (leagueName, eventsInLeague) ->
                                             item(key = "hdr_all_fb_${leagueName.hashCode()}") {
                                                 Row(
@@ -914,13 +1003,15 @@ fun HomeScreen(
                                                 LiveEventCard(
                                                     event = event,
                                                     broadcastingChannels = matchedChannels,
-                                                    onPlayClick = { onPlayEvent(event) },
+                                                    onPlayClick = { onPlayEvent(event, matchedChannels) },
                                                     onChannelClick = { ch -> onChannelClick(ch, null) }
                                                 )
                                             }
                                         }
 
-                                        sportsGroups.forEach { (sportName, eventsInSport) ->
+                                        // Modalidades específicas (Motores, Basquete, Ténis, Combate)
+                                        val specificSports = sportsGroups.filterKeys { !it.contains("Outros", ignoreCase = true) }
+                                        specificSports.forEach { (sportName, eventsInSport) ->
                                             item(key = "hdr_all_sp_${sportName.hashCode()}") {
                                                 Row(
                                                     modifier = Modifier
@@ -950,7 +1041,45 @@ fun HomeScreen(
                                                 LiveEventCard(
                                                     event = event,
                                                     broadcastingChannels = matchedChannels,
-                                                    onPlayClick = { onPlayEvent(event) },
+                                                    onPlayClick = { onPlayEvent(event, matchedChannels) },
+                                                    onChannelClick = { ch -> onChannelClick(ch, null) }
+                                                )
+                                            }
+                                        }
+
+                                        // Outros Desportos garantidamente no fim
+                                        val otherSports = sportsGroups.filterKeys { it.contains("Outros", ignoreCase = true) }
+                                        otherSports.forEach { (sportName, eventsInSport) ->
+                                            item(key = "hdr_all_sp_other_${sportName.hashCode()}") {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 4.dp, vertical = 6.dp),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        text = sportName,
+                                                        color = TextPrimary,
+                                                        fontSize = 14.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                    Text(
+                                                        text = "${eventsInSport.size} eventos",
+                                                        color = TextSecondary,
+                                                        fontSize = 11.sp
+                                                    )
+                                                }
+                                            }
+
+                                            itemsIndexed(eventsInSport, key = { index, event -> "ev_all_sp_other_${sportName.hashCode()}_${event.id}_$index" }) { _, event ->
+                                                val matchedChannels = remember(event.id) {
+                                                    SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
+                                                }
+                                                LiveEventCard(
+                                                    event = event,
+                                                    broadcastingChannels = matchedChannels,
+                                                    onPlayClick = { onPlayEvent(event, matchedChannels) },
                                                     onChannelClick = { ch -> onChannelClick(ch, null) }
                                                 )
                                             }
@@ -987,7 +1116,7 @@ fun HomeScreen(
                                             LiveEventCard(
                                                 event = event,
                                                 broadcastingChannels = matchedChannels,
-                                                onPlayClick = { onPlayEvent(event) },
+                                                onPlayClick = { onPlayEvent(event, matchedChannels) },
                                                 onChannelClick = { ch -> onChannelClick(ch, null) }
                                             )
                                         }
@@ -1269,8 +1398,9 @@ fun LiveEventCard(
                     Spacer(modifier = Modifier.width(12.dp))
 
                     Column {
+                        val displayName = remember(event.name) { SportsMatchHelper.translateToPt(event.name) }
                         Text(
-                            text = event.name,
+                            text = displayName,
                             color = TextPrimary,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
