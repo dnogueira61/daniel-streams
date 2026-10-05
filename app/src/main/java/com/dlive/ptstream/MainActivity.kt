@@ -67,11 +67,7 @@ class MainActivity : ComponentActivity() {
 
     private fun launchPlayer(channel: com.dlive.ptstream.data.Channel, directUrl: String? = null) {
         PlayerActivity.closeActivePip()
-        val timstUrl = when {
-            channel.backupStreamUrl?.let { it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") } == true -> channel.backupStreamUrl
-            channel.backupStreamUrl2?.let { it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") } == true -> channel.backupStreamUrl2
-            else -> null
-        }
+        val timstUrl = channel.timStreamsUrl
 
         val intent = Intent(this, PlayerActivity::class.java).apply {
             putExtra("EXTRA_CHANNEL_ID", channel.id)

@@ -25,7 +25,21 @@ data class Channel(
     val isPortuguese: Boolean
         get() = isPt || country.equals("PT", ignoreCase = true) || isPortugueseChannelName(name)
 
+    val timStreamsUrl: String?
+        get() {
+            val u1 = backupStreamUrl
+            if (u1 != null && isTimStreamsUrl(u1)) return u1
+            val u2 = backupStreamUrl2
+            if (u2 != null && isTimStreamsUrl(u2)) return u2
+            return null
+        }
+
     companion object {
+        fun isTimStreamsUrl(url: String?): Boolean {
+            if (url.isNullOrBlank()) return false
+            return url.contains("exmxbxe") || url.contains("timst") || url.contains("grandemx")
+        }
+
         fun isPortugueseChannelName(name: String): Boolean {
             val lower = name.lowercase()
             if (lower.contains("poland") || lower.contains("slovenia") || lower.contains("germany") || lower.contains("italia") || lower.contains("spain")) {

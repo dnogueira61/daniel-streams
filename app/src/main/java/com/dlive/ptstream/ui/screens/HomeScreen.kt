@@ -774,13 +774,16 @@ fun HomeScreen(
                                             .fillMaxWidth()
                                             .padding(horizontal = 12.dp, vertical = 4.dp)
                                     ) {
+                                        var isLeagueCardFocused by remember { mutableStateOf(false) }
                                         Card(
                                             modifier = Modifier
                                                 .fillMaxWidth()
+                                                .onFocusChanged { isLeagueCardFocused = it.isFocused }
+                                                .focusable()
                                                 .clickable { leagueDropdownExpanded = !leagueDropdownExpanded },
                                             shape = RoundedCornerShape(10.dp),
-                                            colors = CardDefaults.cardColors(containerColor = SurfaceDark),
-                                            border = BorderStroke(1.dp, if (leagueDropdownExpanded) Color(0xFF38BDF8) else BorderDark)
+                                            colors = CardDefaults.cardColors(containerColor = if (isLeagueCardFocused) SurfaceVariantDark else SurfaceDark),
+                                            border = BorderStroke(if (isLeagueCardFocused) 2.dp else 1.dp, if (isLeagueCardFocused || leagueDropdownExpanded) Color(0xFF38BDF8) else BorderDark)
                                         ) {
                                             Row(
                                                 modifier = Modifier
@@ -827,6 +830,7 @@ fun HomeScreen(
                                         ) {
                                             availableFootballLeagues.forEach { (lgName, lgCount) ->
                                                 val isCurrent = selectedFootballLeague == lgName
+                                                var isItemFocused by remember { mutableStateOf(false) }
                                                 DropdownMenuItem(
                                                     text = {
                                                         Row(
@@ -836,14 +840,14 @@ fun HomeScreen(
                                                         ) {
                                                             Text(
                                                                 text = if (lgName == "Todas") "Todas as Ligas" else lgName,
-                                                                color = if (isCurrent) Color(0xFF38BDF8) else TextPrimary,
+                                                                color = if (isItemFocused) Color.White else if (isCurrent) Color(0xFF38BDF8) else TextPrimary,
                                                                 fontSize = 13.sp,
-                                                                fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal
+                                                                fontWeight = if (isCurrent || isItemFocused) FontWeight.Bold else FontWeight.Normal
                                                             )
                                                             Spacer(modifier = Modifier.width(16.dp))
                                                             Text(
                                                                 text = "$lgCount jogos",
-                                                                color = TextSecondary,
+                                                                color = if (isItemFocused) Color.White.copy(alpha = 0.8f) else TextSecondary,
                                                                 fontSize = 11.sp
                                                             )
                                                         }
@@ -852,7 +856,10 @@ fun HomeScreen(
                                                         selectedFootballLeague = lgName
                                                         leagueDropdownExpanded = false
                                                     },
-                                                    modifier = Modifier.background(if (isCurrent) SurfaceVariantDark else Color.Transparent)
+                                                    modifier = Modifier
+                                                        .onFocusChanged { isItemFocused = it.isFocused }
+                                                        .focusable()
+                                                        .background(if (isItemFocused) Color(0xFF1E293B) else if (isCurrent) SurfaceVariantDark else Color.Transparent)
                                                 )
                                             }
                                         }
@@ -894,7 +901,7 @@ fun HomeScreen(
                                             if (backupUrl2 != null) putExtra("EXTRA_BACKUP_STREAM_URL2", backupUrl2)
                                         }
                                         context.startActivity(intent)
-                                    } else if (channelTimstUrl != null && anyPtChannel != null) {
+                                    } else if (channelTimstUrl != null) {
                                         // Prioridade 2: Canal PT com transmissão TimStreams
                                         onChannelClick(anyPtChannel, channelTimstUrl)
                                     } else if (anyPtChannel != null) {
@@ -1473,6 +1480,7 @@ fun LiveEventCard(
                 // Watch Button
                 Button(
                     onClick = onPlayClick,
+                    modifier = Modifier.focusable(false),
                     colors = ButtonDefaults.buttonColors(containerColor = RedPrimary),
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)

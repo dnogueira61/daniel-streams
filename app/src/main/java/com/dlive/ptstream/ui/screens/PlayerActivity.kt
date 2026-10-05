@@ -265,6 +265,7 @@ class PlayerActivity : ComponentActivity() {
     }
 
     fun triggerFailoverDueToPlaybackError(reason: String) {
+        android.util.Log.w("PlayerFailover", "Triggering failover due to: $reason")
         val now = System.currentTimeMillis()
         if (now - lastFailoverTime < 2500L) return
         lastFailoverTime = now
@@ -475,13 +476,18 @@ class PlayerActivity : ComponentActivity() {
             nextFocusLeftId = R.id.btnLandscapeServer
             nextFocusRightId = R.id.btnLandscapePip
         }
-        findViewById<View>(R.id.btnLandscapePip)?.nextFocusLeftId = R.id.btnLandscapeUnmute
+        findViewById<View>(R.id.btnLandscapePip)?.apply {
+            nextFocusLeftId = R.id.btnLandscapeUnmute
+            nextFocusRightId = R.id.btnLandscapeExitFullscreen
+        }
+        findViewById<View>(R.id.btnLandscapeExitFullscreen)?.nextFocusLeftId = R.id.btnLandscapePip
 
         val isTv = packageManager.hasSystemFeature("android.software.leanback") ||
                 packageManager.hasSystemFeature("android.hardware.type.television")
         if (isTv) {
             btnLandscapeExitFullscreen.visibility = View.GONE
             btnFullscreen.visibility = View.GONE
+            findViewById<View>(R.id.btnLandscapePip)?.nextFocusRightId = View.NO_ID
         }
 
         // Gesture HUD & Audio
@@ -895,11 +901,7 @@ class PlayerActivity : ComponentActivity() {
         backupDirectUrl2 = newChannel.backupStreamUrl2
         repository.setLastWatchedChannelId(channelId)
 
-        val timstUrl = when {
-            newChannel.backupStreamUrl?.let { it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") } == true -> newChannel.backupStreamUrl
-            newChannel.backupStreamUrl2?.let { it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") } == true -> newChannel.backupStreamUrl2
-            else -> null
-        }
+        val timstUrl = newChannel.timStreamsUrl
 
         if (timstUrl != null) {
             activeDirectUrl = timstUrl
@@ -1212,7 +1214,7 @@ class PlayerActivity : ComponentActivity() {
                 val url = request?.url?.toString() ?: return false
                 val host = request.url?.host?.lowercase() ?: ""
 
-                if (request?.isForMainFrame == false) {
+                if (!request.isForMainFrame) {
                     return false
                 }
 
@@ -1662,8 +1664,19 @@ class PlayerActivity : ComponentActivity() {
             currentFailoverIndex = 0
         }
 
-        val targetDirect = activeDirectUrl ?: directStreamUrl
-        if (targetDirect != null) {
+        val rawDirect = activeDirectUrl ?: directStreamUrl
+        if (rawDirect != null) {
+            val targetDirect = if (Channel.isTimStreamsUrl(rawDirect)) {
+                val activeBase = repository.getTimstBaseUrl()
+                when {
+                    rawDirect.contains("grandemx.org") -> rawDirect.replace("https://grandemx.org", activeBase)
+                    rawDirect.contains("exmxbxe.cfd") -> rawDirect.replace("https://exmxbxe.cfd", activeBase)
+                    rawDirect.contains("timst.top") -> rawDirect.replace("https://timst.top", activeBase)
+                    else -> rawDirect
+                }
+            } else {
+                rawDirect
+            }
             val referer = when {
                 targetDirect.contains("impresa.pt") -> "https://sic.pt/"
                 targetDirect.contains("rtp.pt") -> "https://www.rtp.pt/"
@@ -1780,17 +1793,17 @@ class PlayerActivity : ComponentActivity() {
         }
 
         // 2. DaddyLive (second priority if channel has numeric ID)
-        val hasDaddyLive = (currentChannel?.id?.toIntOrNull() != null) || (channelId.toIntOrNull() != null)
+        val hasDaddyLive = (currentChannel.id.toIntOrNull() != null) || (channelId.toIntOrNull() != null)
         if (hasDaddyLive) {
             val label = if (timstUrl != null) "Servidor Alternativo 1 (DaddyLive)" else "Servidor Principal (DaddyLive)"
             options.add(ServerOption(label, isDirect = false, folder = "stream"))
         }
 
         // 3. M3UPT / Official direct stream (Higher quality and stability than NTV)
-        val officialUrl = currentChannel?.backupStreamUrl2?.takeIf {
+        val officialUrl = currentChannel.backupStreamUrl2?.takeIf {
             it.contains("rtp.pt") || it.contains("impresa.pt") || it.contains("github.com") ||
             it.contains("cloudfront") || it.contains("fastly") || it.contains("livextend")
-        } ?: currentChannel?.backupStreamUrl?.takeIf {
+        } ?: currentChannel.backupStreamUrl?.takeIf {
             it.contains("rtp.pt") || it.contains("impresa.pt") || it.contains("github.com") ||
             it.contains("cloudfront") || it.contains("fastly") || it.contains("livextend")
         }
@@ -2768,13 +2781,15 @@ class PlayerActivity : ComponentActivity() {
                     }
 
                     if (wasOverlayVisible) {
-                        val touchY = ev.y
-                        val overlayHeight = if (isLandscape) landscapeOverlay.height.toFloat() else playerHeader.height.toFloat()
-                        // Se o toque foi na barra superior, entrega normalmente o clique aos botões!
-                        if (touchY <= overlayHeight && overlayHeight > 0) {
+                        val isTouchOnControls = (isLandscape && isTouchInsideView(landscapeOverlay, ev.rawX, ev.rawY)) ||
+                                (!isLandscape && isTouchInsideView(playerHeader, ev.rawX, ev.rawY)) ||
+                                isTouchInsideView(osdBanner, ev.rawX, ev.rawY)
+
+                        // Se o toque foi nos botões/controlos, entrega normalmente o clique!
+                        if (isTouchOnControls) {
                             return super.dispatchTouchEvent(ev)
                         }
-                        // Se o toque foi na área de vídeo abaixo da barra, recolhe os controlos
+                        // Se o toque foi na área de vídeo livre fora dos controlos, recolhe os controlos
                         hideControlsOverlay()
                     } else {
                         // Se os controlos estavam escondidos, exibe os controlos nativos
@@ -2788,6 +2803,13 @@ class PlayerActivity : ComponentActivity() {
         }
 
         return super.dispatchTouchEvent(ev)
+    }
+
+    private fun isTouchInsideView(view: View?, rawX: Float, rawY: Float): Boolean {
+        if (view == null || view.visibility != View.VISIBLE) return false
+        val rect = android.graphics.Rect()
+        view.getGlobalVisibleRect(rect)
+        return rect.contains(rawX.toInt(), rawY.toInt())
     }
 
     @Deprecated("Deprecated in Java")
