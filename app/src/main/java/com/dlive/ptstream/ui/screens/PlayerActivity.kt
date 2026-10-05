@@ -28,6 +28,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.*
+import android.net.Uri
 import android.widget.*
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
@@ -1208,17 +1209,22 @@ class PlayerActivity : ComponentActivity() {
 
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
-                val host = request.url?.host ?: ""
+                val host = request.url?.host?.lowercase() ?: ""
 
                 if (request?.isForMainFrame == false) {
                     return false
                 }
+
+                val currentTimstHost = try { Uri.parse(repository.getTimstBaseUrl()).host?.lowercase() ?: "" } catch (_: Exception) { "" }
+                val currentBaseHost = try { Uri.parse(repository.getBaseUrl()).host?.lowercase() ?: "" } catch (_: Exception) { "" }
 
                 val isAllowed = host.contains("dlive") ||
                         host.contains("daddylive") ||
                         host.contains("thedaddy") ||
                         host.contains("dlhd") ||
                         host.contains("dlstreams") ||
+                        host.contains("dembed") ||
+                        host.contains("grandemx") ||
                         host.contains("wideiptv") ||
                         host.contains("assetrage") ||
                         host.contains("exmxbxe") ||
@@ -1226,10 +1232,21 @@ class PlayerActivity : ComponentActivity() {
                         host.contains("tim-streams") ||
                         host.contains("ntv") ||
                         host.contains("epicsports") ||
-                        host.contains(".cfd") ||
-                        host.contains(".pk") ||
-                        host.contains(".cx") ||
-                        host.contains(".st") ||
+                        host.contains("world-proxifier") ||
+                        host.contains("dreamstream") ||
+                        host.contains("hesgoal") ||
+                        host.contains("cdnlive") ||
+                        host.contains("cowedd") ||
+                        (currentTimstHost.isNotEmpty() && host.contains(currentTimstHost)) ||
+                        (currentBaseHost.isNotEmpty() && host.contains(currentBaseHost)) ||
+                        host.endsWith(".cfd") ||
+                        host.endsWith(".pk") ||
+                        host.endsWith(".cx") ||
+                        host.endsWith(".st") ||
+                        host.endsWith(".top") ||
+                        host.endsWith(".sbs") ||
+                        host.endsWith(".ru") ||
+                        host.endsWith(".org") ||
                         url.startsWith("blob:") ||
                         url.startsWith("data:")
 
@@ -1237,6 +1254,22 @@ class PlayerActivity : ComponentActivity() {
                     return true
                 }
                 return false
+            }
+
+            override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
+                val didCrash = detail?.didCrash() ?: true
+                android.util.Log.e("PlayerActivity", "WebView renderer process gone (crashed=$didCrash)")
+                try {
+                    (view?.parent as? ViewGroup)?.removeView(view)
+                    view?.destroy()
+                } catch (_: Exception) {}
+                runOnUiThread {
+                    if (!isFinishing && !isDestroyed) {
+                        Toast.makeText(this@PlayerActivity, "A restabelecer motor de vídeo...", Toast.LENGTH_SHORT).show()
+                        recreate()
+                    }
+                }
+                return true
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
@@ -1628,10 +1661,11 @@ class PlayerActivity : ComponentActivity() {
                 targetDirect.contains("impresa.pt") -> "https://sic.pt/"
                 targetDirect.contains("rtp.pt") -> "https://www.rtp.pt/"
                 targetDirect.contains("TVI") || targetDirect.contains("iol.pt") || targetDirect.contains("raw.githubusercontent.com") -> "https://tviplayer.iol.pt/"
-                targetDirect.contains("epicsports") || targetDirect.contains("ntv.st") -> "https://ntv.st/"
+                targetDirect.contains("epicsports") || targetDirect.contains("ntv.st") || targetDirect.contains("ntv.cx") -> "https://ntv.cx/"
                 targetDirect.contains("twitch.tv") -> "https://dlive.sx/"
                 targetDirect.contains("cdnlivetv") || targetDirect.contains("streamsports") -> "https://streamsports99.ru/"
                 targetDirect.contains("embed.st") || targetDirect.contains("streamed") -> "https://streamed.pk/"
+                targetDirect.contains("grandemx") || targetDirect.contains("exmxbxe") || targetDirect.contains("timst") -> "https://timst.top/"
                 else -> "${repository.getTimstBaseUrl()}/"
             }
             if (targetDirect.contains(".m3u8")) {
@@ -1704,7 +1738,7 @@ class PlayerActivity : ComponentActivity() {
             val list = listOfNotNull(directStreamUrl, backupDirectUrl, backupDirectUrl2)
             list.forEachIndexed { idx, url ->
                 val name = when {
-                    url.contains("exmxbxe") || url.contains("timst") -> "Servidor Principal (TimStreams 1080p)"
+                    url.contains("grandemx") || url.contains("exmxbxe") || url.contains("timst") -> "Servidor Principal (TimStreams 1080p)"
                     url.contains("kobra") -> "Servidor Alternativo (NTV Kobra)"
                     url.contains("falcon") -> "Servidor Alternativo (NTV Falcon)"
                     url.contains("raptor") -> "Servidor Alternativo (NTV Raptor)"
@@ -1719,12 +1753,12 @@ class PlayerActivity : ComponentActivity() {
 
         // 1. TimStreams backup (HIGHEST PRIORITY when available)
         val ntvUrl = currentChannel.backupStreamUrl ?: backupDirectUrl
-        val rawTimst = if (ntvUrl != null && (ntvUrl.contains("exmxbxe") || ntvUrl.contains("timst"))) ntvUrl
-            else (currentChannel.backupStreamUrl2 ?: backupDirectUrl2)?.takeIf { it.contains("exmxbxe") || it.contains("timst") }
-            ?: directStreamUrl?.takeIf { it.contains("exmxbxe") || it.contains("timst") }
+        val rawTimst = if (ntvUrl != null && (ntvUrl.contains("grandemx") || ntvUrl.contains("exmxbxe") || ntvUrl.contains("timst"))) ntvUrl
+            else (currentChannel.backupStreamUrl2 ?: backupDirectUrl2)?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("timst") }
+            ?: directStreamUrl?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("timst") }
         val timstUrl = rawTimst?.let { url ->
             val base = repository.getTimstBaseUrl()
-            if (base != "https://timst.top" && url.contains("exmxbxe.cfd")) {
+            if (url.contains("exmxbxe.cfd")) {
                 url.replace("https://exmxbxe.cfd", base)
             } else {
                 url

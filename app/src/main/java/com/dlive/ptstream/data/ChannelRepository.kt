@@ -200,7 +200,7 @@ class ChannelRepository(private val context: Context) {
         prefs.edit().putString(PREF_BASE_URL, clean).apply()
     }
 
-    fun getTimstBaseUrl(): String = prefs.getString(PREF_TIMST_BASE_URL, "https://timst.top") ?: "https://timst.top"
+    fun getTimstBaseUrl(): String = prefs.getString(PREF_TIMST_BASE_URL, "https://grandemx.org") ?: "https://grandemx.org"
     fun setTimstBaseUrl(newUrl: String) {
         val clean = if (newUrl.endsWith("/")) newUrl.dropLast(1) else newUrl
         prefs.edit().putString(PREF_TIMST_BASE_URL, clean).apply()
@@ -354,11 +354,40 @@ class ChannelRepository(private val context: Context) {
                 val location = conn.getHeaderField("Location")
                 if (!location.isNullOrBlank() && (location.startsWith("http://") || location.startsWith("https://"))) {
                     setBaseUrl(location)
-                    return
+                    break
                 }
                 if (code in 200..399) {
                     setBaseUrl(m)
-                    return
+                    break
+                }
+            } catch (_: Exception) {}
+        }
+
+        val timstMirrors = listOf(
+            getTimstBaseUrl(),
+            "https://grandemx.org",
+            "https://exmxbxe.cfd",
+            "https://timst.top"
+        )
+        for (tm in timstMirrors) {
+            try {
+                val u = URL(tm)
+                val conn = (u.openConnection() as HttpURLConnection).apply {
+                    instanceFollowRedirects = false
+                    connectTimeout = 3000
+                    readTimeout = 3000
+                    requestMethod = "HEAD"
+                    setRequestProperty("User-Agent", "Mozilla/5.0")
+                }
+                val code = conn.responseCode
+                val location = conn.getHeaderField("Location")
+                if (!location.isNullOrBlank() && (location.startsWith("http://") || location.startsWith("https://"))) {
+                    setTimstBaseUrl(location)
+                    break
+                }
+                if (code in 200..399) {
+                    setTimstBaseUrl(tm)
+                    break
                 }
             } catch (_: Exception) {}
         }

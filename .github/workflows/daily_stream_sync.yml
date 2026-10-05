@@ -1,0 +1,42 @@
+name: Daily Stream & Domain Sync
+
+on:
+  schedule:
+    # 11:30 UTC (12:30 Lisboa) - Janela de manutenção e rotação pré-jogos
+    - cron: '30 11 * * *'
+    # 05:00 UTC (06:00 Lisboa) - Janela de manutenção matinal
+    - cron: '0 5 * * *'
+  workflow_dispatch: # Permite correr manualmente com 1 clique no GitHub
+
+permissions:
+  contents: write
+
+jobs:
+  sync-streams:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Stream Validator & Domain Detector
+        run: |
+          python scripts/stream_validator.py
+
+      - name: Commit & Push changes if updated
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add app/src/main/assets/channels.json
+          if git diff --staged --quiet; then
+            echo "Nenhuma alteração nos canais ou domínios hoje."
+          else
+            echo "Detetadas alterações nos streams/domínios. A comitar e atualizar repositório..."
+            git commit -m "chore(streams): auto-update stream domains and channel tokens [skip ci]"
+            git push
+          fi
