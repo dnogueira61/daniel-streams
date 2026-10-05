@@ -860,14 +860,48 @@ fun HomeScreen(
                                 }
 
                                 val onPlayEvent: (LiveEvent, List<Channel>) -> Unit = { event, matchedChannels ->
-                                    // 1. Prioridade máxima: canal PT oficial (Sport TV primeiro, depois DAZN/outros canais PT)
+                                    // 1. Procurar stream TimStreams direta do próprio jogo (feed direto 1080p do evento)
+                                    val timstStream = event.streams.firstOrNull {
+                                        it.url.contains("exmxbxe") || it.url.contains("timst") || it.url.contains("grandemx") ||
+                                        (!it.url.contains("ntv.st") && !it.url.contains("embed.st") && !it.url.contains("strmfree") && !it.url.contains("ppv.st"))
+                                    }
+
+                                    // 2. Procurar canal PT correspondente (preferência Sport TV 1..6, depois restantes)
                                     val sportTvChannel = matchedChannels.firstOrNull { it.isPortuguese && it.name.contains("Sport TV", ignoreCase = true) }
                                     val anyPtChannel = sportTvChannel ?: matchedChannels.firstOrNull { it.isPortuguese }
 
-                                    if (anyPtChannel != null) {
+                                    // Link TimStreams do canal PT caso exista
+                                    val channelTimstUrl = anyPtChannel?.let { ch ->
+                                        when {
+                                            ch.backupStreamUrl?.let { it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") } == true -> ch.backupStreamUrl
+                                            ch.backupStreamUrl2?.let { it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") } == true -> ch.backupStreamUrl2
+                                            else -> null
+                                        }
+                                    }
+
+                                    if (timstStream != null) {
+                                        // Prioridade 1: Stream TimStreams do próprio jogo
+                                        PlayerActivity.closeActivePip()
+                                        val streamUrl = timstStream.url
+                                        val otherStreams = event.streams.filter { it.url != streamUrl }
+                                        val backupUrl = otherStreams.firstOrNull()?.url ?: channelTimstUrl ?: anyPtChannel?.backupStreamUrl
+                                        val backupUrl2 = if (otherStreams.size > 1) otherStreams[1].url else anyPtChannel?.backupStreamUrl ?: anyPtChannel?.backupStreamUrl2
+                                        val intent = Intent(context, PlayerActivity::class.java).apply {
+                                            putExtra("EXTRA_CHANNEL_ID", "event_${event.id}")
+                                            putExtra("EXTRA_CHANNEL_NAME", SportsMatchHelper.translateToPt(event.name))
+                                            putExtra("EXTRA_DIRECT_STREAM_URL", streamUrl)
+                                            if (backupUrl != null) putExtra("EXTRA_BACKUP_STREAM_URL", backupUrl)
+                                            if (backupUrl2 != null) putExtra("EXTRA_BACKUP_STREAM_URL2", backupUrl2)
+                                        }
+                                        context.startActivity(intent)
+                                    } else if (channelTimstUrl != null && anyPtChannel != null) {
+                                        // Prioridade 2: Canal PT com transmissão TimStreams
+                                        onChannelClick(anyPtChannel, channelTimstUrl)
+                                    } else if (anyPtChannel != null) {
+                                        // Prioridade 3: Canal PT oficial (DaddyLive / outros)
                                         onChannelClick(anyPtChannel, null)
                                     } else {
-                                        // 2. Se não houver canal PT matched, verificar se existe stream com Sport TV / PT no nome
+                                        // Prioridade 4: Outras streams do evento (NTV, Streamed, PPV)
                                         val ptStream = event.streams.firstOrNull {
                                             it.name.contains("Sport TV", ignoreCase = true) ||
                                             it.name.contains("DAZN PT", ignoreCase = true) ||
@@ -875,12 +909,11 @@ fun HomeScreen(
                                             it.name.contains("Português", ignoreCase = true) ||
                                             it.name.contains("Portuguese", ignoreCase = true)
                                         }
-
-                                        PlayerActivity.closeActivePip()
                                         val streamUrl = ptStream?.url ?: event.streams.firstOrNull()?.url ?: ""
                                         val otherStreams = event.streams.filter { it.url != streamUrl }
                                         val backupUrl = otherStreams.firstOrNull()?.url
                                         val backupUrl2 = if (otherStreams.size > 1) otherStreams[1].url else null
+                                        PlayerActivity.closeActivePip()
                                         val intent = Intent(context, PlayerActivity::class.java).apply {
                                             putExtra("EXTRA_CHANNEL_ID", "event_${event.id}")
                                             putExtra("EXTRA_CHANNEL_NAME", SportsMatchHelper.translateToPt(event.name))
