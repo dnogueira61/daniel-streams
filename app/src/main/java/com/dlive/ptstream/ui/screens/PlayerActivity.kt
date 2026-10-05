@@ -330,7 +330,7 @@ class PlayerActivity : ComponentActivity() {
         backupDirectUrl2 = intent.getStringExtra("EXTRA_BACKUP_STREAM_URL2")
 
         val timstCandidate = listOfNotNull(directStreamUrl, backupDirectUrl, backupDirectUrl2)
-            .firstOrNull { it.contains("exmxbxe") || it.contains("timst") }
+            .firstOrNull { it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") }
         if (timstCandidate != null && directStreamUrl == null) {
             directStreamUrl = timstCandidate
         }
@@ -896,8 +896,8 @@ class PlayerActivity : ComponentActivity() {
         repository.setLastWatchedChannelId(channelId)
 
         val timstUrl = when {
-            newChannel.backupStreamUrl?.let { it.contains("exmxbxe") || it.contains("timst") } == true -> newChannel.backupStreamUrl
-            newChannel.backupStreamUrl2?.let { it.contains("exmxbxe") || it.contains("timst") } == true -> newChannel.backupStreamUrl2
+            newChannel.backupStreamUrl?.let { it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") } == true -> newChannel.backupStreamUrl
+            newChannel.backupStreamUrl2?.let { it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") } == true -> newChannel.backupStreamUrl2
             else -> null
         }
 
@@ -956,7 +956,7 @@ class PlayerActivity : ComponentActivity() {
                 u.contains("TVI") || u.contains("github") -> "S (TVI)"
                 u.contains("cloudfront") -> "S (C11)"
                 u.contains("fastly") -> "S (Porto)"
-                u.contains("exmxbxe") -> "S (TimST)"
+                u.contains("exmxbxe") || u.contains("grandemx") || u.contains("timst") -> "S (TimST)"
                 u.contains("epicsports") || u.contains("ntv.st") -> "S (NTV)"
                 else -> "S (Direto)"
             }
@@ -1199,7 +1199,8 @@ class PlayerActivity : ComponentActivity() {
                     "googlesyndication", "monetag", "trafficjunky",
                     "adservice", "chatango", "onclicksuper", "syndication",
                     "exdynsrv", "adsystem", "adnxs", "burstyflavia",
-                    "profitableratecpmnetwork", "cleverwebserver", "adsboosters"
+                    "profitableratecpmnetwork", "cleverwebserver", "adsboosters",
+                    "reliedhounder", "canine.tools", "disable-devtool", "plausible"
                 )
                 if (adBlockPatterns.any { urlLower.contains(it) }) {
                     return WebResourceResponse("text/plain", "UTF-8", ByteArrayInputStream(ByteArray(0)))
@@ -1768,6 +1769,8 @@ class PlayerActivity : ComponentActivity() {
             val base = repository.getTimstBaseUrl()
             if (url.contains("exmxbxe.cfd")) {
                 url.replace("https://exmxbxe.cfd", base)
+            } else if (url.contains("grandemx.org")) {
+                url.replace("https://grandemx.org", base)
             } else {
                 url
             }
@@ -1803,7 +1806,7 @@ class PlayerActivity : ComponentActivity() {
         }
 
         // 5. Non-NTV backup (if backupStreamUrl is not NTV and not Timst)
-        if (ntvUrl != null && !ntvUrl.contains("epicsports") && !ntvUrl.contains("ntv.st") && !ntvUrl.contains("exmxbxe") && options.none { it.directUrl == ntvUrl }) {
+        if (ntvUrl != null && !ntvUrl.contains("epicsports") && !ntvUrl.contains("ntv.st") && !ntvUrl.contains("exmxbxe") && !ntvUrl.contains("grandemx") && !ntvUrl.contains("timst") && options.none { it.directUrl == ntvUrl }) {
             options.add(ServerOption("Servidor Alternativo (Direto)", isDirect = true, directUrl = ntvUrl))
         }
 
@@ -2774,15 +2777,12 @@ class PlayerActivity : ComponentActivity() {
                         // Se o toque foi na área de vídeo abaixo da barra, recolhe os controlos
                         hideControlsOverlay()
                     } else {
-                        // Se os controlos estavam escondidos, agenda a exibição no próximo ciclo
-                        // para que este ACTION_UP atual não ative nenhum botão que apareça agora
-                        handler.post {
-                            showControlsOverlay()
-                        }
+                        // Se os controlos estavam escondidos, exibe os controlos nativos
+                        showControlsOverlay()
                     }
-                    // CRÍTICO: Permite que o ACTION_UP passe para a WebView para que o utilizador
-                    // consiga clicar diretamente no Unmute, Play ou controlos do leitor web!
-                    return super.dispatchTouchEvent(ev)
+                    // Consome o toque aqui para que a WebView NÃO receba cliques de anúncios,
+                    // popunders ou pausas que causam ecrã preto!
+                    return true
                 }
             }
         }
