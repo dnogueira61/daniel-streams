@@ -2848,10 +2848,10 @@ fun SettingsDialog(
                     ) {
                         Text("Domínio TimStreams:", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
                         TextButton(onClick = {
-                            timstBaseUrl = "https://timst.top"
+                            timstBaseUrl = "https://grandemx.org"
                             repository.setTimstBaseUrl(timstBaseUrl)
                         }) {
-                            Text("Repor timst.top", fontSize = 11.sp, color = Color(0xFF38BDF8))
+                            Text("Repor grandemx.org", fontSize = 11.sp, color = Color(0xFF38BDF8))
                         }
                     }
                     TextField(

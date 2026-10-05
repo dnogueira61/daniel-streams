@@ -220,7 +220,14 @@ class ChannelRepository(private val context: Context) {
         prefs.edit().putString(PREF_BASE_URL, clean).apply()
     }
 
-    fun getTimstBaseUrl(): String = prefs.getString(PREF_TIMST_BASE_URL, "https://grandemx.org") ?: "https://grandemx.org"
+    fun getTimstBaseUrl(): String {
+        val saved = prefs.getString(PREF_TIMST_BASE_URL, null)?.trim()
+        if (saved.isNullOrBlank() || saved.contains("timst.top") || saved.contains("exmxbxe.cfd")) {
+            setTimstBaseUrl("https://grandemx.org")
+            return "https://grandemx.org"
+        }
+        return saved
+    }
     fun setTimstBaseUrl(newUrl: String) {
         val clean = if (newUrl.endsWith("/")) newUrl.dropLast(1) else newUrl
         prefs.edit().putString(PREF_TIMST_BASE_URL, clean).apply()

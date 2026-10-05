@@ -67,6 +67,9 @@ import java.io.ByteArrayInputStream
 import java.lang.ref.WeakReference
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class PlayerActivity : ComponentActivity() {
 
@@ -255,6 +258,16 @@ class PlayerActivity : ComponentActivity() {
         fun onPlaybackError(reason: String) {
             runOnUiThread {
                 triggerFailoverDueToPlaybackError(reason)
+            }
+        }
+
+        @android.webkit.JavascriptInterface
+        fun onPlaybackStarted() {
+            runOnUiThread {
+                streamLoadedSuccessfully = true
+                handler.removeCallbacks(failoverTimeoutRunnable)
+                progressBar.visibility = View.GONE
+                connectingOverlay.visibility = View.GONE
             }
         }
     }
@@ -1090,14 +1103,19 @@ class PlayerActivity : ComponentActivity() {
                                 try { unmuteBtn.click(); } catch(e) {}
                             }
 
-                            // 3. Play & Unmute all video/audio tags
+                            // 3. Play video/audio tags without breaking autoplay policy
                             var vids = document.querySelectorAll('video, audio');
                             for (var i = 0; i < vids.length; i++) {
                                 var v = vids[i];
-                                if (v.muted || v.defaultMuted) {
-                                    v.muted = false;
-                                    v.defaultMuted = false;
-                                    v.volume = 1.0;
+                                if (!v._startedHooked) {
+                                    v._startedHooked = true;
+                                    v.addEventListener('playing', function() {
+                                        try {
+                                            if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackStarted === 'function') {
+                                                window.AndroidFailover.onPlaybackStarted();
+                                            }
+                                        } catch(e) {}
+                                    });
                                 }
                                 if (v.paused) {
                                     v.play().catch(function(){});
@@ -1108,9 +1126,15 @@ class PlayerActivity : ComponentActivity() {
                             if (window.jwplayer && typeof window.jwplayer === 'function') {
                                 var jw = window.jwplayer();
                                 if (jw) {
-                                    if (typeof jw.getMute === 'function' && jw.getMute()) {
-                                        jw.setMute(false);
-                                        jw.setVolume(100);
+                                    if (!jw._startedHooked && typeof jw.on === 'function') {
+                                        jw._startedHooked = true;
+                                        jw.on('play', function() {
+                                            try {
+                                                if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackStarted === 'function') {
+                                                    window.AndroidFailover.onPlaybackStarted();
+                                                }
+                                            } catch(e) {}
+                                        });
                                     }
                                     if (typeof jw.getState === 'function' && jw.getState() !== 'playing') {
                                         jw.play();
@@ -1210,10 +1234,10 @@ class PlayerActivity : ComponentActivity() {
                     "adservice", "chatango", "onclicksuper", "syndication",
                     "exdynsrv", "adsystem", "adnxs", "burstyflavia",
                     "profitableratecpmnetwork", "cleverwebserver", "adsboosters",
-                    "reliedhounder", "canine.tools", "disable-devtool", "plausible"
+                    "reliedhounder", "canine.tools", "plausible"
                 )
                 if (adBlockPatterns.any { urlLower.contains(it) }) {
-                    return WebResourceResponse("text/plain", "UTF-8", ByteArrayInputStream(ByteArray(0)))
+                    return WebResourceResponse("application/javascript", "UTF-8", ByteArrayInputStream(ByteArray(0)))
                 }
                 return super.shouldInterceptRequest(view, request)
             }
@@ -1661,6 +1685,179 @@ class PlayerActivity : ComponentActivity() {
         }
     }
 
+    private suspend fun resolveTimStreamsToHls(rawUrl: String): String? = withContext(Dispatchers.IO) {
+        try {
+            var target = rawUrl.trim()
+            val activeBase = repository.getTimstBaseUrl().trim().let { if (it.endsWith("/")) it.dropLast(1) else it }
+            when {
+                target.contains("exmxbxe.cfd") -> target = target.replace("https://exmxbxe.cfd", activeBase).replace("http://exmxbxe.cfd", activeBase)
+                target.contains("timst.top") -> target = target.replace("https://timst.top", activeBase).replace("http://timst.top", activeBase)
+            }
+            if (!target.startsWith("http://") && !target.startsWith("https://")) {
+                target = "https://$target"
+            }
+
+            var conn = (URL(target).openConnection() as HttpURLConnection).apply {
+                instanceFollowRedirects = true
+                connectTimeout = 4000
+                readTimeout = 4000
+                setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
+                setRequestProperty("Referer", "https://timst.top/")
+            }
+
+            val respCode = conn.responseCode
+            if (respCode in 300..399) {
+                val loc = conn.getHeaderField("Location")
+                if (!loc.isNullOrBlank()) {
+                    val redirectUrl = if (loc.startsWith("http")) loc else "https://grandemx.org$loc"
+                    conn = (URL(redirectUrl).openConnection() as HttpURLConnection).apply {
+                        connectTimeout = 4000
+                        readTimeout = 4000
+                        setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
+                        setRequestProperty("Referer", "https://timst.top/")
+                    }
+                }
+            }
+
+            val html = conn.inputStream.bufferedReader().use { it.readText() }
+
+            // 1. Decode XOR obfuscated array if present
+            val regex = Regex("""var\s+([_a-zA-Z0-9]+)\s*=\s*\[([0-9,\s]+)\]\s*,\s*([_a-zA-Z0-9]+)\s*=\s*(\d+)\s*,\s*([_a-zA-Z0-9]+)\s*=\s*(\d+)""")
+            val match = regex.find(html)
+            if (match != null) {
+                val numbersStr = match.groupValues[2]
+                val sk3 = match.groupValues[4].toInt()
+                val iw9 = match.groupValues[6].toInt()
+                val sb = java.lang.StringBuilder()
+                val tokens = numbersStr.split(',')
+                for (token in tokens) {
+                    val trimmed = token.trim()
+                    if (trimmed.isNotEmpty()) {
+                        val num = trimmed.toInt()
+                        val ch = (((num xor sk3) - iw9 + 256) % 256).toChar()
+                        sb.append(ch)
+                    }
+                }
+                val decoded = sb.toString()
+                val signedMatch = Regex("""SIGNED_URL\s*=\s*"([^"]+)"""").find(decoded)
+                    ?: Regex("""https://[^\s"']+\.m3u8""").find(decoded)
+                if (signedMatch != null) {
+                    val m3u8 = if (signedMatch.groupValues.size > 1) signedMatch.groupValues[1] else signedMatch.value
+                    if (m3u8.isNotBlank()) return@withContext m3u8
+                }
+            }
+
+            // 2. Direct plain text search fallback
+            val plainMatch = Regex("""SIGNED_URL\s*=\s*"([^"]+)"""").find(html)
+                ?: Regex("""https://[^\s"']+\.m3u8""").find(html)
+            if (plainMatch != null) {
+                val m3u8 = if (plainMatch.groupValues.size > 1) plainMatch.groupValues[1] else plainMatch.value
+                if (m3u8.isNotBlank()) return@withContext m3u8
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("TimStreamsResolver", "Error resolving TimStreams HLS: ${e.message}")
+        }
+        null
+    }
+
+    private fun loadHlsStream(m3u8Url: String, referer: String) {
+        val hlsHtml = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    * { margin:0; padding:0; background:#000; overflow:hidden; }
+                    video { position:fixed; top:0; left:0; width:100vw; height:100vh; object-fit:contain; z-index:1; }
+                    #unmuteBtn { position:fixed; top:20px; left:20px; z-index:2147483647; display:none; background:rgba(20,20,30,0.85); color:#fff; padding:12px 22px; border-radius:30px; font-family:sans-serif; font-size:14px; font-weight:bold; cursor:pointer; border:1px solid rgba(255,255,255,0.3); box-shadow:0 4px 15px rgba(0,0,0,0.5); }
+                </style>
+                <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+            </head>
+            <body>
+                <video id="v" autoplay playsinline></video>
+                <div id="unmuteBtn">🔊 Toque para Ativar Som</div>
+                <script>
+                    var video = document.getElementById('v');
+                    var unmuteBtn = document.getElementById('unmuteBtn');
+                    var src = '$m3u8Url';
+
+                    function notifyStarted() {
+                        try {
+                            if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackStarted === 'function') {
+                                window.AndroidFailover.onPlaybackStarted();
+                            }
+                        } catch(e) {}
+                    }
+
+                    video.addEventListener('playing', function() {
+                        notifyStarted();
+                        if (video.muted || video.volume === 0) {
+                            unmuteBtn.style.display = 'flex';
+                        } else {
+                            unmuteBtn.style.display = 'none';
+                        }
+                    });
+
+                    video.addEventListener('volumechange', function() {
+                        if (video.muted || video.volume === 0) {
+                            unmuteBtn.style.display = 'flex';
+                        } else {
+                            unmuteBtn.style.display = 'none';
+                        }
+                    });
+
+                    unmuteBtn.addEventListener('click', function() {
+                        video.muted = false;
+                        video.volume = 1.0;
+                        video.play().catch(function(){});
+                        unmuteBtn.style.display = 'none';
+                    });
+
+                    function startPlay() {
+                        var p = video.play();
+                        if (p !== undefined) {
+                            p.catch(function(err) {
+                                video.muted = true;
+                                video.play().catch(function(){});
+                                unmuteBtn.style.display = 'flex';
+                            });
+                        }
+                    }
+
+                    if (Hls.isSupported()) {
+                        var hls = new Hls({ enableWorker: true, maxBufferLength: 30 });
+                        hls.loadSource(src);
+                        hls.attachMedia(video);
+                        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                            startPlay();
+                        });
+                        hls.on(Hls.Events.ERROR, function(event, data) {
+                            if (data && data.fatal) {
+                                try {
+                                    if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackError === 'function') {
+                                        window.AndroidFailover.onPlaybackError('hls_fatal_' + data.type);
+                                    }
+                                } catch(e) {}
+                            }
+                        });
+                    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                        video.src = src;
+                        video.onerror = function() {
+                            try {
+                                if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackError === 'function') {
+                                    window.AndroidFailover.onPlaybackError('video_onerror');
+                                }
+                            } catch(e) {}
+                        };
+                        startPlay();
+                    }
+                </script>
+            </body>
+            </html>
+        """.trimIndent()
+        webView.loadDataWithBaseURL(referer, hlsHtml, "text/html", "UTF-8", null)
+    }
+
     private fun loadCurrentStream() {
         showConnectingOverlay(channelName)
         progressBar.visibility = View.VISIBLE
@@ -1675,23 +1872,30 @@ class PlayerActivity : ComponentActivity() {
 
         if (isDirectStreamActive && !activeDirectUrl.isNullOrBlank()) {
             val rawDirect = activeDirectUrl!!
-            val targetDirect = if (Channel.isTimStreamsUrl(rawDirect)) {
-                var activeBase = repository.getTimstBaseUrl().trim()
-                if (!activeBase.startsWith("http://") && !activeBase.startsWith("https://")) {
-                    activeBase = "https://$activeBase"
+            if (Channel.isTimStreamsUrl(rawDirect)) {
+                lifecycleScope.launch {
+                    val resolvedM3u8 = resolveTimStreamsToHls(rawDirect)
+                    if (isFinishing || isDestroyed) return@launch
+                    if (!resolvedM3u8.isNullOrBlank()) {
+                        android.util.Log.d("PlayerActivity", "Resolved TimStreams HLS: $resolvedM3u8")
+                        loadHlsStream(resolvedM3u8, "https://grandemx.org/")
+                    } else {
+                        android.util.Log.w("PlayerActivity", "Fallback loading TimStreams page direct")
+                        val activeBase = repository.getTimstBaseUrl().trim().let { if (it.endsWith("/")) it.dropLast(1) else it }
+                        val targetDirect = when {
+                            rawDirect.contains("grandemx.org") -> rawDirect.replace("https://grandemx.org", activeBase)
+                            rawDirect.contains("exmxbxe.cfd") -> rawDirect.replace("https://exmxbxe.cfd", activeBase)
+                            rawDirect.contains("timst.top") -> rawDirect.replace("https://timst.top", activeBase)
+                            else -> rawDirect
+                        }
+                        webView.loadUrl(targetDirect, mapOf("Referer" to "https://timst.top/"))
+                    }
                 }
-                if (activeBase.endsWith("/")) {
-                    activeBase = activeBase.dropLast(1)
-                }
-                when {
-                    rawDirect.contains("grandemx.org") -> rawDirect.replace("https://grandemx.org", activeBase).replace("http://grandemx.org", activeBase)
-                    rawDirect.contains("exmxbxe.cfd") -> rawDirect.replace("https://exmxbxe.cfd", activeBase).replace("http://exmxbxe.cfd", activeBase)
-                    rawDirect.contains("timst.top") -> rawDirect.replace("https://timst.top", activeBase).replace("http://timst.top", activeBase)
-                    else -> rawDirect
-                }
-            } else {
-                rawDirect
+                handler.postDelayed(failoverTimeoutRunnable, failoverTimeoutMs)
+                return
             }
+
+            val targetDirect = rawDirect
             val referer = when {
                 targetDirect.contains("impresa.pt") -> "https://sic.pt/"
                 targetDirect.contains("rtp.pt") -> "https://www.rtp.pt/"
@@ -1700,54 +1904,12 @@ class PlayerActivity : ComponentActivity() {
                 targetDirect.contains("twitch.tv") -> "https://dlive.sx/"
                 targetDirect.contains("cdnlivetv") || targetDirect.contains("streamsports") -> "https://streamsports99.ru/"
                 targetDirect.contains("embed.st") || targetDirect.contains("streamed") -> "https://streamed.pk/"
-                targetDirect.contains("grandemx") || targetDirect.contains("exmxbxe") || targetDirect.contains("timst") -> "https://timst.top/"
                 targetDirect.contains("strmfree") || targetDirect.contains("streamfree") -> "https://strmfree.st/"
                 targetDirect.contains("ppv") || targetDirect.contains("embedindia") -> "https://ppv.st/"
                 else -> "${repository.getTimstBaseUrl()}/"
             }
             if (targetDirect.contains(".m3u8")) {
-                val hlsHtml = """
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <style>
-                            * { margin:0; padding:0; background:#000; overflow:hidden; }
-                            video { width:100vw; height:100vh; object-fit:contain; }
-                        </style>
-                        <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-                    </head>
-                    <body>
-                        <video id="v" autoplay controls playsinline></video>
-                        <script>
-                            var video = document.getElementById('v');
-                            var src = '$targetDirect';
-                            if (Hls.isSupported()) {
-                                var hls = new Hls({ enableWorker: true });
-                                hls.loadSource(src);
-                                hls.attachMedia(video);
-                                hls.on(Hls.Events.MANIFEST_PARSED, function() { video.play().catch(function(){}); });
-                                hls.on(Hls.Events.ERROR, function(event, data) {
-                                    if (data && data.fatal) {
-                                        try {
-                                            if (window.AndroidFailover) window.AndroidFailover.onPlaybackError('hls_fatal_' + data.type);
-                                        } catch(e) {}
-                                    }
-                                });
-                            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                                video.src = src;
-                                video.onerror = function() {
-                                    try {
-                                        if (window.AndroidFailover) window.AndroidFailover.onPlaybackError('video_onerror');
-                                    } catch(e) {}
-                                };
-                                video.play().catch(function(){});
-                            }
-                        </script>
-                    </body>
-                    </html>
-                """.trimIndent()
-                webView.loadDataWithBaseURL(referer, hlsHtml, "text/html", "UTF-8", null)
+                loadHlsStream(targetDirect, referer)
             } else {
                 val headers = mapOf("Referer" to referer)
                 webView.loadUrl(targetDirect, headers)
@@ -1794,13 +1956,12 @@ class PlayerActivity : ComponentActivity() {
             else (currentChannel.backupStreamUrl2 ?: backupDirectUrl2)?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("timst") }
             ?: directStreamUrl?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("timst") }
         val timstUrl = rawTimst?.let { url ->
-            val base = repository.getTimstBaseUrl()
-            if (url.contains("exmxbxe.cfd")) {
-                url.replace("https://exmxbxe.cfd", base)
-            } else if (url.contains("grandemx.org")) {
-                url.replace("https://grandemx.org", base)
-            } else {
-                url
+            val base = repository.getTimstBaseUrl().trim().let { if (it.endsWith("/")) it.dropLast(1) else it }
+            when {
+                url.contains("exmxbxe.cfd") -> url.replace("https://exmxbxe.cfd", base).replace("http://exmxbxe.cfd", base)
+                url.contains("grandemx.org") -> url.replace("https://grandemx.org", base).replace("http://grandemx.org", base)
+                url.contains("timst.top") -> url.replace("https://timst.top", base).replace("http://timst.top", base)
+                else -> url
             }
         }
         if (timstUrl != null) {
