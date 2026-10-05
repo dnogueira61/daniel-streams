@@ -214,6 +214,7 @@ class PlayerActivity : ComponentActivity() {
     private var backupDirectUrl2: String? = null
     private var isBackupSelected: Boolean = false
     private var activeDirectUrl: String? = null
+    private var isDirectStreamActive: Boolean = false
     private var currentFolder: String = "stream"
 
     private val handler = Handler(Looper.getMainLooper())
@@ -298,6 +299,7 @@ class PlayerActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         activeInstance = WeakReference(this)
         setContentView(R.layout.activity_player)
+        try { WebView(this).resumeTimers() } catch (_: Exception) {}
 
         val screenFilter = IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_OFF)
@@ -336,6 +338,7 @@ class PlayerActivity : ComponentActivity() {
             directStreamUrl = timstCandidate
         }
         activeDirectUrl = directStreamUrl
+        isDirectStreamActive = (directStreamUrl != null)
 
         if (channelId.isBlank() && directStreamUrl.isNullOrBlank()) {
             Toast.makeText(this, "ID de canal inválido", Toast.LENGTH_SHORT).show()
@@ -904,14 +907,17 @@ class PlayerActivity : ComponentActivity() {
         val timstUrl = newChannel.timStreamsUrl
 
         if (timstUrl != null) {
+            isDirectStreamActive = true
             activeDirectUrl = timstUrl
             directStreamUrl = timstUrl
             isBackupSelected = false
         } else if (newChannel.id.toIntOrNull() == null) {
+            isDirectStreamActive = true
             activeDirectUrl = newChannel.backupStreamUrl
             directStreamUrl = newChannel.backupStreamUrl
             isBackupSelected = false
         } else {
+            isDirectStreamActive = false
             activeDirectUrl = null
             directStreamUrl = null
             isBackupSelected = false
@@ -1019,6 +1025,7 @@ class PlayerActivity : ComponentActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
+        webView.resumeTimers()
         val settings = webView.settings
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
@@ -1060,9 +1067,10 @@ class PlayerActivity : ComponentActivity() {
                         if (!style) {
                             style = document.createElement('style');
                             style.id = 'dlive-clean-style';
-                            style.innerHTML = 'header, footer, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], iframe:not(#thatframe):not([id^="player"]) { display: none !important; } ' +
+                            style.innerHTML = 'header, footer, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], iframe:not(#thatframe):not([id^="player"]):not(#streamPlayer) { display: none !important; } ' +
                                               'html, body { margin:0 !important; padding:0 !important; background-color:#000 !important; overflow:hidden !important; width:100% !important; height:100% !important; } ' +
-                                              'iframe#thatframe, .preview-wrap, #player { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
+                                              'iframe#thatframe, .preview-wrap, #player, iframe#streamPlayer, .watch-player-wrapper, video#video, #player_prog, #player_prog video, .vjs-tech { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
+                                              '#unmuteBtn, .unmute-btn { z-index: 2147483647 !important; display: flex !important; pointer-events: auto !important; } ' +
                                               '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], button[title*="ecrã inteiro" i], button[aria-label*="ecrã inteiro" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"] { display: none !important; pointer-events: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }';
                             document.head.appendChild(style);
                         }
@@ -1077,7 +1085,7 @@ class PlayerActivity : ComponentActivity() {
                             }
 
                             // 2. Click Unmute button if present
-                            var unmuteBtn = document.getElementById('unmute') || document.querySelector('.unmute-button, [aria-label*="unmute" i]');
+                            var unmuteBtn = document.getElementById('unmute') || document.getElementById('unmuteBtn') || document.querySelector('.unmute-button, .unmute-btn, [aria-label*="unmute" i]');
                             if (unmuteBtn) {
                                 try { unmuteBtn.click(); } catch(e) {}
                             }
@@ -1365,7 +1373,8 @@ class PlayerActivity : ComponentActivity() {
                                   'html, body { margin:0 !important; padding:0 !important; background-color:#000 !important; overflow:hidden !important; width:100% !important; height:100% !important; } ' +
                                   'iframe#thatframe, .preview-wrap, #player, iframe#streamPlayer, .watch-player-wrapper, video#video, #player_prog, #player_prog video, .vjs-tech { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
                                   '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], button[title*="ecrã inteiro" i], button[aria-label*="ecrã inteiro" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"] { display: none !important; pointer-events: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; } ' +
-                                  '.jw-controls, .jw-controlbar, .jw-display-icon-container, .jw-icon-display { opacity: 0 !important; transition: opacity 0.3s !important; pointer-events: none !important; }';
+                                  '#unmuteBtn, .unmute-btn { z-index: 2147483647 !important; display: flex !important; pointer-events: auto !important; } ' +
+                                  '.jw-controlbar { opacity: 0 !important; pointer-events: none !important; }';
                 document.head.appendChild(style);
 
                 window.open = function() { return null; };
@@ -1533,7 +1542,7 @@ class PlayerActivity : ComponentActivity() {
                         if (msg) {
                             try { msg.click(); unmuted = true; } catch(e) {}
                         }
-                        var btn = doc.getElementById('unmute') || doc.querySelector('.unmute-button, [aria-label*="unmute" i]');
+                        var btn = doc.getElementById('unmute') || doc.getElementById('unmuteBtn') || doc.querySelector('.unmute-button, .unmute-btn, [aria-label*="unmute" i]');
                         if (btn) {
                             try { btn.click(); unmuted = true; } catch(e) {}
                         }
@@ -1664,14 +1673,20 @@ class PlayerActivity : ComponentActivity() {
             currentFailoverIndex = 0
         }
 
-        val rawDirect = activeDirectUrl ?: directStreamUrl
-        if (rawDirect != null) {
+        if (isDirectStreamActive && !activeDirectUrl.isNullOrBlank()) {
+            val rawDirect = activeDirectUrl!!
             val targetDirect = if (Channel.isTimStreamsUrl(rawDirect)) {
-                val activeBase = repository.getTimstBaseUrl()
+                var activeBase = repository.getTimstBaseUrl().trim()
+                if (!activeBase.startsWith("http://") && !activeBase.startsWith("https://")) {
+                    activeBase = "https://$activeBase"
+                }
+                if (activeBase.endsWith("/")) {
+                    activeBase = activeBase.dropLast(1)
+                }
                 when {
-                    rawDirect.contains("grandemx.org") -> rawDirect.replace("https://grandemx.org", activeBase)
-                    rawDirect.contains("exmxbxe.cfd") -> rawDirect.replace("https://exmxbxe.cfd", activeBase)
-                    rawDirect.contains("timst.top") -> rawDirect.replace("https://timst.top", activeBase)
+                    rawDirect.contains("grandemx.org") -> rawDirect.replace("https://grandemx.org", activeBase).replace("http://grandemx.org", activeBase)
+                    rawDirect.contains("exmxbxe.cfd") -> rawDirect.replace("https://exmxbxe.cfd", activeBase).replace("http://exmxbxe.cfd", activeBase)
+                    rawDirect.contains("timst.top") -> rawDirect.replace("https://timst.top", activeBase).replace("http://timst.top", activeBase)
                     else -> rawDirect
                 }
             } else {
@@ -1737,8 +1752,8 @@ class PlayerActivity : ComponentActivity() {
                 val headers = mapOf("Referer" to referer)
                 webView.loadUrl(targetDirect, headers)
             }
-            // Start failover timeout: shorter timeout for NTV streams to quickly switch if unresponsive
-            val timeout = if (targetDirect.contains("epicsports") || targetDirect.contains("ntv.st")) 4500L else failoverTimeoutMs
+            // Start failover timeout: at least 10000ms
+            val timeout = if (targetDirect.contains("epicsports") || targetDirect.contains("ntv.st")) 10000L else failoverTimeoutMs
             handler.postDelayed(failoverTimeoutRunnable, timeout)
             return
         }
@@ -1829,10 +1844,13 @@ class PlayerActivity : ComponentActivity() {
     private fun applyServerOption(option: ServerOption) {
         handler.removeCallbacks(failoverTimeoutRunnable)
         streamLoadedSuccessfully = false
+        isDirectStreamActive = option.isDirect
         if (option.isDirect) {
             activeDirectUrl = option.directUrl
+            directStreamUrl = option.directUrl
         } else {
             activeDirectUrl = null
+            directStreamUrl = null
             currentFolder = option.folder ?: "stream"
         }
         updateServerBadgeText()
@@ -2842,7 +2860,6 @@ class PlayerActivity : ComponentActivity() {
             """.trimIndent()
             webView.evaluateJavascript(pauseJs, null)
             webView.onPause()
-            webView.pauseTimers()
         } catch (_: Exception) {}
     }
 
