@@ -9,6 +9,7 @@ import android.app.PictureInPictureParams
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.os.Message
@@ -478,32 +479,40 @@ class PlayerActivity : ComponentActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
-        // Explicit D-Pad focus chaining for Google TV remote navigation
-        findViewById<View>(R.id.btnLandscapeBack)?.nextFocusRightId = R.id.btnLandscapeChannels
-        findViewById<View>(R.id.btnLandscapeChannels)?.apply {
-            nextFocusLeftId = R.id.btnLandscapeBack
-            nextFocusRightId = R.id.btnLandscapeServer
-        }
-        findViewById<View>(R.id.btnLandscapeServer)?.apply {
-            nextFocusLeftId = R.id.btnLandscapeChannels
-            nextFocusRightId = R.id.btnLandscapeUnmute
-        }
-        findViewById<View>(R.id.btnLandscapeUnmute)?.apply {
-            nextFocusLeftId = R.id.btnLandscapeServer
-            nextFocusRightId = R.id.btnLandscapePip
-        }
-        findViewById<View>(R.id.btnLandscapePip)?.apply {
-            nextFocusLeftId = R.id.btnLandscapeUnmute
-            nextFocusRightId = R.id.btnLandscapeExitFullscreen
-        }
-        findViewById<View>(R.id.btnLandscapeExitFullscreen)?.nextFocusLeftId = R.id.btnLandscapePip
-
         val isTv = packageManager.hasSystemFeature("android.software.leanback") ||
                 packageManager.hasSystemFeature("android.hardware.type.television")
         if (isTv) {
+            // Google TV (Opção B):
+            // Deixar APENAS: [Canais] à esquerda e [Streams (S1 ▾)] à direita!
+            // Esconder botões supérfluos da TV (Voltar, Rodar/Fullscreen)
+            findViewById<View>(R.id.btnLandscapeBack)?.visibility = View.GONE
             btnLandscapeExitFullscreen.visibility = View.GONE
             btnFullscreen.visibility = View.GONE
-            findViewById<View>(R.id.btnLandscapePip)?.nextFocusRightId = View.NO_ID
+
+            // Encadeamento do comando D-Pad entre Canais <-> Servidor/Streams
+            findViewById<View>(R.id.btnLandscapeChannels)?.apply {
+                nextFocusLeftId = View.NO_ID
+                nextFocusRightId = R.id.btnLandscapeServer
+            }
+            findViewById<View>(R.id.btnLandscapeServer)?.apply {
+                nextFocusLeftId = R.id.btnLandscapeChannels
+                nextFocusRightId = View.NO_ID
+            }
+        } else {
+            // Android Telemóvel / Tablet em Landscape
+            findViewById<View>(R.id.btnLandscapeBack)?.nextFocusRightId = R.id.btnLandscapeChannels
+            findViewById<View>(R.id.btnLandscapeChannels)?.apply {
+                nextFocusLeftId = R.id.btnLandscapeBack
+                nextFocusRightId = R.id.btnLandscapeServer
+            }
+            findViewById<View>(R.id.btnLandscapeServer)?.apply {
+                nextFocusLeftId = R.id.btnLandscapeChannels
+                nextFocusRightId = R.id.btnLandscapeExitFullscreen
+            }
+            btnLandscapeExitFullscreen.apply {
+                nextFocusLeftId = R.id.btnLandscapeServer
+                nextFocusRightId = View.NO_ID
+            }
         }
 
         // Gesture HUD & Audio
@@ -2061,6 +2070,7 @@ class PlayerActivity : ComponentActivity() {
     }
 
     private fun showControlsOverlay() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInPictureInPictureMode) return
         lastOverlayShowTime = SystemClock.uptimeMillis()
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (isLandscape) {
@@ -2085,6 +2095,7 @@ class PlayerActivity : ComponentActivity() {
     }
 
     private fun toggleControlsOverlay() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInPictureInPictureMode) return
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         val isVisible = if (isLandscape) landscapeOverlay.visibility == View.VISIBLE else playerHeader.visibility == View.VISIBLE
         if (isVisible) {
@@ -2376,11 +2387,21 @@ class PlayerActivity : ComponentActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInPictureInPictureMode) {
+            playerHeader.visibility = View.GONE
+            landscapeOverlay.visibility = View.GONE
+            return
+        }
         val isLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE
         applyFullscreenMode(isLandscape)
     }
 
     private fun applyFullscreenMode(isLandscape: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInPictureInPictureMode) {
+            playerHeader.visibility = View.GONE
+            landscapeOverlay.visibility = View.GONE
+            return
+        }
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
 
         if (isLandscape) {
@@ -2427,6 +2448,11 @@ class PlayerActivity : ComponentActivity() {
 
                 val builder = PictureInPictureParams.Builder()
                     .setAspectRatio(Rational(16, 9))
+                val visibleRect = Rect()
+                webView.getGlobalVisibleRect(visibleRect)
+                if (visibleRect.width() > 0 && visibleRect.height() > 0) {
+                    builder.setSourceRectHint(visibleRect)
+                }
 
                 enterPictureInPictureMode(builder.build())
             } catch (e: Exception) {
@@ -2866,6 +2892,9 @@ class PlayerActivity : ComponentActivity() {
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent?): Boolean {
         if (ev == null) return super.dispatchTouchEvent(ev)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInPictureInPictureMode) {
+            return super.dispatchTouchEvent(ev)
+        }
 
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             return super.dispatchTouchEvent(ev)

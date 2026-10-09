@@ -135,6 +135,7 @@
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_gesture_volume"
                 android:tint="#FFFFFF"
+                android:visibility="gone"
                 android:contentDescription="Ativar Som" />
 
             <ImageButton
@@ -144,6 +145,7 @@
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@android:drawable/ic_popup_sync"
                 android:tint="#FFFFFF"
+                android:visibility="gone"
                 android:contentDescription="Recarregar" />
 
             <ImageButton
@@ -153,6 +155,7 @@
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_pip"
                 android:tint="#FFFFFF"
+                android:visibility="gone"
                 android:contentDescription="PiP" />
 
             <ImageButton
@@ -290,7 +293,8 @@
                 android:paddingStart="12dp"
                 android:paddingEnd="14dp"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:visibility="gone">
 
                 <ImageView
                     android:layout_width="18dp"
@@ -317,6 +321,7 @@
                 android:src="@drawable/ic_pip"
                 android:tint="#FFFFFF"
                 android:focusable="true"
+                android:visibility="gone"
                 android:contentDescription="PiP" />
 
             <ImageButton
