@@ -1741,7 +1741,10 @@ class PlayerActivity : ComponentActivity() {
                     ?: Regex("""https://[^\s"']+\.m3u8""").find(decoded)
                 if (signedMatch != null) {
                     val m3u8 = if (signedMatch.groupValues.size > 1) signedMatch.groupValues[1] else signedMatch.value
-                    if (m3u8.isNotBlank()) return@withContext m3u8
+                    if (m3u8.isNotBlank()) {
+                        val valid = validateHlsStreamAlive(m3u8)
+                        if (valid) return@withContext m3u8 else return@withContext null
+                    }
                 }
             }
 
@@ -1750,12 +1753,44 @@ class PlayerActivity : ComponentActivity() {
                 ?: Regex("""https://[^\s"']+\.m3u8""").find(html)
             if (plainMatch != null) {
                 val m3u8 = if (plainMatch.groupValues.size > 1) plainMatch.groupValues[1] else plainMatch.value
-                if (m3u8.isNotBlank()) return@withContext m3u8
+                if (m3u8.isNotBlank()) {
+                    val valid = validateHlsStreamAlive(m3u8)
+                    if (valid) return@withContext m3u8 else return@withContext null
+                }
             }
         } catch (e: Exception) {
             android.util.Log.w("TimStreamsResolver", "Error resolving TimStreams HLS: ${e.message}")
         }
         null
+    }
+
+    private fun validateHlsStreamAlive(m3u8Url: String): Boolean {
+        return try {
+            val pConn = (URL(m3u8Url).openConnection() as HttpURLConnection).apply {
+                connectTimeout = 2000
+                readTimeout = 2000
+                setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
+                setRequestProperty("Referer", "https://grandemx.org/")
+            }
+            if (pConn.responseCode in 200..299) {
+                val sample = pConn.inputStream.bufferedReader().use { it.readText() }
+                val expMatch = Regex("""x-expires=(\d+)""").find(sample)
+                if (expMatch != null) {
+                    val exp = expMatch.groupValues[1].toLongOrNull() ?: 0L
+                    val nowSec = System.currentTimeMillis() / 1000L
+                    if (exp in 1..nowSec) {
+                        android.util.Log.w("TimStreamsResolver", "TimStreams chunks expired (${nowSec - exp}s ago) -> Stream dead upstream!")
+                        return false
+                    }
+                }
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("TimStreamsResolver", "Failed validating TimStreams playlist alive: ${e.message}")
+            false
+        }
     }
 
     private fun loadHlsStream(m3u8Url: String, referer: String) {
