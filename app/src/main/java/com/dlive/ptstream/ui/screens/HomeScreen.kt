@@ -870,7 +870,7 @@ fun HomeScreen(
                                     // 1. Procurar stream TimStreams direta do próprio jogo (feed direto 1080p do evento)
                                     val timstStream = event.streams.firstOrNull {
                                         it.url.contains("exmxbxe") || it.url.contains("timst") || it.url.contains("grandemx") ||
-                                        (!it.url.contains("ntv.st") && !it.url.contains("embed.st") && !it.url.contains("strmfree") && !it.url.contains("ppv.st"))
+                                        (!it.url.contains("embed.st") && !it.url.contains("strmfree") && !it.url.contains("ppv.st"))
                                     }
 
                                     // 2. Procurar canal PT correspondente (preferência Sport TV 1..6, depois restantes)
@@ -908,7 +908,7 @@ fun HomeScreen(
                                         // Prioridade 3: Canal PT oficial (DaddyLive / outros)
                                         onChannelClick(anyPtChannel, null)
                                     } else {
-                                        // Prioridade 4: Outras streams do evento (NTV, Streamed, PPV)
+                                        // Prioridade 4: Outras streams do evento (Streamed, PPV)
                                         val ptStream = event.streams.firstOrNull {
                                             it.name.contains("Sport TV", ignoreCase = true) ||
                                             it.name.contains("DAZN PT", ignoreCase = true) ||

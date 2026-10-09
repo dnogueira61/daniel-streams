@@ -67,15 +67,6 @@ def check_url_alive(url, referer=None, timeout=6):
     except Exception:
         return False
 
-def check_epicsports_api():
-    """Checks whether the EpicSports decode token endpoint is functioning."""
-    try:
-        req = urllib.request.Request("https://t.epicsports-tv.com/decode.php", headers=HEADERS)
-        with urllib.request.urlopen(req, context=ctx, timeout=5) as resp:
-            data = resp.read().decode('utf-8', errors='ignore')
-            return "parsed_data" in data or '"status":"OK"' in data
-    except Exception:
-        return False
 
 def detect_active_timstreams_domain():
     """Finds current working domain for TimStreams by following redirects."""
@@ -158,24 +149,23 @@ def main():
     if tvi_url:
         for ch in channels:
             if ch.get("id") in ("723", "tvi-pt") or ch.get("name") == "TVI HD":
-                if ch.get("backupStreamUrl2") != tvi_url and "wmsAuthSign" in tvi_url:
+                field = "backupStreamUrl" if ch.get("backupStreamUrl") and "iol.pt" in ch.get("backupStreamUrl") else "backupStreamUrl2"
+                if ch.get(field) != tvi_url and "wmsAuthSign" in tvi_url:
                     print("Updated TVI HD tokenized stream URL")
-                    ch["backupStreamUrl2"] = tvi_url
+                    ch[field] = tvi_url
                     changes_count += 1
 
     cnn_url = fetch_m3upt_tokenized_url("CNN_Portugal.m3u8")
     if cnn_url:
         for ch in channels:
             if ch.get("id") == "cnn-pt" or ch.get("name") == "CNN Portugal":
-                if ch.get("backupStreamUrl2") != cnn_url and "wmsAuthSign" in cnn_url:
+                field = "backupStreamUrl" if ch.get("backupStreamUrl") and "iol.pt" in ch.get("backupStreamUrl") else "backupStreamUrl2"
+                if ch.get(field) != cnn_url and "wmsAuthSign" in cnn_url:
                     print("Updated CNN Portugal tokenized stream URL")
-                    ch["backupStreamUrl2"] = cnn_url
+                    ch[field] = cnn_url
                     changes_count += 1
 
     # 4. Stream Health & Auto Maintenance Categorization for Portuguese channels
-    epicsports_alive = check_epicsports_api()
-    print(f"EpicSports Token API Status: {'ONLINE' if epicsports_alive else 'OFFLINE (Broken Decode)'}")
-
     pt_channels = [c for c in channels if c.get("isPt") or c.get("country") == "PT"]
     print(f"Analyzing stream health for {len(pt_channels)} Portuguese channels...")
 
@@ -196,10 +186,7 @@ def main():
         # Check Backup 1
         b1 = ch.get("backupStreamUrl")
         if not has_working_source and b1:
-            if "epicsports-tv.com" in b1:
-                if epicsports_alive:
-                    has_working_source = True
-            elif check_url_alive(b1):
+            if check_url_alive(b1):
                 has_working_source = True
 
         # Check Backup 2

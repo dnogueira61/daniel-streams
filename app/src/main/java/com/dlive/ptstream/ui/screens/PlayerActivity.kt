@@ -978,7 +978,6 @@ class PlayerActivity : ComponentActivity() {
                 u.contains("cloudfront") -> "S (C11)"
                 u.contains("fastly") -> "S (Porto)"
                 u.contains("exmxbxe") || u.contains("grandemx") || u.contains("timst") -> "S (TimST)"
-                u.contains("epicsports") || u.contains("ntv.st") -> "S (NTV)"
                 else -> "S (Direto)"
             }
         } else {
@@ -1265,8 +1264,6 @@ class PlayerActivity : ComponentActivity() {
                         host.contains("exmxbxe") ||
                         host.contains("timst") ||
                         host.contains("tim-streams") ||
-                        host.contains("ntv") ||
-                        host.contains("epicsports") ||
                         host.contains("world-proxifier") ||
                         host.contains("dreamstream") ||
                         host.contains("hesgoal") ||
@@ -1875,7 +1872,6 @@ class PlayerActivity : ComponentActivity() {
                 targetDirect.contains("impresa.pt") -> "https://sic.pt/"
                 targetDirect.contains("rtp.pt") -> "https://www.rtp.pt/"
                 targetDirect.contains("TVI") || targetDirect.contains("iol.pt") || targetDirect.contains("raw.githubusercontent.com") -> "https://tviplayer.iol.pt/"
-                targetDirect.contains("epicsports") || targetDirect.contains("ntv.st") || targetDirect.contains("ntv.cx") -> "https://ntv.cx/"
                 targetDirect.contains("twitch.tv") -> "https://dlive.sx/"
                 targetDirect.contains("cdnlivetv") || targetDirect.contains("streamsports") -> "https://streamsports99.ru/"
                 targetDirect.contains("embed.st") || targetDirect.contains("streamed") -> "https://streamed.pk/"
@@ -1889,9 +1885,8 @@ class PlayerActivity : ComponentActivity() {
                 val headers = mapOf("Referer" to referer)
                 webView.loadUrl(targetDirect, headers)
             }
-            // Start failover timeout: at least 10000ms
-            val timeout = if (targetDirect.contains("epicsports") || targetDirect.contains("ntv.st")) 10000L else failoverTimeoutMs
-            handler.postDelayed(failoverTimeoutRunnable, timeout)
+            // Start failover timeout
+            handler.postDelayed(failoverTimeoutRunnable, failoverTimeoutMs)
             return
         }
 
@@ -1913,9 +1908,6 @@ class PlayerActivity : ComponentActivity() {
             list.forEachIndexed { idx, url ->
                 val name = when {
                     url.contains("grandemx") || url.contains("exmxbxe") || url.contains("timst") -> "Servidor Principal (TimStreams 1080p)"
-                    url.contains("kobra") -> "Servidor Alternativo (NTV Kobra)"
-                    url.contains("falcon") -> "Servidor Alternativo (NTV Falcon)"
-                    url.contains("raptor") -> "Servidor Alternativo (NTV Raptor)"
                     idx == 0 -> "Servidor Principal (Direto)"
                     idx == 1 -> "Servidor Alternativo 1 (Direto)"
                     else -> "Servidor Reserva $idx (Direto)"
@@ -1926,8 +1918,8 @@ class PlayerActivity : ComponentActivity() {
         }
 
         // 1. TimStreams backup (HIGHEST PRIORITY when available)
-        val ntvUrl = currentChannel.backupStreamUrl ?: backupDirectUrl
-        val rawTimst = if (ntvUrl != null && (ntvUrl.contains("grandemx") || ntvUrl.contains("exmxbxe") || ntvUrl.contains("timst"))) ntvUrl
+        val backupUrl = currentChannel.backupStreamUrl ?: backupDirectUrl
+        val rawTimst = if (backupUrl != null && (backupUrl.contains("grandemx") || backupUrl.contains("exmxbxe") || backupUrl.contains("timst"))) backupUrl
             else (currentChannel.backupStreamUrl2 ?: backupDirectUrl2)?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("timst") }
             ?: directStreamUrl?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("timst") }
         val timstUrl = rawTimst?.let { url ->
@@ -1950,7 +1942,7 @@ class PlayerActivity : ComponentActivity() {
             options.add(ServerOption(label, isDirect = false, folder = "stream"))
         }
 
-        // 3. M3UPT / Official direct stream (Higher quality and stability than NTV)
+        // 3. M3UPT / Official direct stream (Higher quality and stability)
         val officialUrl = currentChannel.backupStreamUrl2?.takeIf {
             it.contains("rtp.pt") || it.contains("impresa.pt") || it.contains("github.com") ||
             it.contains("cloudfront") || it.contains("fastly") || it.contains("livextend")
@@ -1963,15 +1955,9 @@ class PlayerActivity : ComponentActivity() {
             options.add(ServerOption(label, isDirect = true, directUrl = officialUrl))
         }
 
-        // 4. NTV/EpicSports backup (relegated after TimStreams, DaddyLive and Official streams)
-        if (ntvUrl != null && (ntvUrl.contains("epicsports") || ntvUrl.contains("ntv.st"))) {
-            val label = if (options.isEmpty()) "Servidor Principal (NTV)" else "Servidor Alternativo ${options.size} (NTV - Backup)"
-            options.add(ServerOption(label, isDirect = true, directUrl = ntvUrl))
-        }
-
-        // 5. Non-NTV backup (if backupStreamUrl is not NTV and not Timst)
-        if (ntvUrl != null && !ntvUrl.contains("epicsports") && !ntvUrl.contains("ntv.st") && !ntvUrl.contains("exmxbxe") && !ntvUrl.contains("grandemx") && !ntvUrl.contains("timst") && options.none { it.directUrl == ntvUrl }) {
-            options.add(ServerOption("Servidor Alternativo (Direto)", isDirect = true, directUrl = ntvUrl))
+        // 4. Non-Timst direct backup (e.g. other direct streams)
+        if (backupUrl != null && !backupUrl.contains("exmxbxe") && !backupUrl.contains("grandemx") && !backupUrl.contains("timst") && options.none { it.directUrl == backupUrl }) {
+            options.add(ServerOption("Servidor Alternativo (Direto)", isDirect = true, directUrl = backupUrl))
         }
 
         return options

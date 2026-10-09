@@ -5,8 +5,8 @@
     "country": "PT",
     "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33068",
-    "backupStreamUrl2": "https://streaming-live.rtp.pt/liverepeater/smil:rtp1HD.smil/playlist.m3u8"
+    "backupStreamUrl": "https://streaming-live.rtp.pt/liverepeater/smil:rtp1HD.smil/playlist.m3u8",
+    "backupStreamUrl2": null
   },
   {
     "id": "720",
@@ -14,8 +14,8 @@
     "country": "PT",
     "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33069",
-    "backupStreamUrl2": "https://streaming-live.rtp.pt/liverepeater/rtp2HD.smil/playlist.m3u8"
+    "backupStreamUrl": "https://streaming-live.rtp.pt/liverepeater/rtp2HD.smil/playlist.m3u8",
+    "backupStreamUrl2": null
   },
   {
     "id": "722",
@@ -23,8 +23,8 @@
     "country": "PT",
     "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4233",
-    "backupStreamUrl2": "https://sic.live.impresa.pt/sic1080p.m3u8"
+    "backupStreamUrl": "https://sic.live.impresa.pt/sic1080p.m3u8",
+    "backupStreamUrl2": null
   },
   {
     "id": "723",
@@ -32,8 +32,8 @@
     "country": "PT",
     "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43598",
-    "backupStreamUrl2": "https://video-auth7.iol.pt/live_tvi/live_tvi/edge_servers/tvi-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvOC8yMDI2IDQ6MTM6NiBQTSZoYXNoX3ZhbHVlPXpqOW1kbXhOQjVmMVI2SXlvQzdPU0E9PSZ2YWxpZG1pbnV0ZXM9MTQ0MCZpZD0zYzE4YjYxNS05MjhhLTQ2ZDQtYjQ1OC0zN2U2M2I2ZGY0MjY="
+    "backupStreamUrl": "https://video-auth7.iol.pt/live_tvi/live_tvi/edge_servers/tvi-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvOS8yMDI2IDg6MTY6MzMgQU0maGFzaF92YWx1ZT1Lc3VaN24zRTlEdFVoVkhCYTdEWkpBPT0mdmFsaWRtaW51dGVzPTE0NDAmaWQ9YzVmOWRiYjctODg1MS00ODQ2LWE0YzItMDRlNzhjMmM5ZGNh",
+    "backupStreamUrl2": null
   },
   {
     "id": "721",
@@ -41,8 +41,8 @@
     "country": "PT",
     "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43628",
-    "backupStreamUrl2": "https://streaming-live.rtp.pt/livetvhlsDVR/rtpnHDdvr.smil/playlist.m3u8"
+    "backupStreamUrl": "https://streaming-live.rtp.pt/livetvhlsDVR/rtpnHDdvr.smil/playlist.m3u8",
+    "backupStreamUrl2": null
   },
   {
     "id": "cnn-pt",
@@ -50,8 +50,8 @@
     "country": "PT",
     "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43611",
-    "backupStreamUrl2": "https://video-auth1.iol.pt/live_cnn/live_cnn/edge_servers/cnn-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvOC8yMDI2IDQ6MTM6NiBQTSZoYXNoX3ZhbHVlPXpqOW1kbXhOQjVmMVI2SXlvQzdPU0E9PSZ2YWxpZG1pbnV0ZXM9MTQ0MCZpZD0zYzE4YjYxNS05MjhhLTQ2ZDQtYjQ1OC0zN2U2M2I2ZGY0MjY="
+    "backupStreamUrl": "https://video-auth1.iol.pt/live_cnn/live_cnn/edge_servers/cnn-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvOS8yMDI2IDg6MTY6MzMgQU0maGFzaF92YWx1ZT1Lc3VaN24zRTlEdFVoVkhCYTdEWkpBPT0mdmFsaWRtaW51dGVzPTE0NDAmaWQ9YzVmOWRiYjctODg1MS00ODQ2LWE0YzItMDRlNzhjMmM5ZGNh",
+    "backupStreamUrl2": null
   },
   {
     "id": "artv-pt",
@@ -68,8 +68,8 @@
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43633",
-    "backupStreamUrl2": "https://grandemx.org/oqq5c86g-7521"
+    "backupStreamUrl": "https://grandemx.org/oqq5c86g-7521",
+    "backupStreamUrl2": null
   },
   {
     "id": "74",
@@ -77,8 +77,8 @@
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43634",
-    "backupStreamUrl2": "https://grandemx.org/6dw9r22a-7192"
+    "backupStreamUrl": "https://grandemx.org/6dw9r22a-7192",
+    "backupStreamUrl2": null
   },
   {
     "id": "454",
@@ -86,8 +86,8 @@
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43635",
-    "backupStreamUrl2": "https://grandemx.org/dbo09jwh-5404"
+    "backupStreamUrl": "https://grandemx.org/dbo09jwh-5404",
+    "backupStreamUrl2": null
   },
   {
     "id": "289",
@@ -95,8 +95,8 @@
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43636",
-    "backupStreamUrl2": "https://grandemx.org/t218wwwk-3361"
+    "backupStreamUrl": "https://grandemx.org/t218wwwk-3361",
+    "backupStreamUrl2": null
   },
   {
     "id": "290",
@@ -104,8 +104,8 @@
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43631",
-    "backupStreamUrl2": "https://grandemx.org/twg31g84-6394"
+    "backupStreamUrl": "https://grandemx.org/twg31g84-6394",
+    "backupStreamUrl2": null
   },
   {
     "id": "455",
@@ -113,8 +113,8 @@
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=49075",
-    "backupStreamUrl2": "https://grandemx.org/3zhczzbl-9086"
+    "backupStreamUrl": "https://grandemx.org/3zhczzbl-9086",
+    "backupStreamUrl2": null
   },
   {
     "id": "amc-pt",
@@ -122,8 +122,8 @@
     "country": "PT",
     "category": "Filmes & Séries",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=23178",
-    "backupStreamUrl2": "https://grandemx.org/q4o68v8x-1092"
+    "backupStreamUrl": "https://grandemx.org/q4o68v8x-1092",
+    "backupStreamUrl2": null
   },
   {
     "id": "syfy-pt",
@@ -131,8 +131,8 @@
     "country": "PT",
     "category": "Filmes & Séries",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33092",
-    "backupStreamUrl2": "https://grandemx.org/eymmdvm3-8294"
+    "backupStreamUrl": "https://grandemx.org/eymmdvm3-8294",
+    "backupStreamUrl2": null
   },
   {
     "id": "291",
@@ -140,7 +140,7 @@
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=49068",
+    "backupStreamUrl": null,
     "backupStreamUrl2": null,
     "originalCategory": "Desporto"
   },
@@ -150,7 +150,7 @@
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=49076",
+    "backupStreamUrl": null,
     "backupStreamUrl2": null,
     "originalCategory": "Desporto"
   },
@@ -160,7 +160,7 @@
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=49077",
+    "backupStreamUrl": null,
     "backupStreamUrl2": null,
     "originalCategory": "Desporto"
   },
@@ -170,7 +170,7 @@
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=49078",
+    "backupStreamUrl": null,
     "backupStreamUrl2": null,
     "originalCategory": "Desporto"
   },
@@ -180,7 +180,7 @@
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=49079",
+    "backupStreamUrl": null,
     "backupStreamUrl2": null,
     "originalCategory": "Desporto"
   },
@@ -190,7 +190,7 @@
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=23841",
+    "backupStreamUrl": null,
     "backupStreamUrl2": null,
     "originalCategory": "Desporto"
   },
@@ -200,7 +200,7 @@
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33091",
+    "backupStreamUrl": null,
     "backupStreamUrl2": null,
     "originalCategory": "Desporto"
   },
@@ -210,7 +210,7 @@
     "country": "PT",
     "category": "Filmes & Séries",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4235",
+    "backupStreamUrl": null,
     "backupStreamUrl2": null,
     "originalCategory": "Filmes & Séries"
   },
@@ -218,191 +218,11 @@
     "id": "sicnot-pt",
     "name": "SIC Notícias",
     "country": "PT",
-    "category": "Em Manutenção",
+    "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43632",
-    "backupStreamUrl2": "https://sicnot.live.impresa.pt/sicnot.m3u8",
-    "originalCategory": "Generalistas"
-  },
-  {
-    "id": "euronews-pt",
-    "name": "Euronews PT",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43577",
+    "backupStreamUrl": "https://sicnot.live.impresa.pt/sicnot.m3u8",
     "backupStreamUrl2": null,
     "originalCategory": "Generalistas"
-  },
-  {
-    "id": "abola-pt",
-    "name": "A Bola TV",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43603",
-    "backupStreamUrl2": null,
-    "originalCategory": "Desporto"
-  },
-  {
-    "id": "eurosport1-pt",
-    "name": "Eurosport 1 PT",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43614",
-    "backupStreamUrl2": null,
-    "originalCategory": "Desporto"
-  },
-  {
-    "id": "eurosport2-pt",
-    "name": "Eurosport 2 PT",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43615",
-    "backupStreamUrl2": null,
-    "originalCategory": "Desporto"
-  },
-  {
-    "id": "tvcine-top",
-    "name": "TVCine Top",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33101",
-    "backupStreamUrl2": null,
-    "originalCategory": "Filmes & Séries"
-  },
-  {
-    "id": "tvcine-edition",
-    "name": "TVCine Edition",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33099",
-    "backupStreamUrl2": null,
-    "originalCategory": "Filmes & Séries"
-  },
-  {
-    "id": "tvcine-emotion",
-    "name": "TVCine Emotion",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33100",
-    "backupStreamUrl2": null,
-    "originalCategory": "Filmes & Séries"
-  },
-  {
-    "id": "tvcine-action",
-    "name": "TVCine Action",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33098",
-    "backupStreamUrl2": null,
-    "originalCategory": "Filmes & Séries"
-  },
-  {
-    "id": "hollywood-pt",
-    "name": "Canal Hollywood",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43580",
-    "backupStreamUrl2": null,
-    "originalCategory": "Filmes & Séries"
-  },
-  {
-    "id": "cinemundo-pt",
-    "name": "Cinemundo",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=43610",
-    "backupStreamUrl2": null,
-    "originalCategory": "Filmes & Séries"
-  },
-  {
-    "id": "nosstudios-pt",
-    "name": "NOS Studios",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33064",
-    "backupStreamUrl2": null,
-    "originalCategory": "Filmes & Séries"
-  },
-  {
-    "id": "starchannel-pt",
-    "name": "Star Channel",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33042",
-    "backupStreamUrl2": null,
-    "originalCategory": "Filmes & Séries"
-  },
-  {
-    "id": "starlife-pt",
-    "name": "Star Life",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33043",
-    "backupStreamUrl2": null,
-    "originalCategory": "Filmes & Séries"
-  },
-  {
-    "id": "starmovies-pt",
-    "name": "Star Movies",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33044",
-    "backupStreamUrl2": null,
-    "originalCategory": "Filmes & Séries"
-  },
-  {
-    "id": "starcomedy-pt",
-    "name": "Star Comedy",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33040",
-    "backupStreamUrl2": null,
-    "originalCategory": "Filmes & Séries"
-  },
-  {
-    "id": "starcrime-pt",
-    "name": "Star Crime",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=33041",
-    "backupStreamUrl2": null,
-    "originalCategory": "Filmes & Séries"
-  },
-  {
-    "id": "axn-pt",
-    "name": "AXN HD",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4236",
-    "backupStreamUrl2": null,
-    "originalCategory": "Filmes & Séries"
-  },
-  {
-    "id": "axnwhite-pt",
-    "name": "AXN White",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://epicsports-tv.com/eu.html?id=4237",
-    "backupStreamUrl2": null,
-    "originalCategory": "Filmes & Séries"
   },
   {
     "id": "521",
@@ -2574,15 +2394,6 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "767-fox-sports-argentina",
-    "name": "Fox Sports Argentina",
-    "country": "AR",
-    "category": "Argentina",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
     "id": "830",
     "name": "Fox Sports Premium MX",
     "country": "MX",
@@ -3001,15 +2812,6 @@
     "name": "Longhorn Network USA",
     "country": "US",
     "category": "United States",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "470-m6-france",
-    "name": "M6 France",
-    "country": "FR",
-    "category": "France",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -3753,15 +3555,6 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "43-pdc-tv",
-    "name": "PDC TV",
-    "country": "US",
-    "category": "United States",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
     "id": "653",
     "name": "POP TV USA",
     "country": "US",
@@ -3996,15 +3789,6 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "740-rtl-de",
-    "name": "RTL DE",
-    "country": "DE",
-    "category": "Germany",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
     "id": "390",
     "name": "RTL7 Netherlands",
     "country": "NL",
@@ -4054,15 +3838,6 @@
     "name": "Rai Sport Italy",
     "country": "IT",
     "category": "Italy",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "607-rally-tv",
-    "name": "Rally Tv",
-    "country": "US",
-    "category": "United States",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -4610,15 +4385,6 @@
   {
     "id": "684",
     "name": "Sky Comedy UK",
-    "country": "UK",
-    "category": "United Kingdom",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "685-sky-crime",
-    "name": "Sky Crime",
     "country": "UK",
     "category": "United Kingdom",
     "isPt": false,
@@ -5499,15 +5265,6 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "469-tf1-france",
-    "name": "TF1 France",
-    "country": "FR",
-    "category": "France",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
     "id": "337",
     "name": "TLC",
     "country": "US",
@@ -5994,15 +5751,6 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "680-the-hallmark",
-    "name": "The Hallmark",
-    "country": "US",
-    "category": "United States",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
     "id": "320",
     "name": "The Hallmark Channel",
     "country": "US",
@@ -6232,15 +5980,6 @@
     "name": "YES Network USA",
     "country": "US",
     "category": "United States",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "609-yas-tv-uae",
-    "name": "Yas TV UAE",
-    "country": "INT",
-    "category": "United Arab Emirates",
     "isPt": false,
     "backupStreamUrl": null,
     "backupStreamUrl2": null
@@ -6608,33 +6347,6 @@
   {
     "id": "90",
     "name": "beIN Sports MENA English 2",
-    "country": "INT",
-    "category": "Others",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "98-bein-sports-mena-premium-1",
-    "name": "beIN Sports MENA Premium 1",
-    "country": "INT",
-    "category": "Others",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "99-bein-sports-mena-premium-2",
-    "name": "beIN Sports MENA Premium 2",
-    "country": "INT",
-    "category": "Others",
-    "isPt": false,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "100-bein-sports-mena-premium-3",
-    "name": "beIN Sports MENA Premium 3",
     "country": "INT",
     "category": "Others",
     "isPt": false,
