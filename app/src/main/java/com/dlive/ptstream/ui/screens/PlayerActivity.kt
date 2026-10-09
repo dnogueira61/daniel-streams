@@ -250,7 +250,7 @@ class PlayerActivity : ComponentActivity() {
     private var failoverServers: List<ServerOption> = emptyList()
     private var currentFailoverIndex = 0
     private var streamLoadedSuccessfully = false
-    private val failoverTimeoutMs = 6000L // 6 seconds before trying next server
+    private val failoverTimeoutMs = 4500L // 4.5 seconds before trying next server
     private var lastFailoverTime = 0L
 
     inner class FailoverBridge {
@@ -1800,13 +1800,16 @@ class PlayerActivity : ComponentActivity() {
             <head>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <style>
-                    * { margin:0; padding:0; background:#000; overflow:hidden; }
-                    video { position:fixed; top:0; left:0; width:100vw; height:100vh; object-fit:contain; z-index:1; }
+                    * { margin:0; padding:0; background:#000 !important; overflow:hidden; }
+                    video { position:fixed; top:0; left:0; width:100vw; height:100vh; object-fit:contain; z-index:1; background:#000 !important; }
+                    video::-webkit-media-controls { display:none !important; }
+                    video::-webkit-media-controls-enclosure { display:none !important; }
+                    video::-webkit-media-controls-panel { display:none !important; }
                 </style>
                 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
             </head>
             <body>
-                <video id="v" autoplay playsinline></video>
+                <video id="v" autoplay playsinline style="background:#000;"></video>
                 <script>
                     var video = document.getElementById('v');
                     var src = '$m3u8Url';
@@ -1834,19 +1837,29 @@ class PlayerActivity : ComponentActivity() {
                     }
 
                     if (Hls.isSupported()) {
-                        var hls = new Hls({ enableWorker: true, maxBufferLength: 30 });
+                        var hls = new Hls({
+                            enableWorker: true,
+                            maxBufferLength: 10,
+                            fragLoadingMaxRetry: 1,
+                            levelLoadingMaxRetry: 1,
+                            manifestLoadingMaxRetry: 1,
+                            fragLoadingTimeOut: 2000,
+                            manifestLoadingTimeOut: 2000
+                        });
                         hls.loadSource(src);
                         hls.attachMedia(video);
                         hls.on(Hls.Events.MANIFEST_PARSED, function() {
                             startPlay();
                         });
                         hls.on(Hls.Events.ERROR, function(event, data) {
-                            if (data && data.fatal) {
-                                try {
-                                    if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackError === 'function') {
-                                        window.AndroidFailover.onPlaybackError('hls_fatal_' + data.type);
-                                    }
-                                } catch(e) {}
+                            if (data) {
+                                if (data.fatal || data.details === 'fragLoadError' || (data.response && data.response.code >= 400)) {
+                                    try {
+                                        if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackError === 'function') {
+                                            window.AndroidFailover.onPlaybackError('hls_err_' + (data.details || data.type));
+                                        }
+                                    } catch(e) {}
+                                }
                             }
                         });
                     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
