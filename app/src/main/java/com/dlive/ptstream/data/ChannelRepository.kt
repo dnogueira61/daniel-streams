@@ -436,7 +436,7 @@ class ChannelRepository(private val context: Context) {
         scope.launch(Dispatchers.IO) {
             val eventsList = mutableListOf<LiveEvent>()
             try {
-                val url = "${getTimstBaseUrl()}/api/live-upcoming"
+                val url = "https://timst.top/api/live-upcoming"
                 val conn = (URL(url).openConnection() as HttpURLConnection).apply {
                     connectTimeout = 6000
                     readTimeout = 6000
