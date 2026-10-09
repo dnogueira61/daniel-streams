@@ -1083,7 +1083,7 @@ class PlayerActivity : ComponentActivity() {
                             style.innerHTML = 'header, footer, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], iframe:not(#thatframe):not([id^="player"]):not(#streamPlayer) { display: none !important; } ' +
                                               'html, body { margin:0 !important; padding:0 !important; background-color:#000 !important; overflow:hidden !important; width:100% !important; height:100% !important; } ' +
                                               'iframe#thatframe, .preview-wrap, #player, iframe#streamPlayer, .watch-player-wrapper, video#video, #player_prog, #player_prog video, .vjs-tech { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
-                                              '#unmuteBtn, .unmute-btn { z-index: 2147483647 !important; display: flex !important; pointer-events: auto !important; } ' +
+                                              '#unmuteBtn, .unmute-btn, .embedme-unmute, [class*="unmute" i] { display: none !important; } ' +
                                               '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], button[title*="ecrã inteiro" i], button[aria-label*="ecrã inteiro" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"] { display: none !important; pointer-events: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }';
                             document.head.appendChild(style);
                         }
@@ -1396,8 +1396,7 @@ class PlayerActivity : ComponentActivity() {
                 style.innerHTML = 'header, footer, nav, .site-header, .site-footer, .watch-channel-header, .watch-controls-bar, .watch-sidebar, .watch-chat, .chat-panel, #shareCodeOverlay, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], iframe:not(#thatframe):not([id^="player"]):not(#streamPlayer) { display: none !important; } ' +
                                   'html, body { margin:0 !important; padding:0 !important; background-color:#000 !important; overflow:hidden !important; width:100% !important; height:100% !important; } ' +
                                   'iframe#thatframe, .preview-wrap, #player, iframe#streamPlayer, .watch-player-wrapper, video#video, #player_prog, #player_prog video, .vjs-tech { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
-                                  '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], button[title*="ecrã inteiro" i], button[aria-label*="ecrã inteiro" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"] { display: none !important; pointer-events: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; } ' +
-                                  '#unmuteBtn, .unmute-btn { z-index: 2147483647 !important; display: flex !important; pointer-events: auto !important; } ' +
+                                  '#unmuteBtn, .unmute-btn, .embedme-unmute, [class*="unmute" i] { display: none !important; } ' +
                                   '.jw-controlbar { opacity: 0 !important; pointer-events: none !important; }';
                 document.head.appendChild(style);
 
@@ -1769,16 +1768,13 @@ class PlayerActivity : ComponentActivity() {
                 <style>
                     * { margin:0; padding:0; background:#000; overflow:hidden; }
                     video { position:fixed; top:0; left:0; width:100vw; height:100vh; object-fit:contain; z-index:1; }
-                    #unmuteBtn { position:fixed; top:20px; left:20px; z-index:2147483647; display:none; background:rgba(20,20,30,0.85); color:#fff; padding:12px 22px; border-radius:30px; font-family:sans-serif; font-size:14px; font-weight:bold; cursor:pointer; border:1px solid rgba(255,255,255,0.3); box-shadow:0 4px 15px rgba(0,0,0,0.5); }
                 </style>
                 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
             </head>
             <body>
                 <video id="v" autoplay playsinline></video>
-                <div id="unmuteBtn">🔊 Toque para Ativar Som</div>
                 <script>
                     var video = document.getElementById('v');
-                    var unmuteBtn = document.getElementById('unmuteBtn');
                     var src = '$m3u8Url';
 
                     function notifyStarted() {
@@ -1791,26 +1787,6 @@ class PlayerActivity : ComponentActivity() {
 
                     video.addEventListener('playing', function() {
                         notifyStarted();
-                        if (video.muted || video.volume === 0) {
-                            unmuteBtn.style.display = 'flex';
-                        } else {
-                            unmuteBtn.style.display = 'none';
-                        }
-                    });
-
-                    video.addEventListener('volumechange', function() {
-                        if (video.muted || video.volume === 0) {
-                            unmuteBtn.style.display = 'flex';
-                        } else {
-                            unmuteBtn.style.display = 'none';
-                        }
-                    });
-
-                    unmuteBtn.addEventListener('click', function() {
-                        video.muted = false;
-                        video.volume = 1.0;
-                        video.play().catch(function(){});
-                        unmuteBtn.style.display = 'none';
                     });
 
                     function startPlay() {
@@ -1819,7 +1795,6 @@ class PlayerActivity : ComponentActivity() {
                             p.catch(function(err) {
                                 video.muted = true;
                                 video.play().catch(function(){});
-                                unmuteBtn.style.display = 'flex';
                             });
                         }
                     }
