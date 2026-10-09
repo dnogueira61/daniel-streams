@@ -250,7 +250,7 @@ class PlayerActivity : ComponentActivity() {
     private var failoverServers: List<ServerOption> = emptyList()
     private var currentFailoverIndex = 0
     private var streamLoadedSuccessfully = false
-    private val failoverTimeoutMs = 10000L // 10 seconds before trying next server
+    private val failoverTimeoutMs = 6000L // 6 seconds before trying next server
     private var lastFailoverTime = 0L
 
     inner class FailoverBridge {
@@ -281,7 +281,7 @@ class PlayerActivity : ComponentActivity() {
     fun triggerFailoverDueToPlaybackError(reason: String) {
         android.util.Log.w("PlayerFailover", "Triggering failover due to: $reason")
         val now = System.currentTimeMillis()
-        if (now - lastFailoverTime < 2500L) return
+        if (now - lastFailoverTime < 1800L) return
         lastFailoverTime = now
 
         handler.removeCallbacks(failoverTimeoutRunnable)
@@ -291,7 +291,7 @@ class PlayerActivity : ComponentActivity() {
             val next = failoverServers[currentFailoverIndex]
             runOnUiThread {
                 Toast.makeText(this@PlayerActivity, "⚡ Erro na stream. A tentar ${next.label}...", Toast.LENGTH_SHORT).show()
-                applyServerOption(next)
+                applyServerOption(next, currentFailoverIndex)
             }
         } else {
             runOnUiThread {
@@ -982,9 +982,9 @@ class PlayerActivity : ComponentActivity() {
             }
         } else {
             when (currentFolder) {
-                "stream" -> "S (DLive)"
-                "cast" -> "S (Cast)"
-                "watch" -> "S (Watch)"
+                "stream" -> "S (DLive 1)"
+                "cast" -> "S (DLive 2)"
+                "watch" -> "S (DLive 3)"
                 "player" -> "S (Player)"
                 "plus" -> "S (Plus)"
                 else -> "S (${currentFolder.uppercase()})"
@@ -1022,7 +1022,7 @@ class PlayerActivity : ComponentActivity() {
             .setSingleChoiceItems(titles, currentSelectedIndex) { d, which ->
                 d.dismiss()
                 val selected = options[which]
-                applyServerOption(selected)
+                applyServerOption(selected, which)
             }
             .setNegativeButton("Fechar", null)
             .create()
@@ -1695,8 +1695,8 @@ class PlayerActivity : ComponentActivity() {
 
             var conn = (URL(target).openConnection() as HttpURLConnection).apply {
                 instanceFollowRedirects = true
-                connectTimeout = 4000
-                readTimeout = 4000
+                connectTimeout = 2500
+                readTimeout = 2500
                 setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
                 setRequestProperty("Referer", "https://timst.top/")
             }
@@ -1707,12 +1707,14 @@ class PlayerActivity : ComponentActivity() {
                 if (!loc.isNullOrBlank()) {
                     val redirectUrl = if (loc.startsWith("http")) loc else "https://grandemx.org$loc"
                     conn = (URL(redirectUrl).openConnection() as HttpURLConnection).apply {
-                        connectTimeout = 4000
-                        readTimeout = 4000
+                        connectTimeout = 2000
+                        readTimeout = 2000
                         setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
                         setRequestProperty("Referer", "https://timst.top/")
                     }
                 }
+            } else if (respCode !in 200..299) {
+                return@withContext null
             }
 
             val html = conn.inputStream.bufferedReader().use { it.readText() }
@@ -1851,19 +1853,12 @@ class PlayerActivity : ComponentActivity() {
                     if (!resolvedM3u8.isNullOrBlank()) {
                         android.util.Log.d("PlayerActivity", "Resolved TimStreams HLS: $resolvedM3u8")
                         loadHlsStream(resolvedM3u8, "https://grandemx.org/")
+                        handler.postDelayed(failoverTimeoutRunnable, failoverTimeoutMs)
                     } else {
-                        android.util.Log.w("PlayerActivity", "Fallback loading TimStreams page direct")
-                        val activeBase = repository.getTimstBaseUrl().trim().let { if (it.endsWith("/")) it.dropLast(1) else it }
-                        val targetDirect = when {
-                            rawDirect.contains("grandemx.org") -> rawDirect.replace("https://grandemx.org", activeBase)
-                            rawDirect.contains("exmxbxe.cfd") -> rawDirect.replace("https://exmxbxe.cfd", activeBase)
-                            rawDirect.contains("timst.top") -> rawDirect.replace("https://timst.top", activeBase)
-                            else -> rawDirect
-                        }
-                        webView.loadUrl(targetDirect, mapOf("Referer" to "https://timst.top/"))
+                        android.util.Log.w("PlayerActivity", "TimStreams offline ou inacessível -> Failover imediato para o próximo servidor")
+                        triggerFailoverDueToPlaybackError("timstreams_offline")
                     }
                 }
-                handler.postDelayed(failoverTimeoutRunnable, failoverTimeoutMs)
                 return
             }
 
@@ -1914,6 +1909,10 @@ class PlayerActivity : ComponentActivity() {
                 }
                 options.add(ServerOption(name, isDirect = true, directUrl = url))
             }
+            if (channelId.toIntOrNull() != null) {
+                options.add(ServerOption("Servidor Alternativo ${options.size} (DaddyLive - Player 1)", isDirect = false, folder = "stream"))
+                options.add(ServerOption("Servidor Alternativo ${options.size} (DaddyLive - Player 2 / Cast)", isDirect = false, folder = "cast"))
+            }
             return options
         }
 
@@ -1935,11 +1934,14 @@ class PlayerActivity : ComponentActivity() {
             options.add(ServerOption("Servidor Principal (TimStreams 1080p)", isDirect = true, directUrl = timstUrl))
         }
 
-        // 2. DaddyLive (second priority if channel has numeric ID)
+        // 2. DaddyLive (Player 1 e Player 2 como backups)
         val hasDaddyLive = (currentChannel.id.toIntOrNull() != null) || (channelId.toIntOrNull() != null)
         if (hasDaddyLive) {
-            val label = if (timstUrl != null) "Servidor Alternativo 1 (DaddyLive)" else "Servidor Principal (DaddyLive)"
-            options.add(ServerOption(label, isDirect = false, folder = "stream"))
+            val label1 = if (timstUrl != null) "Servidor Alternativo 1 (DaddyLive - Player 1)" else "Servidor Principal (DaddyLive - Player 1)"
+            options.add(ServerOption(label1, isDirect = false, folder = "stream"))
+
+            val label2 = if (timstUrl != null) "Servidor Alternativo 2 (DaddyLive - Player 2 / Cast)" else "Servidor Alternativo 1 (DaddyLive - Player 2 / Cast)"
+            options.add(ServerOption(label2, isDirect = false, folder = "cast"))
         }
 
         // 3. M3UPT / Official direct stream (Higher quality and stability)
@@ -1957,15 +1959,21 @@ class PlayerActivity : ComponentActivity() {
 
         // 4. Non-Timst direct backup (e.g. other direct streams)
         if (backupUrl != null && !backupUrl.contains("exmxbxe") && !backupUrl.contains("grandemx") && !backupUrl.contains("timst") && options.none { it.directUrl == backupUrl }) {
-            options.add(ServerOption("Servidor Alternativo (Direto)", isDirect = true, directUrl = backupUrl))
+            options.add(ServerOption("Servidor Alternativo ${options.size} (Direto)", isDirect = true, directUrl = backupUrl))
         }
 
         return options
     }
 
-    private fun applyServerOption(option: ServerOption) {
+    private fun applyServerOption(option: ServerOption, manualIndex: Int = -1) {
         handler.removeCallbacks(failoverTimeoutRunnable)
         streamLoadedSuccessfully = false
+        if (manualIndex >= 0) {
+            currentFailoverIndex = manualIndex
+        } else {
+            val idx = failoverServers.indexOf(option)
+            if (idx >= 0) currentFailoverIndex = idx
+        }
         isDirectStreamActive = option.isDirect
         if (option.isDirect) {
             activeDirectUrl = option.directUrl
