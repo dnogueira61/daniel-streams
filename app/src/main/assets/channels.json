@@ -18,15 +18,6 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "722",
-    "name": "SIC HD",
-    "country": "PT",
-    "category": "Generalistas",
-    "isPt": true,
-    "backupStreamUrl": "https://sic.live.impresa.pt/sic1080p.m3u8",
-    "backupStreamUrl2": null
-  },
-  {
     "id": "723",
     "name": "TVI HD",
     "country": "PT",
@@ -145,48 +136,8 @@
     "originalCategory": "Desporto"
   },
   {
-    "id": "456",
-    "name": "DAZN 2 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null,
-    "originalCategory": "Desporto"
-  },
-  {
-    "id": "457",
-    "name": "DAZN 3 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null,
-    "originalCategory": "Desporto"
-  },
-  {
     "id": "458",
     "name": "DAZN 4 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null,
-    "originalCategory": "Desporto"
-  },
-  {
-    "id": "459",
-    "name": "DAZN 5 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null,
-    "originalCategory": "Desporto"
-  },
-  {
-    "id": "380",
-    "name": "Benfica TV",
     "country": "PT",
     "category": "Desporto",
     "isPt": true,
@@ -205,10 +156,60 @@
     "originalCategory": "Desporto"
   },
   {
+    "id": "722",
+    "name": "SIC HD",
+    "country": "PT",
+    "category": "Em Manutenção",
+    "isPt": true,
+    "backupStreamUrl": "https://sic.live.impresa.pt/sic1080p.m3u8",
+    "backupStreamUrl2": null,
+    "originalCategory": "Generalistas"
+  },
+  {
+    "id": "456",
+    "name": "DAZN 2 Portugal",
+    "country": "PT",
+    "category": "Em Manutenção",
+    "isPt": true,
+    "backupStreamUrl": null,
+    "backupStreamUrl2": null,
+    "originalCategory": "Desporto"
+  },
+  {
+    "id": "457",
+    "name": "DAZN 3 Portugal",
+    "country": "PT",
+    "category": "Em Manutenção",
+    "isPt": true,
+    "backupStreamUrl": null,
+    "backupStreamUrl2": null,
+    "originalCategory": "Desporto"
+  },
+  {
+    "id": "459",
+    "name": "DAZN 5 Portugal",
+    "country": "PT",
+    "category": "Em Manutenção",
+    "isPt": true,
+    "backupStreamUrl": null,
+    "backupStreamUrl2": null,
+    "originalCategory": "Desporto"
+  },
+  {
+    "id": "380",
+    "name": "Benfica TV",
+    "country": "PT",
+    "category": "Em Manutenção",
+    "isPt": true,
+    "backupStreamUrl": null,
+    "backupStreamUrl2": null,
+    "originalCategory": "Desporto"
+  },
+  {
     "id": "717",
     "name": "AXN Movies",
     "country": "PT",
-    "category": "Filmes & Séries",
+    "category": "Em Manutenção",
     "isPt": true,
     "backupStreamUrl": null,
     "backupStreamUrl2": null,
@@ -218,7 +219,7 @@
     "id": "sicnot-pt",
     "name": "SIC Notícias",
     "country": "PT",
-    "category": "Generalistas",
+    "category": "Em Manutenção",
     "isPt": true,
     "backupStreamUrl": "https://sicnot.live.impresa.pt/sicnot.m3u8",
     "backupStreamUrl2": null,
