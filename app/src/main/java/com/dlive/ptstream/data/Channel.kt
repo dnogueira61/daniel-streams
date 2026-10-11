@@ -37,7 +37,7 @@ data class Channel(
     companion object {
         fun isTimStreamsUrl(url: String?): Boolean {
             if (url.isNullOrBlank()) return false
-            return url.contains("exmxbxe") || url.contains("timst") || url.contains("grandemx")
+            return url.contains("exmxbxe") || url.contains("timst") || url.contains("grandemx") || url.contains("tim-streams")
         }
 
         fun isPortugueseChannelName(name: String): Boolean {

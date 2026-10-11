@@ -1697,6 +1697,8 @@ class PlayerActivity : ComponentActivity() {
             when {
                 target.contains("exmxbxe.cfd") -> target = target.replace("https://exmxbxe.cfd", activeBase).replace("http://exmxbxe.cfd", activeBase)
                 target.contains("timst.top") -> target = target.replace("https://timst.top", activeBase).replace("http://timst.top", activeBase)
+                target.contains("timst.cfd") -> target = target.replace("https://timst.cfd", activeBase).replace("http://timst.cfd", activeBase)
+                target.contains("tim-streams.com") -> target = target.replace("https://tim-streams.com", activeBase).replace("http://tim-streams.com", activeBase)
             }
             if (!target.startsWith("http://") && !target.startsWith("https://")) {
                 target = "https://$target"
@@ -1707,7 +1709,7 @@ class PlayerActivity : ComponentActivity() {
                 connectTimeout = 2500
                 readTimeout = 2500
                 setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
-                setRequestProperty("Referer", "https://timst.top/")
+                setRequestProperty("Referer", "https://tim-streams.com/")
             }
 
             val respCode = conn.responseCode
@@ -1719,7 +1721,7 @@ class PlayerActivity : ComponentActivity() {
                         connectTimeout = 2000
                         readTimeout = 2000
                         setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
-                        setRequestProperty("Referer", "https://timst.top/")
+                        setRequestProperty("Referer", "https://tim-streams.com/")
                     }
                 }
             } else if (respCode !in 200..299) {
@@ -2572,7 +2574,7 @@ class PlayerActivity : ComponentActivity() {
         // 5. Back Button / PiP
         if (!isTv) {
             val swPip = Switch(this).apply {
-                text = "📱 Ativar PiP ao Premir Voltar"
+                text = "📱 Minimizar para PiP ao Premir Voltar"
                 setTextColor(Color.WHITE)
                 isChecked = repository.isAutoPipOnBack()
                 setPadding(0, 10, 0, 14)

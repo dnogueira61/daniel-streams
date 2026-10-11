@@ -74,6 +74,12 @@ class ChannelRepository(private val context: Context) {
     val channelsVersion = androidx.compose.runtime.mutableIntStateOf(0)
 
     init {
+        if (!prefs.getBoolean("pip_default_reset_v206", false)) {
+            prefs.edit()
+                .putBoolean(PREF_AUTO_PIP_ON_BACK, false)
+                .putBoolean("pip_default_reset_v206", true)
+                .apply()
+        }
         loadChannels()
     }
 
@@ -171,7 +177,7 @@ class ChannelRepository(private val context: Context) {
 
     fun isAutoPipOnBack(): Boolean {
         if (isTv()) return false
-        return prefs.getBoolean(PREF_AUTO_PIP_ON_BACK, true)
+        return prefs.getBoolean(PREF_AUTO_PIP_ON_BACK, false)
     }
     fun setAutoPipOnBack(enabled: Boolean) = prefs.edit().putBoolean(PREF_AUTO_PIP_ON_BACK, enabled).apply()
 
@@ -222,9 +228,9 @@ class ChannelRepository(private val context: Context) {
 
     fun getTimstBaseUrl(): String {
         val saved = prefs.getString(PREF_TIMST_BASE_URL, null)?.trim()
-        if (saved.isNullOrBlank() || saved.contains("timst.top") || saved.contains("exmxbxe.cfd")) {
-            setTimstBaseUrl("https://grandemx.org")
-            return "https://grandemx.org"
+        if (saved.isNullOrBlank() || saved.contains("timst.top") || saved.contains("exmxbxe.cfd") || saved.contains("timst.cfd")) {
+            setTimstBaseUrl("https://tim-streams.com")
+            return "https://tim-streams.com"
         }
         return saved
     }
@@ -391,10 +397,11 @@ class ChannelRepository(private val context: Context) {
         }
 
         val timstMirrors = listOf(
+            "https://tim-streams.com",
             getTimstBaseUrl(),
             "https://grandemx.org",
-            "https://exmxbxe.cfd",
-            "https://timst.top"
+            "https://timst.top",
+            "https://exmxbxe.cfd"
         )
         for (tm in timstMirrors) {
             try {
@@ -435,18 +442,24 @@ class ChannelRepository(private val context: Context) {
     fun fetchLiveMatches(scope: CoroutineScope, onResult: (List<LiveEvent>) -> Unit) {
         scope.launch(Dispatchers.IO) {
             val eventsList = mutableListOf<LiveEvent>()
-            try {
-                val url = "https://timst.top/api/live-upcoming"
-                val conn = (URL(url).openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 6000
-                    readTimeout = 6000
-                    setRequestProperty("User-Agent", "Mozilla/5.0")
-                }
+            val apiMirrors = listOf(
+                "https://tim-streams.com/api/live-upcoming",
+                "${getTimstBaseUrl()}/api/live-upcoming",
+                "https://grandemx.org/api/live-upcoming",
+                "https://timst.top/api/live-upcoming"
+            )
+            for (apiUrl in apiMirrors) {
+                try {
+                    val conn = (URL(apiUrl).openConnection() as HttpURLConnection).apply {
+                        connectTimeout = 4000
+                        readTimeout = 4000
+                        setRequestProperty("User-Agent", "Mozilla/5.0")
+                    }
 
-                if (conn.responseCode == HttpURLConnection.HTTP_OK) {
-                    val jsonStr = conn.inputStream.bufferedReader().use { it.readText() }
-                    val root = JsonParser.parseString(jsonStr).asJsonObject
-                    val eventsArr = root.getAsJsonArray("events")
+                    if (conn.responseCode == HttpURLConnection.HTTP_OK) {
+                        val jsonStr = conn.inputStream.bufferedReader().use { it.readText() }
+                        val root = JsonParser.parseString(jsonStr).asJsonObject
+                        val eventsArr = root.getAsJsonArray("events")
 
                     // Build genre map
                     val genreMap = mutableMapOf<Int, String>()
@@ -525,10 +538,14 @@ class ChannelRepository(private val context: Context) {
                             )
                         }
                     }
+                    if (eventsList.isNotEmpty()) {
+                        break
+                    }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                // Try next mirror
             }
+        }
 
 
             // Also fetch from Streamed (streamed.pk / strmd.link active mirror)
