@@ -101,11 +101,25 @@ class ChannelRepository(private val context: Context) {
             }
         }
 
-        // Ordenar canais PT: primeiro TODOS os Sport TV (ordenados: 1, 2, 3, 4, 5, 6, +), depois mantém a ordenação existente
+        // Ordenar canais PT: primeiro TODOS os Sport TV (1..6..+), a seguir TODOS os DAZN (1..6), depois os restantes
         val sportTv = pt.filter { it.name.contains("Sport TV", ignoreCase = true) }
             .sortedBy { getSportTvOrder(it.name) }
-        val otherPt = pt.filter { !it.name.contains("Sport TV", ignoreCase = true) }
-        precomputedPtChannels = sportTv + otherPt
+        val dazn = pt.filter { it.name.contains("DAZN", ignoreCase = true) || it.name.contains("Eleven", ignoreCase = true) }
+            .sortedBy { getDaznOrder(it.name) }
+        val otherPt = pt.filter { !it.name.contains("Sport TV", ignoreCase = true) && !it.name.contains("DAZN", ignoreCase = true) && !it.name.contains("Eleven", ignoreCase = true) }
+
+        val defaultPt = sportTv + dazn + otherPt
+
+        val customOrder = getCustomChannelOrder()
+        val customOrderMap = customOrder.mapIndexed { index, id -> id to index }.toMap()
+
+        precomputedPtChannels = if (customOrderMap.isNotEmpty()) {
+            defaultPt.sortedWith(compareBy { ch ->
+                customOrderMap[ch.id] ?: (10000 + defaultPt.indexOf(ch))
+            })
+        } else {
+            defaultPt
+        }
 
         precomputedAllChannels = all
         precomputedFavChannels = fav
@@ -122,6 +136,60 @@ class ChannelRepository(private val context: Context) {
         channelsVersion.intValue++
     }
 
+    private val PREF_CUSTOM_CHANNEL_ORDER = "custom_channel_order_ids"
+
+    fun getCustomChannelOrder(): List<String> {
+        val raw = prefs.getString(PREF_CUSTOM_CHANNEL_ORDER, null) ?: return emptyList()
+        return raw.split(",").filter { it.isNotBlank() }
+    }
+
+    fun setCustomChannelOrder(orderedIds: List<String>) {
+        prefs.edit().putString(PREF_CUSTOM_CHANNEL_ORDER, orderedIds.joinToString(",")).apply()
+        rebuildPrecomputedLists()
+    }
+
+    fun resetCustomChannelOrder() {
+        prefs.edit().remove(PREF_CUSTOM_CHANNEL_ORDER).apply()
+        rebuildPrecomputedLists()
+    }
+
+    fun moveChannel(fromChannelId: String, toChannelId: String) {
+        val currentPt = precomputedPtChannels.toMutableList()
+        val fromIdx = currentPt.indexOfFirst { it.id == fromChannelId }
+        val toIdx = currentPt.indexOfFirst { it.id == toChannelId }
+        if (fromIdx != -1 && toIdx != -1 && fromIdx != toIdx) {
+            val item = currentPt.removeAt(fromIdx)
+            currentPt.add(toIdx, item)
+            setCustomChannelOrder(currentPt.map { it.id })
+        }
+    }
+
+    fun moveChannelByOffset(channelId: String, offset: Int) {
+        val currentPt = precomputedPtChannels.toMutableList()
+        val fromIdx = currentPt.indexOfFirst { it.id == channelId }
+        if (fromIdx != -1) {
+            val toIdx = (fromIdx + offset).coerceIn(0, currentPt.size - 1)
+            if (fromIdx != toIdx) {
+                val item = currentPt.removeAt(fromIdx)
+                currentPt.add(toIdx, item)
+                setCustomChannelOrder(currentPt.map { it.id })
+            }
+        }
+    }
+
+    fun moveChannelToPosition(channelId: String, targetPosition: Int) {
+        val currentPt = precomputedPtChannels.toMutableList()
+        val fromIdx = currentPt.indexOfFirst { it.id == channelId }
+        if (fromIdx != -1) {
+            val toIdx = targetPosition.coerceIn(0, currentPt.size - 1)
+            if (fromIdx != toIdx) {
+                val item = currentPt.removeAt(fromIdx)
+                currentPt.add(toIdx, item)
+                setCustomChannelOrder(currentPt.map { it.id })
+            }
+        }
+    }
+
     fun getSportTvOrder(name: String): Int {
         val lower = name.lowercase()
         return when {
@@ -133,6 +201,19 @@ class ChannelRepository(private val context: Context) {
             lower.contains("sport tv 6") || lower.contains("sport tv6") -> 6
             lower.contains("sport tv +") || lower.contains("sport tv mais") || lower.contains("sport tv+") -> 7
             else -> 8
+        }
+    }
+
+    fun getDaznOrder(name: String): Int {
+        val lower = name.lowercase()
+        return when {
+            lower.contains("dazn 1") || lower.contains("dazn1") || lower.contains("eleven 1") || lower.contains("eleven1") -> 1
+            lower.contains("dazn 2") || lower.contains("dazn2") || lower.contains("eleven 2") || lower.contains("eleven2") -> 2
+            lower.contains("dazn 3") || lower.contains("dazn3") || lower.contains("eleven 3") || lower.contains("eleven3") -> 3
+            lower.contains("dazn 4") || lower.contains("dazn4") || lower.contains("eleven 4") || lower.contains("eleven4") -> 4
+            lower.contains("dazn 5") || lower.contains("dazn5") || lower.contains("eleven 5") || lower.contains("eleven5") -> 5
+            lower.contains("dazn 6") || lower.contains("dazn6") || lower.contains("eleven 6") || lower.contains("eleven6") -> 6
+            else -> 7
         }
     }
 
@@ -1075,8 +1156,9 @@ class ChannelRepository(private val context: Context) {
             TabFilter.PORTUGAL -> if (includeHidden) {
                 val list = cachedChannels.filter { it.isPortuguese }
                 val sportTv = list.filter { it.name.contains("Sport TV", ignoreCase = true) }.sortedBy { getSportTvOrder(it.name) }
-                val others = list.filter { !it.name.contains("Sport TV", ignoreCase = true) }
-                sportTv + others
+                val dazn = list.filter { it.name.contains("DAZN", ignoreCase = true) || it.name.contains("Eleven", ignoreCase = true) }.sortedBy { getDaznOrder(it.name) }
+                val others = list.filter { !it.name.contains("Sport TV", ignoreCase = true) && !it.name.contains("DAZN", ignoreCase = true) && !it.name.contains("Eleven", ignoreCase = true) }
+                sportTv + dazn + others
             } else precomputedPtChannels
             TabFilter.LIVE_GAMES -> getTopFootballChannels(query)
             TabFilter.GAMING -> if (includeHidden) cachedChannels.filter { it.category.contains("Gaming", ignoreCase = true) } else precomputedGamingChannels

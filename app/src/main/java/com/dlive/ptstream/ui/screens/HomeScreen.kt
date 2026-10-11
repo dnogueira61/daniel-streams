@@ -62,6 +62,14 @@ import com.dlive.ptstream.data.*
 import com.dlive.ptstream.ui.theme.*
 import kotlinx.coroutines.launch
 import java.io.File
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import android.widget.Toast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -112,6 +120,11 @@ fun HomeScreen(
 
     var focusedOrSelectedChannel by remember { mutableStateOf<Channel?>(null) }
     var selectedChannelForSheet by remember { mutableStateOf<Channel?>(null) }
+    var channelToMove by remember { mutableStateOf<Channel?>(null) }
+    var draggedChannelId by remember { mutableStateOf<String?>(null) }
+    var dragOffsetY by remember { mutableFloatStateOf(0f) }
+    val density = LocalDensity.current
+    val haptic = LocalHapticFeedback.current
 
     // Live Matches State
     var liveEvents by remember { mutableStateOf<List<LiveEvent>>(emptyList()) }
@@ -1282,7 +1295,60 @@ fun HomeScreen(
                                 }
                             }
                         }
-                        itemsIndexed(channels, key = { index, channel -> "ch_${channel.id}_$index" }) { _, channel ->
+                        itemsIndexed(channels, key = { _, channel -> channel.id }) { _, channel ->
+                            val isDragged = draggedChannelId == channel.id
+                            val itemModifier = Modifier
+                                .zIndex(if (isDragged) 10f else 1f)
+                                .graphicsLayer {
+                                    if (isDragged) {
+                                        translationY = dragOffsetY
+                                        scaleX = 1.03f
+                                        scaleY = 1.03f
+                                        shadowElevation = 16f
+                                    }
+                                }
+                                .pointerInput(channel.id, channels.size) {
+                                    detectDragGesturesAfterLongPress(
+                                        onDragStart = {
+                                            draggedChannelId = channel.id
+                                            dragOffsetY = 0f
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        },
+                                        onDrag = { change, dragAmount ->
+                                            change.consume()
+                                            dragOffsetY += dragAmount.y
+                                            val thresholdPx = with(density) { 76.dp.toPx() }
+                                            if (dragOffsetY > thresholdPx * 0.65f) {
+                                                val currIdx = channels.indexOfFirst { it.id == channel.id }
+                                                if (currIdx != -1 && currIdx < channels.size - 1) {
+                                                    val nextCh = channels[currIdx + 1]
+                                                    repository.moveChannel(channel.id, nextCh.id)
+                                                    dragOffsetY -= thresholdPx
+                                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                    refreshKey++
+                                                }
+                                            } else if (dragOffsetY < -thresholdPx * 0.65f) {
+                                                val currIdx = channels.indexOfFirst { it.id == channel.id }
+                                                if (currIdx > 0) {
+                                                    val prevCh = channels[currIdx - 1]
+                                                    repository.moveChannel(channel.id, prevCh.id)
+                                                    dragOffsetY += thresholdPx
+                                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                    refreshKey++
+                                                }
+                                            }
+                                        },
+                                        onDragEnd = {
+                                            draggedChannelId = null
+                                            dragOffsetY = 0f
+                                        },
+                                        onDragCancel = {
+                                            draggedChannelId = null
+                                            dragOffsetY = 0f
+                                        }
+                                    )
+                                }
+
                             ChannelCard(
                                 channel = channel,
                                 epgProgram = repository.epgRepository.getCurrentProgram(channel.name),
@@ -1292,6 +1358,9 @@ fun HomeScreen(
                                 onShowDetails = {
                                     selectedChannelForSheet = channel
                                 },
+                                onMoveChannel = {
+                                    channelToMove = channel
+                                },
                                 onToggleFavorite = {
                                     repository.toggleFavorite(channel.id)
                                     refreshKey++
@@ -1299,7 +1368,8 @@ fun HomeScreen(
                                 onHideChannel = {
                                     repository.hideChannel(channel.id)
                                     refreshKey++
-                                }
+                                },
+                                modifier = itemModifier
                             )
                         }
                     }
@@ -1365,6 +1435,80 @@ fun HomeScreen(
             release = availableRelease!!,
             updateManager = updateManager,
             onDismiss = { showUpdateDialog = false }
+        )
+    }
+
+    if (channelToMove != null) {
+        val ch = channelToMove!!
+        val currentIdx = channels.indexOfFirst { it.id == ch.id }
+        val currentPos = if (currentIdx != -1) currentIdx + 1 else 1
+        val totalCount = channels.size
+
+        AlertDialog(
+            onDismissRequest = { channelToMove = null },
+            title = {
+                Column {
+                    Text("Mover Canal", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.White)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("${ch.name} (Posição $currentPos de $totalCount)", fontSize = 13.sp, color = Color(0xFF38BDF8))
+                }
+            },
+            text = {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    FilledTonalButton(
+                        onClick = {
+                            repository.moveChannelToPosition(ch.id, 0)
+                            refreshKey++
+                            channelToMove = null
+                            Toast.makeText(context, "${ch.name} movido para o topo!", Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.filledTonalButtonColors(containerColor = Color(0xFF1E293B))
+                    ) { Text("⬆️ Mover para o Topo (1º lugar)", color = Color.White) }
+
+                    if (currentIdx > 0) {
+                        FilledTonalButton(
+                            onClick = {
+                                repository.moveChannelByOffset(ch.id, -1)
+                                refreshKey++
+                                channelToMove = null
+                                Toast.makeText(context, "${ch.name} subiu para a posição ${currentPos - 1}!", Toast.LENGTH_SHORT).show()
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.filledTonalButtonColors(containerColor = Color(0xFF1E293B))
+                        ) { Text("▲ Subir uma posição (${currentPos - 1})", color = Color.White) }
+                    }
+
+                    if (currentIdx < totalCount - 1 && currentIdx != -1) {
+                        FilledTonalButton(
+                            onClick = {
+                                repository.moveChannelByOffset(ch.id, 1)
+                                refreshKey++
+                                channelToMove = null
+                                Toast.makeText(context, "${ch.name} desceu para a posição ${currentPos + 1}!", Toast.LENGTH_SHORT).show()
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.filledTonalButtonColors(containerColor = Color(0xFF1E293B))
+                        ) { Text("▼ Descer uma posição (${currentPos + 1})", color = Color.White) }
+                    }
+
+                    FilledTonalButton(
+                        onClick = {
+                            repository.moveChannelToPosition(ch.id, totalCount - 1)
+                            refreshKey++
+                            channelToMove = null
+                            Toast.makeText(context, "${ch.name} movido para o fim ($totalCount)!", Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.filledTonalButtonColors(containerColor = Color(0xFF1E293B))
+                    ) { Text("⬇️ Mover para o Fim ($totalCount)", color = Color.White) }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { channelToMove = null }) { Text("Fechar", color = Color(0xFF9CA3AF)) }
+            },
+            containerColor = Color(0xFF111827)
         )
     }
 }
@@ -1997,14 +2141,16 @@ fun ChannelCard(
     onPlayClick: () -> Unit,
     onToggleFavorite: () -> Unit,
     onHideChannel: () -> Unit,
-    onShowDetails: (() -> Unit)? = null
+    onShowDetails: (() -> Unit)? = null,
+    onMoveChannel: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
     var isFocused by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(if (isFocused) 1.02f else 1.0f, label = "channel_scale")
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .scale(scale)
             .onFocusChanged { isFocused = it.isFocused }
@@ -2171,6 +2317,18 @@ fun ChannelCard(
                                 onClick = {
                                     showMenu = false
                                     onShowDetails()
+                                }
+                            )
+                        }
+                        if (onMoveChannel != null) {
+                            DropdownMenuItem(
+                                text = { Text("Mover canal", color = TextPrimary, fontSize = 13.sp) },
+                                leadingIcon = {
+                                    Icon(Icons.Default.SwapVert, contentDescription = null, tint = Color(0xFF10B981))
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    onMoveChannel()
                                 }
                             )
                         }

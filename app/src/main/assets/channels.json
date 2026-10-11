@@ -1,5 +1,109 @@
 [
   {
+    "id": "49",
+    "name": "Sport TV 1 HD",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://grandemx.org/oqq5c86g-7521",
+    "backupStreamUrl2": null
+  },
+  {
+    "id": "74",
+    "name": "Sport TV 2 HD",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://grandemx.org/6dw9r22a-7192",
+    "backupStreamUrl2": null
+  },
+  {
+    "id": "454",
+    "name": "Sport TV 3 HD",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://grandemx.org/dbo09jwh-5404",
+    "backupStreamUrl2": null
+  },
+  {
+    "id": "289",
+    "name": "Sport TV 4 HD",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://grandemx.org/t218wwwk-3361",
+    "backupStreamUrl2": null
+  },
+  {
+    "id": "290",
+    "name": "Sport TV 5 HD",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://grandemx.org/twg31g84-6394",
+    "backupStreamUrl2": null
+  },
+  {
+    "id": "291",
+    "name": "Sport TV 6 HD",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": null,
+    "backupStreamUrl2": null,
+    "originalCategory": "Desporto"
+  },
+  {
+    "id": "455",
+    "name": "DAZN 1 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": "https://grandemx.org/3zhczzbl-9086",
+    "backupStreamUrl2": null
+  },
+  {
+    "id": "456",
+    "name": "DAZN 2 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": null,
+    "backupStreamUrl2": null,
+    "originalCategory": "Desporto"
+  },
+  {
+    "id": "457",
+    "name": "DAZN 3 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": null,
+    "backupStreamUrl2": null,
+    "originalCategory": "Desporto"
+  },
+  {
+    "id": "458",
+    "name": "DAZN 4 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": null,
+    "backupStreamUrl2": null,
+    "originalCategory": "Desporto"
+  },
+  {
+    "id": "459",
+    "name": "DAZN 5 Portugal",
+    "country": "PT",
+    "category": "Desporto",
+    "isPt": true,
+    "backupStreamUrl": null,
+    "backupStreamUrl2": null,
+    "originalCategory": "Desporto"
+  },
+  {
     "id": "719",
     "name": "RTP 1 HD",
     "country": "PT",
@@ -54,60 +158,6 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "49",
-    "name": "Sport TV 1 HD",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://grandemx.org/oqq5c86g-7521",
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "74",
-    "name": "Sport TV 2 HD",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://grandemx.org/6dw9r22a-7192",
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "454",
-    "name": "Sport TV 3 HD",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://grandemx.org/dbo09jwh-5404",
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "289",
-    "name": "Sport TV 4 HD",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://grandemx.org/t218wwwk-3361",
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "290",
-    "name": "Sport TV 5 HD",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://grandemx.org/twg31g84-6394",
-    "backupStreamUrl2": null
-  },
-  {
-    "id": "455",
-    "name": "DAZN 1 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": "https://grandemx.org/3zhczzbl-9086",
-    "backupStreamUrl2": null
-  },
-  {
     "id": "amc-pt",
     "name": "AMC",
     "country": "PT",
@@ -124,26 +174,6 @@
     "isPt": true,
     "backupStreamUrl": "https://grandemx.org/eymmdvm3-8294",
     "backupStreamUrl2": null
-  },
-  {
-    "id": "291",
-    "name": "Sport TV 6 HD",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null,
-    "originalCategory": "Desporto"
-  },
-  {
-    "id": "458",
-    "name": "DAZN 4 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null,
-    "originalCategory": "Desporto"
   },
   {
     "id": "716",
@@ -164,36 +194,6 @@
     "backupStreamUrl": "https://sic.live.impresa.pt/sic1080p.m3u8",
     "backupStreamUrl2": null,
     "originalCategory": "Generalistas"
-  },
-  {
-    "id": "456",
-    "name": "DAZN 2 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null,
-    "originalCategory": "Desporto"
-  },
-  {
-    "id": "457",
-    "name": "DAZN 3 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null,
-    "originalCategory": "Desporto"
-  },
-  {
-    "id": "459",
-    "name": "DAZN 5 Portugal",
-    "country": "PT",
-    "category": "Desporto",
-    "isPt": true,
-    "backupStreamUrl": null,
-    "backupStreamUrl2": null,
-    "originalCategory": "Desporto"
   },
   {
     "id": "380",
