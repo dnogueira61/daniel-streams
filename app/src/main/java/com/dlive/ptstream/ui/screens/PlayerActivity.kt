@@ -347,7 +347,7 @@ class PlayerActivity : ComponentActivity() {
         backupDirectUrl2 = intent.getStringExtra("EXTRA_BACKUP_STREAM_URL2")
 
         val timstCandidate = listOfNotNull(directStreamUrl, backupDirectUrl, backupDirectUrl2)
-            .firstOrNull { it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") }
+            .firstOrNull { it.contains("ehgembxe") || it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") }
         if (timstCandidate != null && directStreamUrl == null) {
             directStreamUrl = timstCandidate
         }
@@ -986,7 +986,7 @@ class PlayerActivity : ComponentActivity() {
                 u.contains("TVI") || u.contains("github") -> "S (TVI)"
                 u.contains("cloudfront") -> "S (C11)"
                 u.contains("fastly") -> "S (Porto)"
-                u.contains("exmxbxe") || u.contains("grandemx") || u.contains("timst") -> "S (TimST)"
+                u.contains("ehgembxe") || u.contains("exmxbxe") || u.contains("grandemx") || u.contains("timst") -> "S (TimST)"
                 else -> "S (Direto)"
             }
         } else {
@@ -1271,6 +1271,8 @@ class PlayerActivity : ComponentActivity() {
                         host.contains("wideiptv") ||
                         host.contains("assetrage") ||
                         host.contains("exmxbxe") ||
+                        host.contains("ehgembxe") ||
+                        host.contains("embeds.gay") ||
                         host.contains("timst") ||
                         host.contains("tim-streams") ||
                         host.contains("world-proxifier") ||
@@ -1691,41 +1693,64 @@ class PlayerActivity : ComponentActivity() {
     }
 
     private suspend fun resolveTimStreamsToHls(rawUrl: String): String? = withContext(Dispatchers.IO) {
-        try {
-            var target = rawUrl.trim()
-            val activeBase = repository.getTimstBaseUrl().trim().let { if (it.endsWith("/")) it.dropLast(1) else it }
-            when {
-                target.contains("exmxbxe.cfd") -> target = target.replace("https://exmxbxe.cfd", activeBase).replace("http://exmxbxe.cfd", activeBase)
-                target.contains("timst.top") -> target = target.replace("https://timst.top", activeBase).replace("http://timst.top", activeBase)
-                target.contains("timst.cfd") -> target = target.replace("https://timst.cfd", activeBase).replace("http://timst.cfd", activeBase)
-                target.contains("tim-streams.com") -> target = target.replace("https://tim-streams.com", activeBase).replace("http://tim-streams.com", activeBase)
-            }
-            if (!target.startsWith("http://") && !target.startsWith("https://")) {
-                target = "https://$target"
-            }
+        var target = rawUrl.trim()
+        when {
+            target.contains("grandemx.org") -> target = target.replace("https://grandemx.org", "https://ehgembxe.cfd").replace("http://grandemx.org", "https://ehgembxe.cfd")
+            target.contains("exmxbxe.cfd") -> target = target.replace("https://exmxbxe.cfd", "https://ehgembxe.cfd").replace("http://exmxbxe.cfd", "https://ehgembxe.cfd")
+        }
+        if (!target.startsWith("http://") && !target.startsWith("https://")) {
+            target = "https://$target"
+        }
 
-            var conn = (URL(target).openConnection() as HttpURLConnection).apply {
+        val primaryBase = repository.getTimstBaseUrl().trim().let { if (it.endsWith("/")) it.dropLast(1) else it }
+        val fallbackBase = "https://tim-streams.com"
+
+        // 1. Tentar primeiro com o domínio principal timst.top
+        android.util.Log.d("TimStreamsResolver", "A tentar resolver TimStreams com domínio principal: $primaryBase (URL: $target)")
+        val m3u8Primary = extractTimStreamsM3u8(target, primaryBase)
+        if (!m3u8Primary.isNullOrBlank()) {
+            android.util.Log.d("TimStreamsResolver", "Sucesso via $primaryBase: $m3u8Primary")
+            return@withContext m3u8Primary
+        }
+
+        // 2. Se falhar no domínio principal, tentar fallback exclusivo tim-streams.com (sem aparecer na lista de streams)
+        if (!primaryBase.contains("tim-streams.com")) {
+            android.util.Log.w("TimStreamsResolver", "Falha com $primaryBase -> A tentar fallback exclusivo $fallbackBase...")
+            val m3u8Fallback = extractTimStreamsM3u8(target, fallbackBase)
+            if (!m3u8Fallback.isNullOrBlank()) {
+                android.util.Log.d("TimStreamsResolver", "Sucesso via fallback $fallbackBase: $m3u8Fallback")
+                return@withContext m3u8Fallback
+            }
+        }
+
+        android.util.Log.e("TimStreamsResolver", "TimStreams offline em ambos os domínios ($primaryBase e $fallbackBase)")
+        null
+    }
+
+    private fun extractTimStreamsM3u8(targetUrl: String, refererBase: String): String? {
+        try {
+            var conn = (URL(targetUrl).openConnection() as HttpURLConnection).apply {
                 instanceFollowRedirects = true
-                connectTimeout = 2500
-                readTimeout = 2500
+                connectTimeout = 3000
+                readTimeout = 3000
                 setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
-                setRequestProperty("Referer", "https://tim-streams.com/")
+                setRequestProperty("Referer", "$refererBase/")
             }
 
             val respCode = conn.responseCode
             if (respCode in 300..399) {
                 val loc = conn.getHeaderField("Location")
                 if (!loc.isNullOrBlank()) {
-                    val redirectUrl = if (loc.startsWith("http")) loc else "https://grandemx.org$loc"
+                    val redirectUrl = if (loc.startsWith("http")) loc else "https://ehgembxe.cfd$loc"
                     conn = (URL(redirectUrl).openConnection() as HttpURLConnection).apply {
-                        connectTimeout = 2000
-                        readTimeout = 2000
+                        connectTimeout = 2500
+                        readTimeout = 2500
                         setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
-                        setRequestProperty("Referer", "https://tim-streams.com/")
+                        setRequestProperty("Referer", "$refererBase/")
                     }
                 }
             } else if (respCode !in 200..299) {
-                return@withContext null
+                return null
             }
 
             val html = conn.inputStream.bufferedReader().use { it.readText() }
@@ -1754,7 +1779,7 @@ class PlayerActivity : ComponentActivity() {
                     val m3u8 = if (signedMatch.groupValues.size > 1) signedMatch.groupValues[1] else signedMatch.value
                     if (m3u8.isNotBlank()) {
                         val valid = validateHlsStreamAlive(m3u8)
-                        if (valid) return@withContext m3u8 else return@withContext null
+                        if (valid) return m3u8
                     }
                 }
             }
@@ -1766,22 +1791,22 @@ class PlayerActivity : ComponentActivity() {
                 val m3u8 = if (plainMatch.groupValues.size > 1) plainMatch.groupValues[1] else plainMatch.value
                 if (m3u8.isNotBlank()) {
                     val valid = validateHlsStreamAlive(m3u8)
-                    if (valid) return@withContext m3u8 else return@withContext null
+                    if (valid) return m3u8
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.w("TimStreamsResolver", "Error resolving TimStreams HLS: ${e.message}")
+            android.util.Log.w("TimStreamsResolver", "Erro ao tentar extrair M3U8 com $refererBase: ${e.message}")
         }
-        null
+        return null
     }
 
     private fun validateHlsStreamAlive(m3u8Url: String): Boolean {
         return try {
             val pConn = (URL(m3u8Url).openConnection() as HttpURLConnection).apply {
-                connectTimeout = 2000
-                readTimeout = 2000
+                connectTimeout = 2500
+                readTimeout = 2500
                 setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
-                setRequestProperty("Referer", "https://grandemx.org/")
+                setRequestProperty("Referer", "https://ehgembxe.cfd/")
             }
             if (pConn.responseCode in 200..299) {
                 val sample = pConn.inputStream.bufferedReader().use { it.readText() }
@@ -1911,7 +1936,7 @@ class PlayerActivity : ComponentActivity() {
                     if (isFinishing || isDestroyed) return@launch
                     if (!resolvedM3u8.isNullOrBlank()) {
                         android.util.Log.d("PlayerActivity", "Resolved TimStreams HLS: $resolvedM3u8")
-                        loadHlsStream(resolvedM3u8, "https://grandemx.org/")
+                        loadHlsStream(resolvedM3u8, "https://ehgembxe.cfd/")
                         handler.postDelayed(failoverTimeoutRunnable, failoverTimeoutMs)
                     } else {
                         android.util.Log.w("PlayerActivity", "TimStreams offline ou inacessível -> Failover imediato para o próximo servidor")
@@ -1961,7 +1986,7 @@ class PlayerActivity : ComponentActivity() {
             val list = listOfNotNull(directStreamUrl, backupDirectUrl, backupDirectUrl2)
             list.forEachIndexed { idx, url ->
                 val name = when {
-                    url.contains("grandemx") || url.contains("exmxbxe") || url.contains("timst") -> "Servidor Principal (TimStreams 1080p)"
+                    url.contains("ehgembxe") || url.contains("grandemx") || url.contains("exmxbxe") || url.contains("timst") -> "Servidor Principal (TimStreams 1080p)"
                     idx == 0 -> "Servidor Principal (Direto)"
                     idx == 1 -> "Servidor Alternativo 1 (Direto)"
                     else -> "Servidor Reserva $idx (Direto)"
@@ -1977,17 +2002,14 @@ class PlayerActivity : ComponentActivity() {
 
         // 1. TimStreams backup (HIGHEST PRIORITY when available)
         val backupUrl = currentChannel.backupStreamUrl ?: backupDirectUrl
-        val rawTimst = if (backupUrl != null && (backupUrl.contains("grandemx") || backupUrl.contains("exmxbxe") || backupUrl.contains("timst"))) backupUrl
-            else (currentChannel.backupStreamUrl2 ?: backupDirectUrl2)?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("timst") }
-            ?: directStreamUrl?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("timst") }
+        val rawTimst = if (backupUrl != null && (backupUrl.contains("grandemx") || backupUrl.contains("exmxbxe") || backupUrl.contains("ehgembxe") || backupUrl.contains("timst"))) backupUrl
+            else (currentChannel.backupStreamUrl2 ?: backupDirectUrl2)?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("ehgembxe") || it.contains("timst") }
+            ?: directStreamUrl?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("ehgembxe") || it.contains("timst") }
         val timstUrl = rawTimst?.let { url ->
-            val base = repository.getTimstBaseUrl().trim().let { if (it.endsWith("/")) it.dropLast(1) else it }
-            when {
-                url.contains("exmxbxe.cfd") -> url.replace("https://exmxbxe.cfd", base).replace("http://exmxbxe.cfd", base)
-                url.contains("grandemx.org") -> url.replace("https://grandemx.org", base).replace("http://grandemx.org", base)
-                url.contains("timst.top") -> url.replace("https://timst.top", base).replace("http://timst.top", base)
-                else -> url
-            }
+            var u = url.trim()
+            if (u.contains("grandemx.org")) u = u.replace("https://grandemx.org", "https://ehgembxe.cfd").replace("http://grandemx.org", "https://ehgembxe.cfd")
+            if (u.contains("exmxbxe.cfd")) u = u.replace("https://exmxbxe.cfd", "https://ehgembxe.cfd").replace("http://exmxbxe.cfd", "https://ehgembxe.cfd")
+            u
         }
         if (timstUrl != null) {
             options.add(ServerOption("Servidor Principal (TimStreams 1080p)", isDirect = true, directUrl = timstUrl))
@@ -2017,7 +2039,7 @@ class PlayerActivity : ComponentActivity() {
         }
 
         // 4. Non-Timst direct backup (e.g. other direct streams)
-        if (backupUrl != null && !backupUrl.contains("exmxbxe") && !backupUrl.contains("grandemx") && !backupUrl.contains("timst") && options.none { it.directUrl == backupUrl }) {
+        if (backupUrl != null && !backupUrl.contains("exmxbxe") && !backupUrl.contains("ehgembxe") && !backupUrl.contains("grandemx") && !backupUrl.contains("timst") && options.none { it.directUrl == backupUrl }) {
             options.add(ServerOption("Servidor Alternativo ${options.size} (Direto)", isDirect = true, directUrl = backupUrl))
         }
 
@@ -2595,7 +2617,7 @@ class PlayerActivity : ComponentActivity() {
 
         // 3. TimStreams Base Domain
         val tvTimstTitle = TextView(this).apply {
-            text = "🔗 Domínio TimStreams (Jogos/Backup):"
+            text = "🔗 Domínio TimStreams (Principal - fallback: tim-streams.com):"
             setTextColor(Color.parseColor("#9CA3AF"))
             textSize = 13f
             setPadding(0, 14, 0, 6)

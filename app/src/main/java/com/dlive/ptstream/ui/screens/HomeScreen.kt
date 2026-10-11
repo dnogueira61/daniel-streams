@@ -3004,12 +3004,12 @@ fun SettingsDialog(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Domínio TimStreams:", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                        Text("Domínio TimStreams (Principal):", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
                         TextButton(onClick = {
-                            timstBaseUrl = "https://tim-streams.com"
+                            timstBaseUrl = "https://timst.top"
                             repository.setTimstBaseUrl(timstBaseUrl)
                         }) {
-                            Text("Repor tim-streams.com", fontSize = 11.sp, color = Color(0xFF38BDF8))
+                            Text("Repor timst.top", fontSize = 11.sp, color = Color(0xFF38BDF8))
                         }
                     }
                     TextField(
@@ -3019,6 +3019,9 @@ fun SettingsDialog(
                             repository.setTimstBaseUrl(it)
                         },
                         singleLine = true,
+                        supportingText = {
+                            Text("Fallback automático: tim-streams.com", fontSize = 11.sp, color = Color(0xFF94A3B8))
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .onPreviewKeyEvent { event ->

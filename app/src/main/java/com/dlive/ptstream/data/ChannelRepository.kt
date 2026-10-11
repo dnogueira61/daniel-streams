@@ -54,6 +54,9 @@ class ChannelRepository(private val context: Context) {
     private var liveEvents: List<LiveEvent> = emptyList()
 
     companion object {
+        const val DEFAULT_TIMST_BASE_URL = "https://timst.top"
+        const val FALLBACK_TIMST_BASE_URL = "https://tim-streams.com"
+
         @Volatile
         private var sharedLiveEvents: List<LiveEvent> = emptyList()
     }
@@ -309,12 +312,14 @@ class ChannelRepository(private val context: Context) {
 
     fun getTimstBaseUrl(): String {
         val saved = prefs.getString(PREF_TIMST_BASE_URL, null)?.trim()
-        if (saved.isNullOrBlank() || saved.contains("timst.top") || saved.contains("exmxbxe.cfd") || saved.contains("timst.cfd")) {
-            setTimstBaseUrl("https://tim-streams.com")
-            return "https://tim-streams.com"
+        if (saved.isNullOrBlank() || saved.contains("grandemx.org") || saved.contains("exmxbxe.cfd") || saved.contains("timst.cfd") || saved.contains("tim-streams.com")) {
+            setTimstBaseUrl(DEFAULT_TIMST_BASE_URL)
+            return DEFAULT_TIMST_BASE_URL
         }
         return saved
     }
+    fun getTimstFallbackBaseUrl(): String = FALLBACK_TIMST_BASE_URL
+
     fun setTimstBaseUrl(newUrl: String) {
         val clean = if (newUrl.endsWith("/")) newUrl.dropLast(1) else newUrl
         prefs.edit().putString(PREF_TIMST_BASE_URL, clean).apply()
@@ -371,7 +376,9 @@ class ChannelRepository(private val context: Context) {
                         category = ch.category,
                         isFavorite = favIds.contains(ch.id),
                         logoUrl = logo,
-                        status = ch.safeStatus
+                        status = ch.safeStatus,
+                        backupStreamUrl = normalizeStreamUrl(ch.backupStreamUrl),
+                        backupStreamUrl2 = normalizeStreamUrl(ch.backupStreamUrl2)
                     )
                 }
                 rebuildPrecomputedLists()
@@ -391,7 +398,9 @@ class ChannelRepository(private val context: Context) {
                             category = ch.category,
                             isFavorite = favIds.contains(ch.id),
                             logoUrl = ch.logoUrl ?: ChannelLogoHelper.getDefaultOnlineLogo(ch.name),
-                            status = ch.safeStatus
+                            status = ch.safeStatus,
+                            backupStreamUrl = normalizeStreamUrl(ch.backupStreamUrl),
+                            backupStreamUrl2 = normalizeStreamUrl(ch.backupStreamUrl2)
                         )
                     }
                     rebuildPrecomputedLists()
@@ -401,6 +410,18 @@ class ChannelRepository(private val context: Context) {
                 rebuildPrecomputedLists()
             }
         }
+    }
+
+    private fun normalizeStreamUrl(url: String?): String? {
+        if (url == null) return null
+        var u = url.trim()
+        if (u.contains("grandemx.org")) {
+            u = u.replace("https://grandemx.org", "https://ehgembxe.cfd").replace("http://grandemx.org", "https://ehgembxe.cfd")
+        }
+        if (u.contains("exmxbxe.cfd")) {
+            u = u.replace("https://exmxbxe.cfd", "https://ehgembxe.cfd").replace("http://exmxbxe.cfd", "https://ehgembxe.cfd")
+        }
+        return u
     }
 
     /**
@@ -478,11 +499,9 @@ class ChannelRepository(private val context: Context) {
         }
 
         val timstMirrors = listOf(
-            "https://tim-streams.com",
             getTimstBaseUrl(),
-            "https://grandemx.org",
-            "https://timst.top",
-            "https://exmxbxe.cfd"
+            DEFAULT_TIMST_BASE_URL,
+            "https://timst.cfd"
         )
         for (tm in timstMirrors) {
             try {
@@ -496,11 +515,11 @@ class ChannelRepository(private val context: Context) {
                 }
                 val code = conn.responseCode
                 val location = conn.getHeaderField("Location")
-                if (!location.isNullOrBlank() && (location.startsWith("http://") || location.startsWith("https://"))) {
+                if (!location.isNullOrBlank() && (location.startsWith("http://") || location.startsWith("https://")) && !location.contains("tim-streams.com")) {
                     setTimstBaseUrl(location)
                     break
                 }
-                if (code in 200..399) {
+                if (code in 200..399 && !tm.contains("tim-streams.com")) {
                     setTimstBaseUrl(tm)
                     break
                 }
@@ -524,10 +543,9 @@ class ChannelRepository(private val context: Context) {
         scope.launch(Dispatchers.IO) {
             val eventsList = mutableListOf<LiveEvent>()
             val apiMirrors = listOf(
-                "https://tim-streams.com/api/live-upcoming",
                 "${getTimstBaseUrl()}/api/live-upcoming",
-                "https://grandemx.org/api/live-upcoming",
-                "https://timst.top/api/live-upcoming"
+                "$DEFAULT_TIMST_BASE_URL/api/live-upcoming",
+                "$FALLBACK_TIMST_BASE_URL/api/live-upcoming"
             )
             for (apiUrl in apiMirrors) {
                 try {
