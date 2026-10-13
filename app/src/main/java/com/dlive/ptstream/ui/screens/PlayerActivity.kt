@@ -281,6 +281,13 @@ class PlayerActivity : ComponentActivity() {
 
     fun triggerFailoverDueToPlaybackError(reason: String) {
         android.util.Log.w("PlayerFailover", "Triggering failover due to: $reason")
+        if (streamLoadedSuccessfully) {
+            val isHardError = reason.startsWith("http_error_") || reason == "network_error"
+            if (!isHardError) {
+                android.util.Log.i("PlayerFailover", "Stream já está a tocar com sucesso. A ignorar failover ($reason)")
+                return
+            }
+        }
         val now = System.currentTimeMillis()
         if (now - lastFailoverTime < 1800L) return
         lastFailoverTime = now
@@ -1155,15 +1162,13 @@ class PlayerActivity : ComponentActivity() {
                     // Run kickstart loop during initial buffering, but stop as soon as stream is playing
                     var _kickstarted = false;
                     var kickstartInterval = setInterval(function() {
-                        // If already playing with audio, stop the interval immediately
                         try {
                             var isVideoPlaying = false;
                             var vv = document.querySelector('video');
-                            if (vv && !vv.paused && !vv.muted && vv.volume > 0) { isVideoPlaying = true; }
+                            if (vv && !vv.paused && (vv.currentTime > 0 || !vv.muted)) { isVideoPlaying = true; }
                             if (!isVideoPlaying && window.jwplayer && typeof window.jwplayer === 'function') {
                                 var jw = window.jwplayer();
-                                if (jw && typeof jw.getState === 'function' && jw.getState() === 'playing' &&
-                                    typeof jw.getMute === 'function' && !jw.getMute()) {
+                                if (jw && typeof jw.getState === 'function' && jw.getState() === 'playing') {
                                     isVideoPlaying = true;
                                 }
                             }
@@ -1175,7 +1180,7 @@ class PlayerActivity : ComponentActivity() {
                         kickstartAndUnmute();
                         _kickstarted = true;
                     }, 1000);
-                    setTimeout(function() { clearInterval(kickstartInterval); }, 14000);
+                    setTimeout(function() { clearInterval(kickstartInterval); }, 8000);
 
                     // Cross-frame message handling
                     window.addEventListener('message', function(ev) {
@@ -1526,6 +1531,17 @@ class PlayerActivity : ComponentActivity() {
 
                 function checkAll() {
                     if (reported) return;
+                    try {
+                        var vids = document.querySelectorAll('video');
+                        for (var i = 0; i < vids.length; i++) {
+                            if (!vids[i].paused && vids[i].currentTime > 0) return;
+                        }
+                        if (window.jwplayer && typeof window.jwplayer === 'function') {
+                            var jw = window.jwplayer();
+                            if (jw && typeof jw.getState === 'function' && jw.getState() === 'playing') return;
+                        }
+                    } catch(e) {}
+
                     scanVideos(document);
                     scanJWPlayer();
                     scanDom(document);
@@ -1535,6 +1551,10 @@ class PlayerActivity : ComponentActivity() {
                         for (var f = 0; f < frames.length; f++) {
                             var fdoc = frames[f].contentDocument || frames[f].contentWindow.document;
                             if (fdoc) {
+                                var ifrVids = fdoc.querySelectorAll('video');
+                                for (var j = 0; j < ifrVids.length; j++) {
+                                    if (!ifrVids[j].paused && ifrVids[j].currentTime > 0) return;
+                                }
                                 scanVideos(fdoc);
                                 scanDom(fdoc);
                             }
@@ -1875,12 +1895,14 @@ class PlayerActivity : ComponentActivity() {
                     if (Hls.isSupported()) {
                         var hls = new Hls({
                             enableWorker: true,
-                            maxBufferLength: 10,
-                            fragLoadingMaxRetry: 1,
-                            levelLoadingMaxRetry: 1,
-                            manifestLoadingMaxRetry: 1,
-                            fragLoadingTimeOut: 2000,
-                            manifestLoadingTimeOut: 2000
+                            maxBufferLength: 30,
+                            maxMaxBufferLength: 60,
+                            fragLoadingMaxRetry: 4,
+                            levelLoadingMaxRetry: 4,
+                            manifestLoadingMaxRetry: 4,
+                            fragLoadingTimeOut: 15000,
+                            manifestLoadingTimeOut: 15000,
+                            lowLatencyMode: false
                         });
                         hls.loadSource(src);
                         hls.attachMedia(video);
@@ -1888,13 +1910,22 @@ class PlayerActivity : ComponentActivity() {
                             startPlay();
                         });
                         hls.on(Hls.Events.ERROR, function(event, data) {
-                            if (data) {
-                                if (data.fatal || data.details === 'fragLoadError' || (data.response && data.response.code >= 400)) {
-                                    try {
-                                        if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackError === 'function') {
-                                            window.AndroidFailover.onPlaybackError('hls_err_' + (data.details || data.type));
-                                        }
-                                    } catch(e) {}
+                            if (data && data.fatal) {
+                                switch (data.type) {
+                                    case Hls.ErrorTypes.NETWORK_ERROR:
+                                        hls.startLoad();
+                                        break;
+                                    case Hls.ErrorTypes.MEDIA_ERROR:
+                                        hls.recoverMediaError();
+                                        break;
+                                    default:
+                                        hls.destroy();
+                                        try {
+                                            if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackError === 'function') {
+                                                window.AndroidFailover.onPlaybackError('hls_fatal_' + data.type);
+                                            }
+                                        } catch(e) {}
+                                        break;
                                 }
                             }
                         });
