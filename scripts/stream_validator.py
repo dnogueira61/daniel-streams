@@ -13,6 +13,7 @@ import sys
 import urllib.request
 import urllib.error
 import ssl
+import time
 from urllib.parse import urlparse
 
 CHANNELS_PATH = os.path.join(os.path.dirname(__file__), "..", "app", "src", "main", "assets", "channels.json")
@@ -40,8 +41,34 @@ ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
 
-def check_url_alive(url, referer=None, timeout=6):
-    """Checks if a URL returns HTTP 200/206 or is accessible."""
+def check_hls_sequence_progress(url, headers_dict, timeout=5):
+    """Verifies that an HLS live stream sequence is actively advancing and not stalled."""
+    try:
+        req = urllib.request.Request(url, headers=headers_dict)
+        with urllib.request.urlopen(req, context=ctx, timeout=timeout) as resp:
+            content1 = resp.read().decode('utf-8', errors='ignore')
+            m1 = re.search(r'#EXT-X-MEDIA-SEQUENCE:(\d+)', content1)
+            if not m1:
+                return True  # Master playlist or VOD, assume OK if reachable
+            seq1 = int(m1.group(1))
+
+        time.sleep(3.5)
+
+        req = urllib.request.Request(url, headers=headers_dict)
+        with urllib.request.urlopen(req, context=ctx, timeout=timeout) as resp:
+            content2 = resp.read().decode('utf-8', errors='ignore')
+            m2 = re.search(r'#EXT-X-MEDIA-SEQUENCE:(\d+)', content2)
+            if not m2:
+                return True
+            seq2 = int(m2.group(1))
+
+        # True if sequence advanced; False if stalled/frozen at the same number
+        return seq2 > seq1
+    except Exception:
+        return False
+
+def check_url_alive(url, referer=None, timeout=6, verify_hls_progress=False):
+    """Checks if a URL returns HTTP 200/206 or is accessible, with optional HLS stall detection."""
     if not url:
         return False
     h = dict(HEADERS)
@@ -61,7 +88,13 @@ def check_url_alive(url, referer=None, timeout=6):
     try:
         req = urllib.request.Request(url, headers=h)
         with urllib.request.urlopen(req, context=ctx, timeout=timeout) as resp:
-            return resp.status in range(200, 400)
+            if resp.status not in range(200, 400):
+                return False
+
+        if verify_hls_progress and ".m3u8" in url:
+            return check_hls_sequence_progress(url, h, timeout=timeout)
+
+        return True
     except urllib.error.HTTPError as e:
         return e.code in range(200, 400)
     except Exception:
@@ -186,13 +219,13 @@ def main():
         # Check Backup 1
         b1 = ch.get("backupStreamUrl")
         if not has_working_source and b1:
-            if check_url_alive(b1):
+            if check_url_alive(b1, verify_hls_progress=True):
                 has_working_source = True
 
         # Check Backup 2
         b2 = ch.get("backupStreamUrl2")
         if not has_working_source and b2:
-            if check_url_alive(b2):
+            if check_url_alive(b2, verify_hls_progress=True):
                 has_working_source = True
 
         # State Transition Logic
