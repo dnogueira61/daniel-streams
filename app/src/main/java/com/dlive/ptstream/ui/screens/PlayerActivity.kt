@@ -1089,6 +1089,16 @@ class PlayerActivity : ComponentActivity() {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
             val startScript = """
                 (function() {
+                    try {
+                        Object.defineProperty(document, 'referrer', {
+                            get: function() { return 'https://timst.top/'; },
+                            configurable: true
+                        });
+                    } catch(e) {}
+                    try {
+                        window.stop = function() {};
+                    } catch(e) {}
+
                     window.open = function() { return null; };
                     window.alert = function() {};
                     window.confirm = function() { return true; };
@@ -1108,9 +1118,9 @@ class PlayerActivity : ComponentActivity() {
                         if (!style) {
                             style = document.createElement('style');
                             style.id = 'dlive-clean-style';
-                            style.innerHTML = 'header, footer, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], iframe:not(#thatframe):not([id^="player"]):not(#streamPlayer) { display: none !important; } ' +
+                            style.innerHTML = 'header, footer, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], #embedBtn, #embedModal, [id^="embed"], .jw-related, .jw-icon-share, iframe:not(#thatframe):not([id^="player"]):not(#streamPlayer) { display: none !important; } ' +
                                               'html, body { margin:0 !important; padding:0 !important; background-color:#000 !important; overflow:hidden !important; width:100% !important; height:100% !important; } ' +
-                                              'iframe#thatframe, .preview-wrap, #player, iframe#streamPlayer, .watch-player-wrapper, video#video, #player_prog, #player_prog video, .vjs-tech { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
+                                              'iframe#thatframe, .preview-wrap, #player, #player video, .jwplayer, .jw-wrapper, .jw-media, iframe#streamPlayer, .watch-player-wrapper, video#video, #player_prog, #player_prog video, .vjs-tech { position:fixed !important; top:0 !important; left:0 !important; width:100vw !important; height:100vh !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
                                               '#unmuteBtn, .unmute-btn, .embedme-unmute, [class*="unmute" i] { display: none !important; } ' +
                                               '[data-fullscreen], .media-control-button[data-fullscreen], .player-fullscreen-button, .jw-icon-fullscreen, .vjs-fullscreen-control, .plyr__control--fullscreen, [data-plyr="fullscreen"], button[title*="fullscreen" i], button[title*="full screen" i], button[aria-label*="fullscreen" i], button[aria-label*="full screen" i], button[title*="ecrã inteiro" i], button[aria-label*="ecrã inteiro" i], .fullscreen-button, .fullscreen-btn, .btn-fullscreen, .fs-btn, .plyr__controls__item[data-plyr="fullscreen"] { display: none !important; pointer-events: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }';
                             document.head.appendChild(style);
@@ -1316,7 +1326,8 @@ class PlayerActivity : ComponentActivity() {
                     "adservice", "chatango", "onclicksuper", "syndication",
                     "exdynsrv", "adsystem", "adnxs", "burstyflavia",
                     "profitableratecpmnetwork", "cleverwebserver", "adsboosters",
-                    "reliedhounder", "canine.tools", "plausible"
+                    "reliedhounder", "canine.tools", "plausible",
+                    "disable-devtool", "aclib"
                 )
                 if (adBlockPatterns.any { urlLower.contains(it) }) {
                     return WebResourceResponse("application/javascript", "UTF-8", ByteArrayInputStream(ByteArray(0)))
@@ -1475,9 +1486,9 @@ class PlayerActivity : ComponentActivity() {
             (function() {
                 var style = document.createElement('style');
                 style.type = 'text/css';
-                style.innerHTML = 'header, footer, nav, .site-header, .site-footer, .watch-channel-header, .watch-controls-bar, .watch-sidebar, .watch-chat, .chat-panel, #shareCodeOverlay, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], iframe:not(#thatframe):not([id^="player"]):not(#streamPlayer) { display: none !important; } ' +
+                style.innerHTML = 'header, footer, nav, .site-header, .site-footer, .watch-channel-header, .watch-controls-bar, .watch-sidebar, .watch-chat, .chat-panel, #shareCodeOverlay, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], #embedBtn, #embedModal, [id^="embed"], .jw-related, .jw-icon-share, iframe:not(#thatframe):not([id^="player"]):not(#streamPlayer) { display: none !important; } ' +
                                   'html, body { margin:0 !important; padding:0 !important; background-color:#000 !important; overflow:hidden !important; width:100% !important; height:100% !important; } ' +
-                                  'iframe#thatframe, .preview-wrap, #player, iframe#streamPlayer, .watch-player-wrapper, video#video, #player_prog, #player_prog video, .vjs-tech { position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
+                                  'iframe#thatframe, .preview-wrap, #player, #player video, .jwplayer, .jw-wrapper, .jw-media, iframe#streamPlayer, .watch-player-wrapper, video#video, #player_prog, #player_prog video, .vjs-tech { position:fixed !important; top:0 !important; left:0 !important; width:100vw !important; height:100vh !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
                                   '#unmuteBtn, .unmute-btn, .embedme-unmute, [class*="unmute" i] { display: none !important; } ' +
                                   '.jw-controlbar { opacity: 0 !important; pointer-events: none !important; }';
                 document.head.appendChild(style);
@@ -1781,7 +1792,7 @@ class PlayerActivity : ComponentActivity() {
         }
     }
 
-    private suspend fun resolveTimStreamsToHls(rawUrl: String): String? = withContext(Dispatchers.IO) {
+    private suspend fun resolveTimStreamsPlayUrl(rawUrl: String): String = withContext(Dispatchers.IO) {
         var target = rawUrl.trim()
         when {
             target.contains("grandemx.org") -> target = target.replace("https://grandemx.org", "https://ehgembxe.cfd").replace("http://grandemx.org", "https://ehgembxe.cfd")
@@ -1791,130 +1802,51 @@ class PlayerActivity : ComponentActivity() {
             target = "https://$target"
         }
 
+        if (target.contains("/play/")) return@withContext target
+
         val primaryBase = repository.getTimstBaseUrl().trim().let { if (it.endsWith("/")) it.dropLast(1) else it }
         val fallbackBase = "https://tim-streams.com"
 
-        // 1. Tentar primeiro com o domínio principal timst.top
-        android.util.Log.d("TimStreamsResolver", "A tentar resolver TimStreams com domínio principal: $primaryBase (URL: $target)")
-        val m3u8Primary = extractTimStreamsM3u8(target, primaryBase)
-        if (!m3u8Primary.isNullOrBlank()) {
-            android.util.Log.d("TimStreamsResolver", "Sucesso via $primaryBase: $m3u8Primary")
-            return@withContext m3u8Primary
+        // 1. Tentar obter o redirect 302 oficial com o domínio principal timst.top
+        android.util.Log.d("TimStreamsResolver", "A resolver URL de play via $primaryBase: $target")
+        val playPrimary = fetchTimStreamsRedirect(target, primaryBase)
+        if (!playPrimary.isNullOrBlank()) {
+            android.util.Log.d("TimStreamsResolver", "Sucesso via $primaryBase: $playPrimary")
+            return@withContext playPrimary
         }
 
-        // 2. Se falhar no domínio principal, tentar fallback exclusivo tim-streams.com (sem aparecer na lista de streams)
+        // 2. Se falhar, tentar fallback tim-streams.com
         if (!primaryBase.contains("tim-streams.com")) {
-            android.util.Log.w("TimStreamsResolver", "Falha com $primaryBase -> A tentar fallback exclusivo $fallbackBase...")
-            val m3u8Fallback = extractTimStreamsM3u8(target, fallbackBase)
-            if (!m3u8Fallback.isNullOrBlank()) {
-                android.util.Log.d("TimStreamsResolver", "Sucesso via fallback $fallbackBase: $m3u8Fallback")
-                return@withContext m3u8Fallback
+            android.util.Log.w("TimStreamsResolver", "Falha com $primaryBase -> A tentar fallback $fallbackBase...")
+            val playFallback = fetchTimStreamsRedirect(target, fallbackBase)
+            if (!playFallback.isNullOrBlank()) {
+                android.util.Log.d("TimStreamsResolver", "Sucesso via fallback $fallbackBase: $playFallback")
+                return@withContext playFallback
             }
         }
 
-        android.util.Log.e("TimStreamsResolver", "TimStreams offline em ambos os domínios ($primaryBase e $fallbackBase)")
-        null
+        android.util.Log.w("TimStreamsResolver", "Usando target direto: $target")
+        target
     }
 
-    private fun extractTimStreamsM3u8(targetUrl: String, refererBase: String): String? {
-        try {
-            var conn = (URL(targetUrl).openConnection() as HttpURLConnection).apply {
-                instanceFollowRedirects = true
+    private fun fetchTimStreamsRedirect(targetUrl: String, refererBase: String): String? {
+        return try {
+            val conn = (URL(targetUrl).openConnection() as HttpURLConnection).apply {
+                instanceFollowRedirects = false
                 connectTimeout = 3000
                 readTimeout = 3000
                 setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
                 setRequestProperty("Referer", "$refererBase/")
             }
-
-            val respCode = conn.responseCode
-            if (respCode in 300..399) {
-                val loc = conn.getHeaderField("Location")
-                if (!loc.isNullOrBlank()) {
-                    val redirectUrl = if (loc.startsWith("http")) loc else "https://ehgembxe.cfd$loc"
-                    conn = (URL(redirectUrl).openConnection() as HttpURLConnection).apply {
-                        connectTimeout = 2500
-                        readTimeout = 2500
-                        setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
-                        setRequestProperty("Referer", "$refererBase/")
-                    }
-                }
-            } else if (respCode !in 200..299) {
-                return null
-            }
-
-            val html = conn.inputStream.bufferedReader().use { it.readText() }
-
-            // 1. Decode XOR obfuscated array if present
-            val regex = Regex("""var\s+([_a-zA-Z0-9]+)\s*=\s*\[([0-9,\s]+)\]\s*,\s*([_a-zA-Z0-9]+)\s*=\s*(\d+)\s*,\s*([_a-zA-Z0-9]+)\s*=\s*(\d+)""")
-            val match = regex.find(html)
-            if (match != null) {
-                val numbersStr = match.groupValues[2]
-                val sk3 = match.groupValues[4].toInt()
-                val iw9 = match.groupValues[6].toInt()
-                val sb = java.lang.StringBuilder()
-                val tokens = numbersStr.split(',')
-                for (token in tokens) {
-                    val trimmed = token.trim()
-                    if (trimmed.isNotEmpty()) {
-                        val num = trimmed.toInt()
-                        val ch = (((num xor sk3) - iw9 + 256) % 256).toChar()
-                        sb.append(ch)
-                    }
-                }
-                val decoded = sb.toString()
-                val signedMatch = Regex("""SIGNED_URL\s*=\s*"([^"]+)"""").find(decoded)
-                    ?: Regex("""https://[^\s"']+\.m3u8""").find(decoded)
-                if (signedMatch != null) {
-                    val m3u8 = if (signedMatch.groupValues.size > 1) signedMatch.groupValues[1] else signedMatch.value
-                    if (m3u8.isNotBlank()) {
-                        val valid = validateHlsStreamAlive(m3u8)
-                        if (valid) return m3u8
-                    }
-                }
-            }
-
-            // 2. Direct plain text search fallback
-            val plainMatch = Regex("""SIGNED_URL\s*=\s*"([^"]+)"""").find(html)
-                ?: Regex("""https://[^\s"']+\.m3u8""").find(html)
-            if (plainMatch != null) {
-                val m3u8 = if (plainMatch.groupValues.size > 1) plainMatch.groupValues[1] else plainMatch.value
-                if (m3u8.isNotBlank()) {
-                    val valid = validateHlsStreamAlive(m3u8)
-                    if (valid) return m3u8
-                }
-            }
-        } catch (e: Exception) {
-            android.util.Log.w("TimStreamsResolver", "Erro ao tentar extrair M3U8 com $refererBase: ${e.message}")
-        }
-        return null
-    }
-
-    private fun validateHlsStreamAlive(m3u8Url: String): Boolean {
-        return try {
-            val pConn = (URL(m3u8Url).openConnection() as HttpURLConnection).apply {
-                connectTimeout = 2500
-                readTimeout = 2500
-                setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
-                setRequestProperty("Referer", "https://ehgembxe.cfd/")
-            }
-            if (pConn.responseCode in 200..299) {
-                val sample = pConn.inputStream.bufferedReader().use { it.readText() }
-                val expMatch = Regex("""x-expires=(\d+)""").find(sample)
-                if (expMatch != null) {
-                    val exp = expMatch.groupValues[1].toLongOrNull() ?: 0L
-                    val nowSec = System.currentTimeMillis() / 1000L
-                    if (exp in 1..nowSec) {
-                        android.util.Log.w("TimStreamsResolver", "TimStreams chunks expired (${nowSec - exp}s ago) -> Stream dead upstream!")
-                        return false
-                    }
-                }
-                true
+            val loc = conn.getHeaderField("Location")
+            if (!loc.isNullOrBlank()) {
+                if (loc.startsWith("http")) loc else "https://ehgembxe.cfd$loc"
             } else {
-                false
+                null
             }
         } catch (e: Exception) {
-            android.util.Log.w("TimStreamsResolver", "Failed validating TimStreams playlist alive: ${e.message}")
-            false
+            android.util.Log.w("TimStreamsResolver", "Erro redirect com $refererBase: ${e.message}")
+            null
         }
     }
 
@@ -2088,14 +2020,16 @@ class PlayerActivity : ComponentActivity() {
             val rawDirect = activeDirectUrl!!
             if (Channel.isTimStreamsUrl(rawDirect)) {
                 lifecycleScope.launch {
-                    val resolvedM3u8 = resolveTimStreamsToHls(rawDirect)
+                    val playUrl = resolveTimStreamsPlayUrl(rawDirect)
                     if (isFinishing || isDestroyed) return@launch
-                    if (!resolvedM3u8.isNullOrBlank()) {
-                        android.util.Log.d("PlayerActivity", "Resolved TimStreams HLS: $resolvedM3u8")
-                        loadHlsStream(resolvedM3u8, "https://ehgembxe.cfd/")
+                    if (playUrl.isNotBlank()) {
+                        android.util.Log.d("PlayerActivity", "Loading TimStreams embedded play page: $playUrl")
+                        val referer = "${repository.getTimstBaseUrl()}/"
+                        val headers = mapOf("Referer" to referer)
+                        webView.loadUrl(playUrl, headers)
                         handler.postDelayed(failoverTimeoutRunnable, failoverTimeoutMs)
                     } else {
-                        android.util.Log.w("PlayerActivity", "TimStreams offline ou inacessível -> Failover imediato para o próximo servidor")
+                        android.util.Log.w("PlayerActivity", "TimStreams offline -> Failover imediato para o próximo servidor")
                         triggerFailoverDueToPlaybackError("timstreams_offline")
                     }
                 }
