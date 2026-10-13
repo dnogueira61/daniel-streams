@@ -263,6 +263,13 @@ class PlayerActivity : ComponentActivity() {
         }
 
         @android.webkit.JavascriptInterface
+        fun onPlaybackStalled(reason: String) {
+            runOnUiThread {
+                triggerFailoverDueToPlaybackError("stall_$reason")
+            }
+        }
+
+        @android.webkit.JavascriptInterface
         fun onPlaybackStarted() {
             runOnUiThread {
                 streamLoadedSuccessfully = true
@@ -281,7 +288,8 @@ class PlayerActivity : ComponentActivity() {
 
     fun triggerFailoverDueToPlaybackError(reason: String) {
         android.util.Log.w("PlayerFailover", "Triggering failover due to: $reason")
-        if (streamLoadedSuccessfully) {
+        val isStallError = reason.startsWith("stall") || reason.contains("freeze")
+        if (streamLoadedSuccessfully && !isStallError) {
             val isHardError = reason.startsWith("http_error_") || reason == "network_error"
             if (!isHardError) {
                 android.util.Log.i("PlayerFailover", "Stream já está a tocar com sucesso. A ignorar failover ($reason)")
@@ -298,7 +306,12 @@ class PlayerActivity : ComponentActivity() {
             currentFailoverIndex++
             val next = failoverServers[currentFailoverIndex]
             runOnUiThread {
-                Toast.makeText(this@PlayerActivity, "⚡ Erro na stream. A tentar ${next.label}...", Toast.LENGTH_SHORT).show()
+                val msg = if (isStallError) {
+                    "⚡ Sinal estagnado. A mudar para ${next.label}..."
+                } else {
+                    "⚡ Erro na stream. A tentar ${next.label}..."
+                }
+                Toast.makeText(this@PlayerActivity, msg, Toast.LENGTH_SHORT).show()
                 applyServerOption(next, currentFailoverIndex)
             }
         } else {
@@ -1205,6 +1218,62 @@ class PlayerActivity : ComponentActivity() {
                         }
                     });
 
+                    // Stall detector contínuo para qualquer player (video / jwplayer)
+                    var _lastProgressTime = -1;
+                    var _lastProgressMs = Date.now();
+                    var _hasPlayedOnce = false;
+                    var _stallReported = false;
+
+                    setInterval(function() {
+                        if (_stallReported) return;
+                        try {
+                            var v = document.querySelector('video');
+                            if (!v && window.jwplayer && typeof window.jwplayer === 'function') {
+                                try {
+                                    var jw = window.jwplayer();
+                                    if (jw && typeof jw.getPosition === 'function') {
+                                        var pos = jw.getPosition();
+                                        var st = (typeof jw.getState === 'function') ? jw.getState() : '';
+                                        if (st === 'playing') {
+                                            if (!_hasPlayedOnce) {
+                                                _hasPlayedOnce = true;
+                                                _lastProgressTime = pos;
+                                                _lastProgressMs = Date.now();
+                                                return;
+                                            }
+                                            if (pos > _lastProgressTime + 0.1) {
+                                                _lastProgressTime = pos;
+                                                _lastProgressMs = Date.now();
+                                            } else if (Date.now() - _lastProgressMs > 4000) {
+                                                _stallReported = true;
+                                                reportFailover('stall_jwplayer_freeze');
+                                            }
+                                        }
+                                        return;
+                                    }
+                                } catch(e) {}
+                            }
+                            if (v && !v.paused && v.readyState >= 1) {
+                                var cur = v.currentTime;
+                                if (!_hasPlayedOnce) {
+                                    if (cur > 0) {
+                                        _hasPlayedOnce = true;
+                                        _lastProgressTime = cur;
+                                        _lastProgressMs = Date.now();
+                                    }
+                                    return;
+                                }
+                                if (cur > _lastProgressTime + 0.1) {
+                                    _lastProgressTime = cur;
+                                    _lastProgressMs = Date.now();
+                                } else if (Date.now() - _lastProgressMs > 4000) {
+                                    _stallReported = true;
+                                    reportFailover('stall_video_freeze');
+                                }
+                            }
+                        } catch(e) {}
+                    }, 1000);
+
                     function reportFailover(reason) {
                         try {
                             var b = window.AndroidFailover || (window.top && window.top.AndroidFailover);
@@ -1878,9 +1947,41 @@ class PlayerActivity : ComponentActivity() {
                         } catch(e) {}
                     }
 
+                    var lastTime = -1;
+                    var lastTimeMs = Date.now();
+                    var streamPlaying = false;
+                    var stallTriggered = false;
+
+                    video.addEventListener('timeupdate', function() {
+                        if (video.currentTime > lastTime + 0.1) {
+                            lastTime = video.currentTime;
+                            lastTimeMs = Date.now();
+                            streamPlaying = true;
+                        }
+                    });
+
                     video.addEventListener('playing', function() {
                         notifyStarted();
+                        lastTimeMs = Date.now();
+                        streamPlaying = true;
                     });
+
+                    // Stall detector: se o vídeo estiver a tocar mas o tempo parar de avançar > 3.5s
+                    setInterval(function() {
+                        if (stallTriggered) return;
+                        if (streamPlaying && !video.paused) {
+                            if (Date.now() - lastTimeMs > 3500) {
+                                stallTriggered = true;
+                                try {
+                                    if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackStalled === 'function') {
+                                        window.AndroidFailover.onPlaybackStalled('hls_buffer_exhausted');
+                                    } else if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackError === 'function') {
+                                        window.AndroidFailover.onPlaybackError('stall_hls_buffer_exhausted');
+                                    }
+                                } catch(e) {}
+                            }
+                        }
+                    }, 1000);
 
                     function startPlay() {
                         var p = video.play();
@@ -1910,22 +2011,46 @@ class PlayerActivity : ComponentActivity() {
                             startPlay();
                         });
                         hls.on(Hls.Events.ERROR, function(event, data) {
-                            if (data && data.fatal) {
-                                switch (data.type) {
-                                    case Hls.ErrorTypes.NETWORK_ERROR:
-                                        hls.startLoad();
-                                        break;
-                                    case Hls.ErrorTypes.MEDIA_ERROR:
-                                        hls.recoverMediaError();
-                                        break;
-                                    default:
-                                        hls.destroy();
+                            if (data) {
+                                if (data.details === 'manifestLoadError' || data.details === 'manifestLoadTimeOut') {
+                                    if (!stallTriggered) {
+                                        stallTriggered = true;
                                         try {
-                                            if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackError === 'function') {
-                                                window.AndroidFailover.onPlaybackError('hls_fatal_' + data.type);
+                                            if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackStalled === 'function') {
+                                                window.AndroidFailover.onPlaybackStalled('manifest_load_error');
                                             }
                                         } catch(e) {}
-                                        break;
+                                    }
+                                }
+                                if (data.fatal) {
+                                    switch (data.type) {
+                                        case Hls.ErrorTypes.NETWORK_ERROR:
+                                            hls.startLoad();
+                                            // Se for erro de rede fatal, reporta stall para failover rápido
+                                            if (!stallTriggered) {
+                                                stallTriggered = true;
+                                                try {
+                                                    if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackStalled === 'function') {
+                                                        window.AndroidFailover.onPlaybackStalled('hls_network_fatal');
+                                                    }
+                                                } catch(e) {}
+                                            }
+                                            break;
+                                        case Hls.ErrorTypes.MEDIA_ERROR:
+                                            hls.recoverMediaError();
+                                            break;
+                                        default:
+                                            hls.destroy();
+                                            if (!stallTriggered) {
+                                                stallTriggered = true;
+                                                try {
+                                                    if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackStalled === 'function') {
+                                                        window.AndroidFailover.onPlaybackStalled('hls_fatal_' + data.type);
+                                                    }
+                                                } catch(e) {}
+                                            }
+                                            break;
+                                    }
                                 }
                             }
                         });
@@ -1933,8 +2058,8 @@ class PlayerActivity : ComponentActivity() {
                         video.src = src;
                         video.onerror = function() {
                             try {
-                                if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackError === 'function') {
-                                    window.AndroidFailover.onPlaybackError('video_onerror');
+                                if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackStalled === 'function') {
+                                    window.AndroidFailover.onPlaybackStalled('video_onerror');
                                 }
                             } catch(e) {}
                         };
