@@ -28,8 +28,17 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.dlive.ptstream.data.Channel
 import com.dlive.ptstream.data.ChannelLogoHelper
+import com.dlive.ptstream.data.EpgProgram
 import com.dlive.ptstream.data.EpgRepository
 import com.dlive.ptstream.ui.theme.LocalCustomColors
+import android.view.ViewGroup
+import android.webkit.WebChromeClient
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.compose.runtime.*
+import androidx.compose.ui.viewinterop.AndroidView
+import kotlinx.coroutines.delay
 
 @Composable
 fun EpgDetailPanel(
@@ -49,6 +58,14 @@ fun EpgDetailPanel(
 
     val localLogo = ChannelLogoHelper.getLocalLogoRes(channel.name)
     val onlineLogo = channel.logoUrl ?: ChannelLogoHelper.getLogoUrl(channel.name)
+
+    // Debounce inteligente de 2.2s: se o utilizador estiver a fazer zapping rápido, NÃO carrega vídeo
+    var showPreviewVideo by remember(channel.id) { mutableStateOf(false) }
+    LaunchedEffect(channel.id) {
+        showPreviewVideo = false
+        delay(2200L) // Aguarda 2.2 segundos para garantir que o utilizador parou no canal
+        showPreviewVideo = true
+    }
 
     Column(
         modifier = modifier
@@ -160,6 +177,88 @@ fun EpgDetailPanel(
         }
 
         HorizontalDivider(color = theme.border, thickness = 1.dp)
+
+        // 1.5. Mini Player de Pré-Visualização (Estilo TiviMate com Delay Anti-Lag)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(160.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.Black)
+                .border(1.dp, theme.border, RoundedCornerShape(12.dp))
+                .clickable { onPlayClick(null) },
+            contentAlignment = Alignment.Center
+        ) {
+            val previewUrl = channel.timStreamsUrl ?: channel.backupStreamUrl ?: "https://dlive.sx/stream/stream-${channel.id}.php"
+
+            if (showPreviewVideo) {
+                AndroidView(
+                    factory = { ctx ->
+                        WebView(ctx).apply {
+                            layoutParams = ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                            settings.apply {
+                                javaScriptEnabled = true
+                                domStorageEnabled = true
+                                mediaPlaybackRequiresUserGesture = false
+                                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                                userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+                            }
+                            webViewClient = object : WebViewClient() {
+                                override fun onPageFinished(view: WebView?, url: String?) {
+                                    super.onPageFinished(view, url)
+                                    // Silencia o preview para não sobrepor áudio e remove controlos pesados
+                                    view?.evaluateJavascript(
+                                        "(function() { var v = document.querySelector('video'); if (v) { v.muted = true; v.play(); } })();",
+                                        null
+                                    )
+                                }
+                            }
+                            loadUrl(previewUrl)
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                // Durante a navegação rápida (delay de 2.2s): mostra apenas placeholder elegante sem lag
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Pré-visualização",
+                        tint = theme.primary.copy(alpha = 0.8f),
+                        modifier = Modifier.size(36.dp)
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "A carregar pré-visualização...",
+                        color = Color.LightGray,
+                        fontSize = 11.sp
+                    )
+                }
+            }
+
+            // Badge no canto superior
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(Color.Black.copy(alpha = 0.7f))
+                    .padding(horizontal = 8.dp, vertical = 3.dp)
+            ) {
+                Text(
+                    text = "PRÉ-VISUALIZAÇÃO",
+                    color = Color.White,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
 
         // 2. Emissão Atual (EPG)
         Column(
@@ -274,7 +373,7 @@ fun EpgDetailPanel(
                     .padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                upcoming.forEach { prog ->
+                for (prog in upcoming) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()

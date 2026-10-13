@@ -113,6 +113,22 @@ class PlayerActivity : ComponentActivity() {
     private lateinit var tvOsdId: TextView
     private lateinit var tvOsdName: TextView
     private lateinit var tvOsdTag: TextView
+    private lateinit var ivOsdLogo: ImageView
+    private lateinit var tvOsdQuality: TextView
+    private lateinit var layoutOsdEpg: View
+    private lateinit var tvOsdProgramTitle: TextView
+    private lateinit var tvOsdProgramTime: TextView
+    private lateinit var pbOsdProgramProgress: ProgressBar
+    private lateinit var tvOsdNextProgram: TextView
+    private lateinit var btnLandscapeAspect: ImageButton
+
+    private enum class AspectRatioMode(val label: String) {
+        FIT("Original (Ajustar)"),
+        FILL("Esticar (Ecrã Total)"),
+        ZOOM("Zoom (Cortar Bordas)"),
+        RATIO_16_9("Forçar 16:9")
+    }
+    private var currentAspectRatioMode = AspectRatioMode.FIT
 
     // Gesture HUD & Controls
     private lateinit var gestureHud: View
@@ -424,11 +440,23 @@ class PlayerActivity : ComponentActivity() {
         landscapeOverlay = findViewById(R.id.landscapeOverlay)
         tvLandscapeTitle = findViewById(R.id.tvLandscapeTitle)
 
-        // OSD Banner
+        // OSD Banner & Modern TiviMate HUD
         osdBanner = findViewById(R.id.osdBanner)
         tvOsdId = findViewById(R.id.tvOsdId)
         tvOsdName = findViewById(R.id.tvOsdName)
         tvOsdTag = findViewById(R.id.tvOsdTag)
+        ivOsdLogo = findViewById(R.id.ivOsdLogo)
+        tvOsdQuality = findViewById(R.id.tvOsdQuality)
+        layoutOsdEpg = findViewById(R.id.layoutOsdEpg)
+        tvOsdProgramTitle = findViewById(R.id.tvOsdProgramTitle)
+        tvOsdProgramTime = findViewById(R.id.tvOsdProgramTime)
+        pbOsdProgramProgress = findViewById(R.id.pbOsdProgramProgress)
+        tvOsdNextProgram = findViewById(R.id.tvOsdNextProgram)
+        btnLandscapeAspect = findViewById(R.id.btnLandscapeAspect)
+
+        btnLandscapeAspect.setOnClickListener {
+            cycleAspectRatio()
+        }
 
         tvChannelTitle.text = channelName
         tvLandscapeTitle.text = channelName
@@ -988,9 +1016,91 @@ class PlayerActivity : ComponentActivity() {
         tvOsdName.text = name
         tvOsdTag.text = tag
 
+        // 1. Logótipo do canal
+        val localLogo = ChannelLogoHelper.getLocalLogoRes(name)
+        val onlineLogo = ChannelLogoHelper.getLogoUrl(name)
+        if (localLogo != null) {
+            ivOsdLogo.setImageResource(localLogo)
+            ivOsdLogo.visibility = View.VISIBLE
+        } else if (onlineLogo != null) {
+            ivOsdLogo.load(onlineLogo)
+            ivOsdLogo.visibility = View.VISIBLE
+        } else {
+            ivOsdLogo.visibility = View.GONE
+        }
+
+        // 2. Indicador de Qualidade / Servidor
+        val qualityText = when {
+            activeDirectUrl?.contains("timst") == true || activeDirectUrl?.contains("ehgembxe") == true || activeDirectUrl?.contains("exmxbxe") == true -> "1080p | TimST"
+            activeDirectUrl?.contains("impresa") == true || activeDirectUrl?.contains("rtp") == true -> "1080p | Oficial"
+            isDirectStreamActive -> "HD | Direto"
+            else -> "720p | DLive"
+        }
+        tvOsdQuality.text = qualityText
+
+        // 3. EPG Program Info e Progresso em Tempo Real
+        val currentProg = repository.epgRepository.getCurrentProgram(name)
+        val schedule = repository.epgRepository.getChannelSchedule(name)
+        if (currentProg != null) {
+            layoutOsdEpg.visibility = View.VISIBLE
+            tvOsdProgramTitle.text = currentProg.title
+            tvOsdProgramTime.text = currentProg.timeRange
+
+            val now = System.currentTimeMillis()
+            val total = (currentProg.stopEpoch - currentProg.startEpoch).coerceAtLeast(1L)
+            val elapsed = (now - currentProg.startEpoch).coerceIn(0L, total)
+            val progressPercent = ((elapsed.toFloat() / total.toFloat()) * 100).toInt()
+            pbOsdProgramProgress.progress = progressPercent
+
+            // Próximo programa
+            val nextProg = schedule.firstOrNull { it.startEpoch >= currentProg.stopEpoch }
+            if (nextProg != null) {
+                val nextStart = nextProg.timeRange.substringBefore(" -")
+                tvOsdNextProgram.text = "A seguir ($nextStart): ${nextProg.title}"
+                tvOsdNextProgram.visibility = View.VISIBLE
+            } else {
+                tvOsdNextProgram.visibility = View.GONE
+            }
+        } else {
+            layoutOsdEpg.visibility = View.GONE
+        }
+
         osdBanner.visibility = View.VISIBLE
         handler.removeCallbacks(osdHideRunnable)
-        handler.postDelayed(osdHideRunnable, 3000)
+        handler.postDelayed(osdHideRunnable, 4500)
+    }
+
+    private fun cycleAspectRatio() {
+        val nextMode = when (currentAspectRatioMode) {
+            AspectRatioMode.FIT -> AspectRatioMode.FILL
+            AspectRatioMode.FILL -> AspectRatioMode.ZOOM
+            AspectRatioMode.ZOOM -> AspectRatioMode.RATIO_16_9
+            AspectRatioMode.RATIO_16_9 -> AspectRatioMode.FIT
+        }
+        currentAspectRatioMode = nextMode
+        applyAspectRatioToVideo(nextMode)
+        Toast.makeText(this, "Ecrã: ${nextMode.label}", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun applyAspectRatioToVideo(mode: AspectRatioMode) {
+        val css = when (mode) {
+            AspectRatioMode.FIT -> "video { object-fit: contain !important; width: 100vw !important; height: 100vh !important; }"
+            AspectRatioMode.FILL -> "video { object-fit: fill !important; width: 100vw !important; height: 100vh !important; }"
+            AspectRatioMode.ZOOM -> "video { object-fit: cover !important; width: 100vw !important; height: 100vh !important; }"
+            AspectRatioMode.RATIO_16_9 -> "video { object-fit: contain !important; aspect-ratio: 16/9 !important; width: 100vw !important; height: 56.25vw !important; max-height: 100vh !important; }"
+        }
+        val js = """
+            (function() {
+                var style = document.getElementById('agy_aspect_ratio_style');
+                if (!style) {
+                    style = document.createElement('style');
+                    style.id = 'agy_aspect_ratio_style';
+                    document.head.appendChild(style);
+                }
+                style.innerHTML = '$css';
+            })();
+        """.trimIndent()
+        webView.evaluateJavascript(js, null)
     }
 
     private fun setupServerBadge() {
@@ -2386,7 +2496,7 @@ class PlayerActivity : ComponentActivity() {
                     }
                 }
 
-                // Seta Cima (DPAD_UP): Abre a barra de opções/controlos quando o vídeo está em reprodução
+                // Seta Cima (DPAD_UP): Zapping para o canal anterior se reproduzindo, ou navega na barra de controlos
                 KeyEvent.KEYCODE_DPAD_UP -> {
                     if (isDrawerOpen) {
                         return super.dispatchKeyEvent(event)
@@ -2398,7 +2508,8 @@ class PlayerActivity : ComponentActivity() {
                         }
                         return true
                     } else {
-                        showControlsOverlay()
+                        // TiviMate style: Seta Cima faz zapping direto para o canal anterior
+                        zapPreviousChannel()
                         return true
                     }
                 }
@@ -2412,7 +2523,7 @@ class PlayerActivity : ComponentActivity() {
                     return true
                 }
 
-                // Seta Baixo (DPAD_DOWN): Fecha a barra se aberta, ou abre a gaveta de canais
+                // Seta Baixo (DPAD_DOWN): Zapping para o canal seguinte se reproduzindo, ou fecha/navega controlos
                 KeyEvent.KEYCODE_DPAD_DOWN -> {
                     if (isDrawerOpen) {
                         return super.dispatchKeyEvent(event)
@@ -2421,7 +2532,8 @@ class PlayerActivity : ComponentActivity() {
                         hideControlsOverlay()
                         return true
                     } else {
-                        openDrawer()
+                        // TiviMate style: Seta Baixo faz zapping direto para o canal seguinte
+                        zapNextChannel()
                         return true
                     }
                 }
