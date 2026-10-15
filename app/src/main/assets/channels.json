@@ -127,7 +127,7 @@
     "country": "PT",
     "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://video-auth7.iol.pt/live_tvi/live_tvi/edge_servers/tvi-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMTUvMjAyNiA4OjE0OjE3IEFNJmhhc2hfdmFsdWU9aWprU05rMFlTQTBqSHJCc0ptZHhKUT09JnZhbGlkbWludXRlcz0xNDQwJmlkPTVhNDhiN2Y2LWFlMmQtNDg1ZC05OGFhLTkxMDA2ZDY3MGI2NQ==",
+    "backupStreamUrl": "https://video-auth7.iol.pt/live_tvi/live_tvi/edge_servers/tvi-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMTUvMjAyNiAxMjoxNTo0MyBQTSZoYXNoX3ZhbHVlPTZUaUVSUW9OUjNIai8wQytjRGpKcWc9PSZ2YWxpZG1pbnV0ZXM9MTQ0MCZpZD02YWYyNjMzYS01OGYzLTQ1MTgtYjFhMi05NmVhYmVlZTMxMTI=",
     "backupStreamUrl2": null
   },
   {
@@ -212,7 +212,7 @@
     "country": "PT",
     "category": "Em Manutenção",
     "isPt": true,
-    "backupStreamUrl": "https://video-auth1.iol.pt/live_cnn/live_cnn/edge_servers/cnn-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMTUvMjAyNiA4OjE0OjE3IEFNJmhhc2hfdmFsdWU9aWprU05rMFlTQTBqSHJCc0ptZHhKUT09JnZhbGlkbWludXRlcz0xNDQwJmlkPTVhNDhiN2Y2LWFlMmQtNDg1ZC05OGFhLTkxMDA2ZDY3MGI2NQ==",
+    "backupStreamUrl": "https://video-auth1.iol.pt/live_cnn/live_cnn/edge_servers/cnn-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMTUvMjAyNiAxMjoxNTo0MyBQTSZoYXNoX3ZhbHVlPTZUaUVSUW9OUjNIai8wQytjRGpKcWc9PSZ2YWxpZG1pbnV0ZXM9MTQ0MCZpZD02YWYyNjMzYS01OGYzLTQ1MTgtYjFhMi05NmVhYmVlZTMxMTI=",
     "backupStreamUrl2": null,
     "originalCategory": "Generalistas"
   },
