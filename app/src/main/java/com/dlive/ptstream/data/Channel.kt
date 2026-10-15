@@ -76,7 +76,9 @@ data class LiveEvent(
     val viewers: Int = 0,
     val streams: List<EventStream> = emptyList(),
     val isSoccer: Boolean = true,
-    val startTimestamp: Long = 0L
+    val startTimestamp: Long = 0L,
+    val isHighlight: Boolean = false,
+    val highlightPriority: Int = 999
 )
 
 data class EventStream(

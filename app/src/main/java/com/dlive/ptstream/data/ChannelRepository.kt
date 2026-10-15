@@ -908,6 +908,13 @@ class ChannelRepository(private val context: Context) {
                 e.printStackTrace()
             }
 
+            // Fetch OndeBola highlights (Portuguese televised matches priority)
+            val ondeBolaHighlights = try {
+                SportsMatchHelper.fetchOndeBolaHighlights()
+            } catch (e: Throwable) {
+                emptyList()
+            }
+
             val nowMs = System.currentTimeMillis()
             // Filter out matches that ended more than 10 hours ago
             val validEvents = eventsList.filter {
@@ -916,20 +923,39 @@ class ChannelRepository(private val context: Context) {
                 } else {
                     true
                 }
+            }.map { ev ->
+                val hl = SportsMatchHelper.matchWithOndeBola(ev.name, ondeBolaHighlights)
+                if (hl != null) {
+                    ev.copy(isHighlight = true, highlightPriority = hl.priority)
+                } else {
+                    ev
+                }
             }
 
-            // Sort chronologically by start hour:
-            // 1. Matches with scheduled start time sorted ascending (today's live & upcoming matches first)
-            // 2. Continuous 24/7 streams placed at the end
+            // Ordenação:
+            // 1. Destaques OndeBola Hoje (Futebol principal transmitido na TV portuguesa)
+            // 2. Futebol (isSoccerEvent) prioritário em relação a outros desportos
+            // 3. Jogos com hora agendada ordenados cronologicamente
+            // 4. Streams 24/7 e outras modalidades no fim
             val sortedEvents = validEvents.sortedWith { a, b ->
-                val aTs = a.startTimestamp
-                val bTs = b.startTimestamp
+                val aIsSoccer = SportsMatchHelper.isSoccerEvent(a)
+                val bIsSoccer = SportsMatchHelper.isSoccerEvent(b)
+
                 when {
-                    aTs == 0L && bTs == 0L -> compareBy<LiveEvent>({ !it.isSoccer }, { -it.viewers }).compare(a, b)
-                    aTs == 0L -> 1
-                    bTs == 0L -> -1
-                    aTs != bTs -> aTs.compareTo(bTs)
-                    else -> compareBy<LiveEvent>({ !it.isSoccer }, { -it.viewers }).compare(a, b)
+                    // Prioridade 1: Destaques OndeBola primeiro (ordem do OndeBola)
+                    a.isHighlight && b.isHighlight -> a.highlightPriority.compareTo(b.highlightPriority)
+                    a.isHighlight -> -1
+                    b.isHighlight -> 1
+
+                    // Prioridade 2: Futebol primeiro, outras modalidades depois
+                    aIsSoccer != bIsSoccer -> if (aIsSoccer) -1 else 1
+
+                    // Prioridade 3: Hora do jogo
+                    a.startTimestamp == 0L && b.startTimestamp == 0L -> (-a.viewers).compareTo(-b.viewers)
+                    a.startTimestamp == 0L -> 1
+                    b.startTimestamp == 0L -> -1
+                    a.startTimestamp != b.startTimestamp -> a.startTimestamp.compareTo(b.startTimestamp)
+                    else -> (-a.viewers).compareTo(-b.viewers)
                 }
             }
 

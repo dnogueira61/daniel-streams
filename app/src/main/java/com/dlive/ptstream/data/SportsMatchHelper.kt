@@ -453,6 +453,71 @@ object SportsMatchHelper {
         return res
     }
 
+    data class OndeBolaHighlight(
+        val time: String,
+        val teams: List<String>,
+        val competition: String,
+        val channel: String,
+        val priority: Int
+    )
+
+    fun fetchOndeBolaHighlights(): List<OndeBolaHighlight> {
+        val list = mutableListOf<OndeBolaHighlight>()
+        try {
+            val url = java.net.URL("https://ondebola.com/")
+            val conn = (url.openConnection() as java.net.HttpURLConnection).apply {
+                connectTimeout = 4000
+                readTimeout = 4000
+                setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            }
+            if (conn.responseCode == java.net.HttpURLConnection.HTTP_OK) {
+                val html = conn.inputStream.bufferedReader().use { it.readText() }
+                val rowRegex = Regex("<tr[^>]+data-game-id[^>]*>([\\s\\S]*?)</tr>", RegexOption.IGNORE_CASE)
+                val teamRegex = Regex("<span class=\"team\">([^<]+)</span>", RegexOption.IGNORE_CASE)
+                val extraRegex = Regex("<span class=\"extra\">([^<]+)</span>", RegexOption.IGNORE_CASE)
+                val channelRegex = Regex("<a[^>]+title=\"Detalhes canal\"[^>]*>([^<]+)</a>", RegexOption.IGNORE_CASE)
+                val timeRegex = Regex("(\\d{2}:\\d{2})")
+
+                var priority = 0
+                for (match in rowRegex.findAll(html)) {
+                    val row = match.groupValues[1]
+                    val isToday = row.contains("gametoday", ignoreCase = true) || row.contains("hoje", ignoreCase = true)
+                    if (!isToday) continue
+
+                    val teams = teamRegex.findAll(row).map { it.groupValues[1].trim() }.toList()
+                    val extra = extraRegex.find(row)?.groupValues?.get(1)?.trim() ?: ""
+                    val channel = channelRegex.find(row)?.groupValues?.get(1)?.trim() ?: ""
+                    val time = timeRegex.find(row)?.groupValues?.get(1) ?: ""
+
+                    if (teams.isNotEmpty()) {
+                        list.add(OndeBolaHighlight(time, teams, extra, channel, priority++))
+                    }
+                }
+            }
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+        return list
+    }
+
+    fun matchWithOndeBola(eventName: String, highlights: List<OndeBolaHighlight>): OndeBolaHighlight? {
+        if (highlights.isEmpty()) return null
+        val lower = eventName.lowercase()
+        return highlights.firstOrNull { hl ->
+            val matches = hl.teams.filter { t ->
+                val cleanTeam = t.lowercase()
+                    .replace("al ", "")
+                    .replace("sp. ", "")
+                    .replace("fc ", "")
+                    .trim()
+                cleanTeam.length >= 3 && lower.contains(cleanTeam)
+            }
+            // Se encontrar pelo menos 1 equipa ou ambas
+            matches.size >= 2 || (matches.isNotEmpty() && hl.teams.size == 1) ||
+            (matches.size >= 1 && (lower.contains("benfica") || lower.contains("porto") || lower.contains("sporting") || lower.contains("braga") || lower.contains("al nassr") || lower.contains("juventus") || lower.contains("barcelona") || lower.contains("real madrid")))
+        }
+    }
+
     private fun findChannelByName(channels: List<Channel>, name: String): Channel? {
         return channels.firstOrNull { it.name.equals(name, ignoreCase = true) }
             ?: channels.firstOrNull { it.name.contains(name, ignoreCase = true) }

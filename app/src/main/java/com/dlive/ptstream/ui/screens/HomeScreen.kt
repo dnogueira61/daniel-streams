@@ -108,7 +108,7 @@ fun HomeScreen(
         }
     }
     var selectedCategory by remember { mutableStateOf("Todos") }
-    var gamesSubFilter by remember { mutableStateOf("Canais") }
+    var gamesSubFilter by remember { mutableStateOf("Jogos") }
     var selectedLeagueFilter by remember { mutableStateOf("Todos") }
     var selectedFootballLeague by remember { mutableStateOf("Todas") }
     var refreshKey by remember { mutableStateOf(0) }
@@ -438,7 +438,7 @@ fun HomeScreen(
                     selected = selectedTab == TabFilter.LIVE_GAMES,
                     onClick = {
                         selectedTab = TabFilter.LIVE_GAMES
-                        gamesSubFilter = "Canais"
+                        gamesSubFilter = "Jogos"
                     },
                     icon = { Icon(Icons.Default.SportsSoccer, contentDescription = "Desporto") },
                     label = {
@@ -542,8 +542,8 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         val subOptions = listOf(
-                            "Canais" to "📺 Canais de Desporto (${sportsChannels.size})",
-                            "Jogos" to "🔥 Jogos Hoje (${filteredEvents.size})"
+                            "Jogos" to "🔥 Jogos Hoje (${filteredEvents.size})",
+                            "Canais" to "📺 Canais de Desporto (${sportsChannels.size})"
                         )
                         items(subOptions) { (key, label) ->
                             val isSelected = gamesSubFilter == key
@@ -1594,6 +1594,10 @@ fun LiveEventCard(
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             TagBadge(text = event.genreName, color = if (event.isSoccer) RedPrimary else AccentGreen)
+                            if (event.isHighlight) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                TagBadge(text = "🔥 Destaque TV", color = Color(0xFFF59E0B))
+                            }
                             if (event.time.isNotBlank()) {
                                 Spacer(modifier = Modifier.width(6.dp))
                                 TagBadge(text = event.time, color = if (event.time.startsWith("🔴")) RedPrimary else TextSecondary)

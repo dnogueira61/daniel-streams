@@ -11,8 +11,8 @@ android {
         applicationId = "com.dlive.ptstream"
         minSdk = 24
         targetSdk = 34
-        versionCode = 72
-        versionName = "2.12"
+        versionCode = 73
+        versionName = "2.13"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
