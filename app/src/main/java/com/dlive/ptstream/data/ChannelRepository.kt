@@ -3,13 +3,13 @@ package com.dlive.ptstream.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.InputStreamReader
@@ -20,7 +20,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
-import java.util.regex.Pattern
 
 enum class TabFilter {
     PORTUGAL,
@@ -56,6 +55,11 @@ class ChannelRepository(private val context: Context) {
     companion object {
         const val DEFAULT_TIMST_BASE_URL = "https://timst.top"
         const val FALLBACK_TIMST_BASE_URL = "https://tim-streams.com"
+
+        private val FOOTBALL_PATTERN = Regex(
+            "sport tv|benfica|sporting tv|porto canal|canal 11|dazn|sky sports (premier league|football|main event)|tnt sports|espn|bein sports|super sport (premier league|football)|premier sports",
+            RegexOption.IGNORE_CASE
+        )
 
         @Volatile
         private var sharedLiveEvents: List<LiveEvent> = emptyList()
@@ -474,56 +478,72 @@ class ChannelRepository(private val context: Context) {
             "https://dlstreams.st",
             "https://dlhd.dad",
             "https://dlive.sx"
-        )
-        for (m in mirrors) {
-            try {
-                val u = URL(m)
-                val conn = (u.openConnection() as HttpURLConnection).apply {
-                    instanceFollowRedirects = false
-                    connectTimeout = 3000
-                    readTimeout = 3000
-                    requestMethod = "HEAD"
-                    setRequestProperty("User-Agent", "Mozilla/5.0")
+        ).distinct()
+
+        val workingMirror = runBlocking(Dispatchers.IO) {
+            val deferreds = mirrors.map { m ->
+                async {
+                    try {
+                        val u = URL(m)
+                        val conn = (u.openConnection() as HttpURLConnection).apply {
+                            instanceFollowRedirects = false
+                            connectTimeout = 2500
+                            readTimeout = 2500
+                            requestMethod = "HEAD"
+                            setRequestProperty("User-Agent", "Mozilla/5.0")
+                        }
+                        val code = conn.responseCode
+                        val location = conn.getHeaderField("Location")
+                        if (!location.isNullOrBlank() && (location.startsWith("http://") || location.startsWith("https://"))) {
+                            location
+                        } else if (code in 200..399) {
+                            m
+                        } else null
+                    } catch (_: Exception) {
+                        null
+                    }
                 }
-                val code = conn.responseCode
-                val location = conn.getHeaderField("Location")
-                if (!location.isNullOrBlank() && (location.startsWith("http://") || location.startsWith("https://"))) {
-                    setBaseUrl(location)
-                    break
-                }
-                if (code in 200..399) {
-                    setBaseUrl(m)
-                    break
-                }
-            } catch (_: Exception) {}
+            }
+            deferreds.firstNotNullOfOrNull { it.await() }
+        }
+        if (workingMirror != null) {
+            setBaseUrl(workingMirror)
         }
 
         val timstMirrors = listOf(
             getTimstBaseUrl(),
             DEFAULT_TIMST_BASE_URL,
             "https://timst.cfd"
-        )
-        for (tm in timstMirrors) {
-            try {
-                val u = URL(tm)
-                val conn = (u.openConnection() as HttpURLConnection).apply {
-                    instanceFollowRedirects = false
-                    connectTimeout = 3000
-                    readTimeout = 3000
-                    requestMethod = "HEAD"
-                    setRequestProperty("User-Agent", "Mozilla/5.0")
+        ).distinct()
+
+        val workingTimst = runBlocking(Dispatchers.IO) {
+            val deferreds = timstMirrors.map { tm ->
+                async {
+                    try {
+                        val u = URL(tm)
+                        val conn = (u.openConnection() as HttpURLConnection).apply {
+                            instanceFollowRedirects = false
+                            connectTimeout = 2500
+                            readTimeout = 2500
+                            requestMethod = "HEAD"
+                            setRequestProperty("User-Agent", "Mozilla/5.0")
+                        }
+                        val code = conn.responseCode
+                        val location = conn.getHeaderField("Location")
+                        if (!location.isNullOrBlank() && (location.startsWith("http://") || location.startsWith("https://")) && !location.contains("tim-streams.com")) {
+                            location
+                        } else if (code in 200..399 && !tm.contains("tim-streams.com")) {
+                            tm
+                        } else null
+                    } catch (_: Exception) {
+                        null
+                    }
                 }
-                val code = conn.responseCode
-                val location = conn.getHeaderField("Location")
-                if (!location.isNullOrBlank() && (location.startsWith("http://") || location.startsWith("https://")) && !location.contains("tim-streams.com")) {
-                    setTimstBaseUrl(location)
-                    break
-                }
-                if (code in 200..399 && !tm.contains("tim-streams.com")) {
-                    setTimstBaseUrl(tm)
-                    break
-                }
-            } catch (_: Exception) {}
+            }
+            deferreds.firstNotNullOfOrNull { it.await() }
+        }
+        if (workingTimst != null) {
+            setTimstBaseUrl(workingTimst)
         }
     }
 
@@ -1163,15 +1183,10 @@ class ChannelRepository(private val context: Context) {
     }
 
     fun getTopFootballChannels(query: String = ""): List<Channel> {
-        val footballPattern = Regex(
-            "sport tv|benfica|sporting tv|porto canal|canal 11|dazn|sky sports (premier league|football|main event)|tnt sports|espn|bein sports|super sport (premier league|football)|premier sports",
-            RegexOption.IGNORE_CASE
-        )
-
         val base = precomputedAllChannels
         return base.filter { ch ->
-            val isFootballChannel = ch.isPortuguese && (ch.category.contains("Desporto", ignoreCase = true) || footballPattern.containsMatchIn(ch.name)) ||
-                    footballPattern.containsMatchIn(ch.name) ||
+            val isFootballChannel = ch.isPortuguese && (ch.category.contains("Desporto", ignoreCase = true) || FOOTBALL_PATTERN.containsMatchIn(ch.name)) ||
+                    FOOTBALL_PATTERN.containsMatchIn(ch.name) ||
                     (ch.category.contains("Desporto", ignoreCase = true) && (ch.name.contains("league", ignoreCase = true) || ch.name.contains("football", ignoreCase = true) || ch.name.contains("soccer", ignoreCase = true)))
 
             if (!isFootballChannel) return@filter false

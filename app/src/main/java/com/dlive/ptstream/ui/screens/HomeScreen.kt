@@ -665,6 +665,9 @@ fun HomeScreen(
                     } else {
                         // Sub-tab 2: Live matches for today (StreamFC style: Matchday by Leagues + Game-to-Channel Mapping)
                         val allCachedChannels = remember(refreshKey, channelsVersion) { repository.getAllCachedChannels() }
+                        val epgSnapshot = remember(refreshKey, allCachedChannels) {
+                            allCachedChannels.associate { it.name to repository.epgRepository.getCurrentProgram(it.name) }
+                        }
 
                         val soccerEvents = remember(filteredEvents) {
                             filteredEvents.filter { SportsMatchHelper.isSoccerEvent(it) }
@@ -978,7 +981,7 @@ fun HomeScreen(
 
                                                 itemsIndexed(eventsInLeague, key = { index, event -> "ev_fb_${leagueName.hashCode()}_${event.id}_$index" }) { _, event ->
                                                     val matchedChannels = remember(event.id) {
-                                                        SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
+                                                        SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository, epgSnapshot)
                                                     }
                                                     LiveEventCard(
                                                         event = event,
@@ -1014,7 +1017,7 @@ fun HomeScreen(
 
                                             itemsIndexed(eventsInLeague, key = { index, event -> "ev_fb_s_${selectedFootballLeague.hashCode()}_${event.id}_$index" }) { _, event ->
                                                 val matchedChannels = remember(event.id) {
-                                                    SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
+                                                    SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository, epgSnapshot)
                                                 }
                                                 LiveEventCard(
                                                     event = event,
@@ -1051,7 +1054,7 @@ fun HomeScreen(
 
                                             itemsIndexed(eventsInLeague, key = { index, event -> "ev_all_fb_${leagueName.hashCode()}_${event.id}_$index" }) { _, event ->
                                                 val matchedChannels = remember(event.id) {
-                                                    SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
+                                                    SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository, epgSnapshot)
                                                 }
                                                 LiveEventCard(
                                                     event = event,
@@ -1089,7 +1092,7 @@ fun HomeScreen(
 
                                             itemsIndexed(eventsInSport, key = { index, event -> "ev_all_sp_${sportName.hashCode()}_${event.id}_$index" }) { _, event ->
                                                 val matchedChannels = remember(event.id) {
-                                                    SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
+                                                    SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository, epgSnapshot)
                                                 }
                                                 LiveEventCard(
                                                     event = event,
@@ -1127,7 +1130,7 @@ fun HomeScreen(
 
                                             itemsIndexed(eventsInSport, key = { index, event -> "ev_all_sp_other_${sportName.hashCode()}_${event.id}_$index" }) { _, event ->
                                                 val matchedChannels = remember(event.id) {
-                                                    SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
+                                                    SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository, epgSnapshot)
                                                 }
                                                 LiveEventCard(
                                                     event = event,
@@ -1164,7 +1167,7 @@ fun HomeScreen(
 
                                         itemsIndexed(eventsInSport, key = { index, event -> "ev_sp_s_${currentMainFilter.hashCode()}_${event.id}_$index" }) { _, event ->
                                             val matchedChannels = remember(event.id) {
-                                                SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository)
+                                                SportsMatchHelper.findBroadcastingChannels(event, allCachedChannels, repository.epgRepository, epgSnapshot)
                                             }
                                             LiveEventCard(
                                                 event = event,

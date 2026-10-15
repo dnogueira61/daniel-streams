@@ -171,7 +171,8 @@ object SportsMatchHelper {
     fun findBroadcastingChannels(
         event: LiveEvent,
         allChannels: List<Channel>,
-        epgRepository: EpgRepository?
+        epgRepository: EpgRepository?,
+        epgSnapshot: Map<String, EpgProgram?>? = null
     ): List<Channel> {
         return try {
             val matches = mutableListOf<Channel>()
@@ -194,7 +195,7 @@ object SportsMatchHelper {
 
             // 2. Verificação no EPG para os canais de desporto portugueses
             val teams = extractKeywords(event.name)
-            if (epgRepository != null && teams.isNotEmpty()) {
+            if ((epgRepository != null || epgSnapshot != null) && teams.isNotEmpty()) {
                 val ptSportsChannels = allChannels.filter {
                     it.isPortuguese && (it.category.contains("Desporto", ignoreCase = true) ||
                             it.name.contains("Sport TV", ignoreCase = true) ||
@@ -206,7 +207,7 @@ object SportsMatchHelper {
                 }
                 for (ch in ptSportsChannels) {
                     if (matches.any { it.id == ch.id }) continue
-                    val currentProg = epgRepository.getCurrentProgram(ch.name)
+                    val currentProg = epgSnapshot?.get(ch.name) ?: epgRepository?.getCurrentProgram(ch.name)
                     if (currentProg != null) {
                         val progTitle = currentProg.title.lowercase()
                         val matchedTeams = teams.filter { progTitle.contains(it) }
@@ -435,6 +436,19 @@ object SportsMatchHelper {
         "Lyon" to "Lyon"
     )
 
+    private val COMPILED_TRANSLATIONS: List<Pair<Regex, String>> by lazy {
+        ptTranslations.map { (en, pt) ->
+            Regex("(?i)\\b" + Regex.escape(en) + "\\b") to pt
+        }
+    }
+    private val VS_REGEX = Regex("(?i)\\s+(vs\\.|vs|v)\\s+")
+    private val WHITESPACE_REGEX = Regex("\\s+")
+    private val ONDE_BOLA_ROW_REGEX = Regex("<tr[^>]+data-game-id[^>]*>([\\s\\S]*?)</tr>", RegexOption.IGNORE_CASE)
+    private val ONDE_BOLA_TEAM_REGEX = Regex("<span class=\"team\">([^<]+)</span>", RegexOption.IGNORE_CASE)
+    private val ONDE_BOLA_EXTRA_REGEX = Regex("<span class=\"extra\">([^<]+)</span>", RegexOption.IGNORE_CASE)
+    private val ONDE_BOLA_CHANNEL_REGEX = Regex("<a[^>]+title=\"Detalhes canal\"[^>]*>([^<]+)</a>", RegexOption.IGNORE_CASE)
+    private val ONDE_BOLA_TIME_REGEX = Regex("(\\d{2}:\\d{2})")
+
     /**
      * Traduz e formata nomes de equipas, países e jogos para PT-PT (ex: Suécia - Roménia).
      */
@@ -442,13 +456,12 @@ object SportsMatchHelper {
         if (rawTitle.isBlank()) return rawTitle
         var res = rawTitle
 
-        for ((en, pt) in ptTranslations) {
-            val regex = Regex("(?i)\\b" + Regex.escape(en) + "\\b")
+        for ((regex, pt) in COMPILED_TRANSLATIONS) {
             res = regex.replace(res, pt)
         }
 
         // Normalizar separador de jogo: " vs. ", " vs ", " v " -> " - "
-        res = res.replace(Regex("(?i)\\s+(vs\\.|vs|v)\\s+"), " - ")
+        res = res.replace(VS_REGEX, " - ")
 
         return res
     }
@@ -472,22 +485,17 @@ object SportsMatchHelper {
             }
             if (conn.responseCode == java.net.HttpURLConnection.HTTP_OK) {
                 val html = conn.inputStream.bufferedReader().use { it.readText() }
-                val rowRegex = Regex("<tr[^>]+data-game-id[^>]*>([\\s\\S]*?)</tr>", RegexOption.IGNORE_CASE)
-                val teamRegex = Regex("<span class=\"team\">([^<]+)</span>", RegexOption.IGNORE_CASE)
-                val extraRegex = Regex("<span class=\"extra\">([^<]+)</span>", RegexOption.IGNORE_CASE)
-                val channelRegex = Regex("<a[^>]+title=\"Detalhes canal\"[^>]*>([^<]+)</a>", RegexOption.IGNORE_CASE)
-                val timeRegex = Regex("(\\d{2}:\\d{2})")
 
                 var priority = 0
-                for (match in rowRegex.findAll(html)) {
+                for (match in ONDE_BOLA_ROW_REGEX.findAll(html)) {
                     val row = match.groupValues[1]
                     val isToday = row.contains("gametoday", ignoreCase = true) || row.contains("hoje", ignoreCase = true)
                     if (!isToday) continue
 
-                    val teams = teamRegex.findAll(row).map { it.groupValues[1].trim() }.toList()
-                    val extra = extraRegex.find(row)?.groupValues?.get(1)?.trim() ?: ""
-                    val channel = channelRegex.find(row)?.groupValues?.get(1)?.trim() ?: ""
-                    val time = timeRegex.find(row)?.groupValues?.get(1) ?: ""
+                    val teams = ONDE_BOLA_TEAM_REGEX.findAll(row).map { it.groupValues[1].trim() }.toList()
+                    val extra = ONDE_BOLA_EXTRA_REGEX.find(row)?.groupValues?.get(1)?.trim() ?: ""
+                    val channel = ONDE_BOLA_CHANNEL_REGEX.find(row)?.groupValues?.get(1)?.trim() ?: ""
+                    val time = ONDE_BOLA_TIME_REGEX.find(row)?.groupValues?.get(1) ?: ""
 
                     if (teams.isNotEmpty()) {
                         list.add(OndeBolaHighlight(time, teams, extra, channel, priority++))
@@ -535,7 +543,7 @@ object SportsMatchHelper {
                 .lowercase()
 
             val stopwords = setOf("futebol", "soccer", "live", "direto", "hd", "fc", "cf", "sc", "cp", "the", "de", "da", "do", "club", "clube")
-            clean.split("\\s+".toRegex())
+            clean.split(WHITESPACE_REGEX)
                 .map { it.trim() }
                 .filter { it.length >= 3 && it !in stopwords }
         } catch (e: Throwable) {
