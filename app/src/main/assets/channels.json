@@ -127,7 +127,7 @@
     "country": "PT",
     "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://video-auth7.iol.pt/live_tvi/live_tvi/edge_servers/tvi-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMTcvMjAyNiA4OjExOjQzIEFNJmhhc2hfdmFsdWU9aG5RUVNVTDkzQjlGL0NmN0tEdWdIZz09JnZhbGlkbWludXRlcz0xNDQwJmlkPTk1N2FlMGJhLWJjZTYtNDA4Ny1iNGZmLTgzNWQ3NGNkMDljMg==",
+    "backupStreamUrl": "https://video-auth7.iol.pt/live_tvi/live_tvi/edge_servers/tvi-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMTcvMjAyNiAxMjoxMjo1MSBQTSZoYXNoX3ZhbHVlPWN0ZTY2dU96aUczUXFBNnNmN0ExVUE9PSZ2YWxpZG1pbnV0ZXM9MTQ0MCZpZD0wMjVlOTU2OC0wODUyLTQ1ZjEtYTk2NC03YjdlM2U4MWYyM2U=",
     "backupStreamUrl2": null
   },
   {
@@ -210,9 +210,9 @@
     "id": "cnn-pt",
     "name": "CNN Portugal",
     "country": "PT",
-    "category": "Generalistas",
+    "category": "Em Manutenção",
     "isPt": true,
-    "backupStreamUrl": "https://video-auth1.iol.pt/live_cnn/live_cnn/edge_servers/cnn-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMTcvMjAyNiA4OjExOjQzIEFNJmhhc2hfdmFsdWU9aG5RUVNVTDkzQjlGL0NmN0tEdWdIZz09JnZhbGlkbWludXRlcz0xNDQwJmlkPTk1N2FlMGJhLWJjZTYtNDA4Ny1iNGZmLTgzNWQ3NGNkMDljMg==",
+    "backupStreamUrl": "https://video-auth1.iol.pt/live_cnn/live_cnn/edge_servers/cnn-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMTcvMjAyNiAxMjoxMjo1MSBQTSZoYXNoX3ZhbHVlPWN0ZTY2dU96aUczUXFBNnNmN0ExVUE9PSZ2YWxpZG1pbnV0ZXM9MTQ0MCZpZD0wMjVlOTU2OC0wODUyLTQ1ZjEtYTk2NC03YjdlM2U4MWYyM2U=",
     "backupStreamUrl2": null,
     "originalCategory": "Generalistas"
   },
