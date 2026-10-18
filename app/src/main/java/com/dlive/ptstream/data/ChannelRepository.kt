@@ -322,28 +322,7 @@ class ChannelRepository(private val context: Context) {
         val hiddenIds = getHiddenChannelIds()
         val allCached = cachedChannels.filter { !hiddenIds.contains(it.id) }
 
-        // 1. All Portuguese sports channels (Sport TV 1..6, DAZN 1..6, Benfica TV, Sporting TV, Canal 11, Eurosport, A Bola TV, etc.)
-        val ptSports = allCached.filter { ch ->
-            ch.isPortuguese && (
-                ch.category.contains("Desporto", ignoreCase = true) ||
-                ch.name.contains("Sport TV", ignoreCase = true) ||
-                ch.name.contains("DAZN", ignoreCase = true) ||
-                ch.name.contains("Eleven", ignoreCase = true) ||
-                ch.name.contains("Benfica", ignoreCase = true) ||
-                ch.name.contains("Sporting", ignoreCase = true) ||
-                ch.name.contains("Canal 11", ignoreCase = true) ||
-                ch.name.contains("Eurosport", ignoreCase = true) ||
-                ch.name.contains("A Bola", ignoreCase = true) ||
-                ch.name.contains("Fight", ignoreCase = true) ||
-                ch.name.contains("Motor", ignoreCase = true)
-            )
-        }
-        val ptSportTv = ptSports.filter { it.name.contains("Sport TV", ignoreCase = true) }.sortedBy { getSportTvOrder(it.name) }
-        val ptDazn = ptSports.filter { it.name.contains("DAZN", ignoreCase = true) || it.name.contains("Eleven", ignoreCase = true) }.sortedBy { getDaznOrder(it.name) }
-        val ptOther = ptSports.filter { !it.name.contains("Sport TV", ignoreCase = true) && !it.name.contains("DAZN", ignoreCase = true) && !it.name.contains("Eleven", ignoreCase = true) }
-        val defaultPtSports = ptSportTv + ptDazn + ptOther
-
-        // 2. All International sports channels
+        // Apenas canais internacionais de Desporto (sem canais portugueses, pois estes têm o separador próprio)
         val worldSports = allCached.filter { ch ->
             !ch.isPortuguese && (
                 ch.category.equals("Desporto", ignoreCase = true) ||
@@ -351,12 +330,10 @@ class ChannelRepository(private val context: Context) {
             )
         }
 
-        val combined = defaultPtSports + worldSports
-
         val filtered = if (query.isBlank()) {
-            combined
+            worldSports
         } else {
-            combined.filter {
+            worldSports.filter {
                 it.name.contains(query, ignoreCase = true) ||
                 it.id.contains(query) ||
                 it.category.contains(query, ignoreCase = true)
