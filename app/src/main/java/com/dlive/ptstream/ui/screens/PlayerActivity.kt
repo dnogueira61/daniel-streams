@@ -637,6 +637,9 @@ class PlayerActivity : ComponentActivity() {
     private fun setupDrawer() {
         rvDrawerChannels = findViewById(R.id.rvDrawerChannels)
         etDrawerSearch = findViewById(R.id.etDrawerSearch)
+        if (isTv && !repository.isSearchEnabledOnTv()) {
+            etDrawerSearch.visibility = View.GONE
+        }
         tvDrawerEmpty = findViewById(R.id.tvDrawerEmpty)
         btnTabPt = findViewById(R.id.btnTabPt)
         btnTabSports = findViewById(R.id.btnTabSports)
@@ -939,8 +942,8 @@ class PlayerActivity : ComponentActivity() {
         }
 
         val list = when {
-            currentDrawerCategory == "Desporto" -> repository.getChannels(TabFilter.ALL, query, "Desporto")
-            currentDrawerTab == TabFilter.ALL -> repository.getChannels(TabFilter.ALL, query).filter { !it.isPortuguese }
+            currentDrawerCategory == "Desporto" -> repository.getSportsChannels(query)
+            currentDrawerTab == TabFilter.ALL -> repository.getChannels(TabFilter.ALL, query)
             currentDrawerTab == TabFilter.FAVORITES -> repository.getChannels(TabFilter.FAVORITES, query)
             else -> repository.getChannels(TabFilter.PORTUGAL, query)
         }

@@ -82,7 +82,11 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
 
     val configuration = LocalConfiguration.current
-    val isTabletOrLandscape = configuration.screenWidthDp >= 600 || repository.isTv()
+    var refreshKey by remember { mutableStateOf(0) }
+    val isTv = remember { repository.isTv() }
+    val isSearchEnabledOnTv = remember(refreshKey) { repository.isSearchEnabledOnTv() }
+    val showSearch = !isTv || isSearchEnabledOnTv
+    val isTabletOrLandscape = configuration.screenWidthDp >= 600 || isTv
 
     val defaultTabPref = remember { repository.getDefaultTab() }
     val initialTab = remember {
@@ -100,18 +104,32 @@ fun HomeScreen(
     val searchFocusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    LaunchedEffect(isSearchActive) {
-        if (isSearchActive) {
+    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                refreshKey++
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    LaunchedEffect(isSearchActive, showSearch) {
+        if (isSearchActive && showSearch) {
             kotlinx.coroutines.delay(150)
             searchFocusRequester.requestFocus()
             keyboardController?.show()
+        } else if (!showSearch) {
+            isSearchActive = false
         }
     }
     var selectedCategory by remember { mutableStateOf("Todos") }
     var gamesSubFilter by remember { mutableStateOf("Jogos") }
     var selectedLeagueFilter by remember { mutableStateOf("Todos") }
     var selectedFootballLeague by remember { mutableStateOf("Todas") }
-    var refreshKey by remember { mutableStateOf(0) }
     val prefViewMode = remember(refreshKey) { repository.getChannelViewMode() }
     val showClock = remember(refreshKey) { repository.isShowClockEnabled() }
     val isSplitLayout = if (prefViewMode == "SPLIT_LIST") true else if (prefViewMode == "GRID") false else isTabletOrLandscape
@@ -163,7 +181,7 @@ fun HomeScreen(
     val channelsVersion by repository.channelsVersion
 
     val sportsChannels = remember(searchQuery, refreshKey, channelsVersion) {
-        repository.getChannels(TabFilter.ALL, searchQuery, "Desporto")
+        repository.getSportsChannels(searchQuery)
     }
 
     val favChannels = remember(refreshKey, channelsVersion) {
@@ -235,21 +253,23 @@ fun HomeScreen(
                                 DigitalClock()
                                 Spacer(modifier = Modifier.width(6.dp))
                             }
-                            var searchFocused by remember { mutableStateOf(false) }
-                            var settingsFocused by remember { mutableStateOf(false) }
-                            IconButton(
-                                onClick = { isSearchActive = true },
-                                modifier = Modifier
-                                    .onFocusChanged { searchFocused = it.isFocused }
-                                    .focusable()
-                                    .background(if (searchFocused) Color(0x3338BDF8) else Color.Transparent, CircleShape)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Pesquisar",
-                                    tint = if (searchFocused) Color(0xFF38BDF8) else TextPrimary
-                                )
+                            if (showSearch) {
+                                var searchFocused by remember { mutableStateOf(false) }
+                                IconButton(
+                                    onClick = { isSearchActive = true },
+                                    modifier = Modifier
+                                        .onFocusChanged { searchFocused = it.isFocused }
+                                        .focusable()
+                                        .background(if (searchFocused) Color(0x3338BDF8) else Color.Transparent, CircleShape)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Search,
+                                        contentDescription = "Pesquisar",
+                                        tint = if (searchFocused) Color(0xFF38BDF8) else TextPrimary
+                                    )
+                                }
                             }
+                            var settingsFocused by remember { mutableStateOf(false) }
                             IconButton(
                                 onClick = { showSettingsDialog = true },
                                 modifier = Modifier
@@ -264,7 +284,7 @@ fun HomeScreen(
                                 )
                             }
                         }
-                    } else {
+                    } else if (showSearch) {
                         // Search bar input
                         TextField(
                             value = searchQuery,
@@ -308,7 +328,7 @@ fun HomeScreen(
                 }
 
                 // Filter pills row (Filtrar por nome & Categoria Todos)
-                if (selectedTab != TabFilter.LIVE_GAMES && !isSearchActive) {
+                if (selectedTab != TabFilter.LIVE_GAMES && (!isSearchActive || !showSearch)) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -316,37 +336,39 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Pill 1: Filtrar por nome
-                        Surface(
-                            onClick = { isSearchActive = true },
-                            shape = RoundedCornerShape(20.dp),
-                            color = if (searchQuery.isNotBlank()) Color(0x3338BDF8) else Color(0xFF1E2230),
-                            border = BorderStroke(1.dp, if (searchQuery.isNotBlank()) Color(0xFF38BDF8) else Color(0xFF374151)),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                        // Pill 1: Filtrar por nome (apenas em dispositivos com pesquisa ativa)
+                        if (showSearch) {
+                            Surface(
+                                onClick = { isSearchActive = true },
+                                shape = RoundedCornerShape(20.dp),
+                                color = if (searchQuery.isNotBlank()) Color(0x3338BDF8) else Color(0xFF1E2230),
+                                border = BorderStroke(1.dp, if (searchQuery.isNotBlank()) Color(0xFF38BDF8) else Color(0xFF374151)),
+                                modifier = Modifier.weight(1f)
                             ) {
-                                Icon(
-                                    Icons.Default.Menu,
-                                    contentDescription = null,
-                                    tint = Color(0xFF9CA3AF),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = if (searchQuery.isNotBlank()) searchQuery else "Filtrar por nome",
-                                    color = if (searchQuery.isNotBlank()) Color.White else Color(0xFF9CA3AF),
-                                    fontSize = 13.sp,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Default.Menu,
+                                        contentDescription = null,
+                                        tint = Color(0xFF9CA3AF),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = if (searchQuery.isNotBlank()) searchQuery else "Filtrar por nome",
+                                        color = if (searchQuery.isNotBlank()) Color.White else Color(0xFF9CA3AF),
+                                        fontSize = 13.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
                             }
                         }
 
                         // Pill 2: Categorias (Todos ▾)
-                        Box {
+                        Box(modifier = if (!showSearch) Modifier.wrapContentSize() else Modifier) {
                             Surface(
                                 onClick = { categoryDropdownOpen = true },
                                 shape = RoundedCornerShape(20.dp),
@@ -2906,6 +2928,26 @@ fun SettingsDialog(
                         )
                     }
                 } else {
+                    var searchOnTv by remember { mutableStateOf(repository.isSearchEnabledOnTv()) }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                            Text("Modo Pesquisa na TV", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                            Text("Desativado por defeito na TV para evitar pop-ups de teclado e facilitar a navegação.", color = TextSecondary, fontSize = 11.sp)
+                        }
+                        Switch(
+                            checked = searchOnTv,
+                            onCheckedChange = { enabled ->
+                                searchOnTv = enabled
+                                repository.setSearchEnabledOnTv(enabled)
+                                onChannelsSynced()
+                            },
+                            colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF38BDF8))
+                        )
+                    }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically

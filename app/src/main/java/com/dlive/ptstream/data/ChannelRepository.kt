@@ -298,10 +298,76 @@ class ChannelRepository(private val context: Context) {
         val current = getRecentChannelIds().toMutableList()
         current.remove(channelId)
         current.add(0, channelId)
-        val trimmed = current.take(30)
+        val trimmed = current.take(200)
         prefs.edit().putString(PREF_RECENT_CHANNEL_IDS, trimmed.joinToString(",")).apply()
         rebuildPrecomputedLists()
     }
+
+    fun sortByRecentlyWatched(channels: List<Channel>, recentIds: List<String> = getRecentChannelIds()): List<Channel> {
+        if (recentIds.isEmpty() || channels.isEmpty()) return channels
+        val recentIndexMap = recentIds.mapIndexed { index, id -> id to index }.toMap()
+        return channels.sortedWith { a, b ->
+            val aIdx = recentIndexMap[a.id]
+            val bIdx = recentIndexMap[b.id]
+            when {
+                aIdx != null && bIdx != null -> aIdx.compareTo(bIdx)
+                aIdx != null -> -1
+                bIdx != null -> 1
+                else -> 0
+            }
+        }
+    }
+
+    fun getSportsChannels(query: String = ""): List<Channel> {
+        val hiddenIds = getHiddenChannelIds()
+        val allCached = cachedChannels.filter { !hiddenIds.contains(it.id) }
+
+        // 1. All Portuguese sports channels (Sport TV 1..6, DAZN 1..6, Benfica TV, Sporting TV, Canal 11, Eurosport, A Bola TV, etc.)
+        val ptSports = allCached.filter { ch ->
+            ch.isPortuguese && (
+                ch.category.contains("Desporto", ignoreCase = true) ||
+                ch.name.contains("Sport TV", ignoreCase = true) ||
+                ch.name.contains("DAZN", ignoreCase = true) ||
+                ch.name.contains("Eleven", ignoreCase = true) ||
+                ch.name.contains("Benfica", ignoreCase = true) ||
+                ch.name.contains("Sporting", ignoreCase = true) ||
+                ch.name.contains("Canal 11", ignoreCase = true) ||
+                ch.name.contains("Eurosport", ignoreCase = true) ||
+                ch.name.contains("A Bola", ignoreCase = true) ||
+                ch.name.contains("Fight", ignoreCase = true) ||
+                ch.name.contains("Motor", ignoreCase = true)
+            )
+        }
+        val ptSportTv = ptSports.filter { it.name.contains("Sport TV", ignoreCase = true) }.sortedBy { getSportTvOrder(it.name) }
+        val ptDazn = ptSports.filter { it.name.contains("DAZN", ignoreCase = true) || it.name.contains("Eleven", ignoreCase = true) }.sortedBy { getDaznOrder(it.name) }
+        val ptOther = ptSports.filter { !it.name.contains("Sport TV", ignoreCase = true) && !it.name.contains("DAZN", ignoreCase = true) && !it.name.contains("Eleven", ignoreCase = true) }
+        val defaultPtSports = ptSportTv + ptDazn + ptOther
+
+        // 2. All International sports channels
+        val worldSports = allCached.filter { ch ->
+            !ch.isPortuguese && (
+                ch.category.equals("Desporto", ignoreCase = true) ||
+                ch.category.contains("Sport", ignoreCase = true)
+            )
+        }
+
+        val combined = defaultPtSports + worldSports
+
+        val filtered = if (query.isBlank()) {
+            combined
+        } else {
+            combined.filter {
+                it.name.contains(query, ignoreCase = true) ||
+                it.id.contains(query) ||
+                it.category.contains(query, ignoreCase = true)
+            }
+        }
+
+        return sortByRecentlyWatched(filtered)
+    }
+
+    fun isSearchEnabledOnTv(): Boolean = prefs.getBoolean("pref_search_on_tv", false)
+    fun setSearchEnabledOnTv(enabled: Boolean) = prefs.edit().putBoolean("pref_search_on_tv", enabled).apply()
 
     fun getLastWatchedChannelId(): String? = prefs.getString(PREF_LAST_WATCHED_CHANNEL_ID, null)
     fun setLastWatchedChannelId(channelId: String) {
@@ -1200,7 +1266,7 @@ class ChannelRepository(private val context: Context) {
         if (!includeHidden && query.isBlank() && categoryFilter == "Todos") {
             return when (tab) {
                 TabFilter.PORTUGAL -> precomputedPtChannels
-                TabFilter.ALL -> precomputedAllChannels
+                TabFilter.ALL -> sortByRecentlyWatched(precomputedAllChannels)
                 TabFilter.FAVORITES -> precomputedFavChannels
                 TabFilter.GAMING -> precomputedGamingChannels
                 TabFilter.LIVE_GAMES -> getTopFootballChannels()
@@ -1232,7 +1298,7 @@ class ChannelRepository(private val context: Context) {
             TabFilter.ALL -> if (includeHidden) cachedChannels.filter { !it.isPortuguese } else precomputedAllChannels
         }
 
-        return baseList.filter { ch ->
+        val filtered = baseList.filter { ch ->
             val matchesCategory = if (categoryFilter == "Todos") true
             else if (categoryFilter == "⚡ TimStreams") !ch.backupStreamUrl.isNullOrBlank() || ch.category == "TimStreams" || ch.id.startsWith("timst-")
             else if (categoryFilter.equals("Desporto", ignoreCase = true) && tab == TabFilter.ALL) {
@@ -1246,6 +1312,12 @@ class ChannelRepository(private val context: Context) {
                         ch.category.contains(query, ignoreCase = true)
             }
             matchesCategory && matchesQuery
+        }
+
+        return if (tab == TabFilter.ALL) {
+            sortByRecentlyWatched(filtered)
+        } else {
+            filtered
         }
     }
 
