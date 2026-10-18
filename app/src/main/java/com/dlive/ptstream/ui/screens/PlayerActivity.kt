@@ -2151,6 +2151,9 @@ class PlayerActivity : ComponentActivity() {
                 targetDirect.contains("impresa.pt") -> "https://sic.pt/"
                 targetDirect.contains("rtp.pt") -> "https://www.rtp.pt/"
                 targetDirect.contains("TVI") || targetDirect.contains("iol.pt") || targetDirect.contains("raw.githubusercontent.com") -> "https://tviplayer.iol.pt/"
+                targetDirect.contains("epicsports") -> "https://epicsports-tv.com/"
+                targetDirect.contains("portocanal") || targetDirect.contains("fastly") -> "https://portocanal.sapo.pt/"
+                targetDirect.contains("canal11") || targetDirect.contains("cloudfront") -> "https://canal11.pt/"
                 targetDirect.contains("twitch.tv") -> "https://dlive.sx/"
                 targetDirect.contains("cdnlivetv") || targetDirect.contains("streamsports") -> "https://streamsports99.ru/"
                 targetDirect.contains("embed.st") || targetDirect.contains("streamed") -> "https://streamed.pk/"
@@ -2238,9 +2241,25 @@ class PlayerActivity : ComponentActivity() {
             options.add(ServerOption(label, isDirect = true, directUrl = officialUrl))
         }
 
-        // 4. Non-Timst direct backup (e.g. other direct streams)
-        if (backupUrl != null && !backupUrl.contains("exmxbxe") && !backupUrl.contains("ehgembxe") && !backupUrl.contains("grandemx") && !backupUrl.contains("timst") && options.none { it.directUrl == backupUrl }) {
-            options.add(ServerOption("Servidor Alternativo ${options.size} (Direto)", isDirect = true, directUrl = backupUrl))
+        // 4. Non-Timst direct backups (e.g. EpicSports, alternative direct streams)
+        val candidateBackups = listOfNotNull(
+            currentChannel.backupStreamUrl,
+            currentChannel.backupStreamUrl2,
+            backupDirectUrl,
+            backupDirectUrl2
+        ).filter { !it.contains("exmxbxe") && !it.contains("ehgembxe") && !it.contains("grandemx") && !it.contains("timst") }
+
+        for (bUrl in candidateBackups) {
+            if (options.none { it.directUrl == bUrl }) {
+                val label = if (options.isEmpty()) {
+                    "Servidor Principal (Direto)"
+                } else if (bUrl.contains("epicsports")) {
+                    "Servidor Alternativo ${options.size} (EpicSports)"
+                } else {
+                    "Servidor Alternativo ${options.size} (Direto)"
+                }
+                options.add(ServerOption(label, isDirect = true, directUrl = bUrl))
+            }
         }
 
         return options

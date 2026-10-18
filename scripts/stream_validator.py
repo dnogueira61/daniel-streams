@@ -22,11 +22,11 @@ DADDYLIVE_MIRRORS = [
     "https://dlive.sx",
     "https://dlhd.pk",
     "https://dlhd.st",
-    "https://dlstreams.st",
-    "https://dlhd.dad"
+    "https://dlstreams.st"
 ]
 
 TIMSTREAMS_MIRRORS = [
+    "https://ehgembxe.cfd",
     "https://grandemx.org",
     "https://exmxbxe.cfd",
     "https://timst.top"
@@ -80,7 +80,13 @@ def check_url_alive(url, referer=None, timeout=6, verify_hls_progress=False):
         h["Referer"] = "https://sic.pt/"
     elif "iol.pt" in url:
         h["Referer"] = "https://tviplayer.iol.pt/"
-    elif "grandemx.org" in url:
+    elif "epicsports" in url:
+        h["Referer"] = "https://epicsports-tv.com/"
+    elif "portocanal" in url or "fastly" in url:
+        h["Referer"] = "https://portocanal.sapo.pt/"
+    elif "canal11" in url or "cloudfront" in url:
+        h["Referer"] = "https://canal11.pt/"
+    elif "grandemx.org" in url or "ehgembxe" in url or "exmxbxe" in url:
         h["Referer"] = "https://grandemx.org/"
     elif "dlive" in url:
         h["Referer"] = "https://dlive.sx/"
