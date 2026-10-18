@@ -185,7 +185,7 @@
     "country": "PT",
     "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://video-auth7.iol.pt/live_tvi/live_tvi/edge_servers/tvi-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMTgvMjAyNiA4OjEyOjE3IEFNJmhhc2hfdmFsdWU9a1ZLTm9jN0FnZlU1YXRuYUNGRW9FZz09JnZhbGlkbWludXRlcz0xNDQwJmlkPTY1M2U4MzkwLTc1ZmYtNDcyNi05NmIyLTc5MjhkNzY4Nzg3OA==",
+    "backupStreamUrl": "https://video-auth7.iol.pt/live_tvi/live_tvi/edge_servers/tvi-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMTgvMjAyNiAxMjoxMzo5IFBNJmhhc2hfdmFsdWU9NDdibTBwRm5aUFVQdEJsRUxRcTFYQT09JnZhbGlkbWludXRlcz0xNDQwJmlkPTZkNGNlNDJhLTlmNGItNGExYi1iZmVkLTgxMjI0OGMyODdkNg==",
     "backupStreamUrl2": "https://epicsports-tv.com/eu.html?id=43598"
   },
   {
@@ -212,7 +212,7 @@
     "country": "PT",
     "category": "Generalistas",
     "isPt": true,
-    "backupStreamUrl": "https://video-auth1.iol.pt/live_cnn/live_cnn/edge_servers/cnn-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMTgvMjAyNiA4OjEyOjE3IEFNJmhhc2hfdmFsdWU9a1ZLTm9jN0FnZlU1YXRuYUNGRW9FZz09JnZhbGlkbWludXRlcz0xNDQwJmlkPTY1M2U4MzkwLTc1ZmYtNDcyNi05NmIyLTc5MjhkNzY4Nzg3OA==",
+    "backupStreamUrl": "https://video-auth1.iol.pt/live_cnn/live_cnn/edge_servers/cnn-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMTgvMjAyNiAxMjoxMzo5IFBNJmhhc2hfdmFsdWU9NDdibTBwRm5aUFVQdEJsRUxRcTFYQT09JnZhbGlkbWludXRlcz0xNDQwJmlkPTZkNGNlNDJhLTlmNGItNGExYi1iZmVkLTgxMjI0OGMyODdkNg==",
     "backupStreamUrl2": "https://epicsports-tv.com/eu.html?id=43611"
   },
   {
