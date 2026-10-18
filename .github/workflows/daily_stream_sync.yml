@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -26,7 +28,7 @@ jobs:
 
       - name: Run Stream Validator & Domain Detector
         run: |
-          python scripts/stream_validator.py
+          python -u scripts/stream_validator.py
 
       - name: Commit & Push changes if updated
         run: |
@@ -38,5 +40,7 @@ jobs:
           else
             echo "Detetadas alterações nos streams/domínios. A comitar e atualizar repositório..."
             git commit -m "chore(streams): auto-update stream domains and channel tokens [skip ci]"
-            git push
+            git pull --rebase --autostash origin main
+            git push origin main
           fi
+

@@ -165,18 +165,23 @@ def main():
     changes_count = 0
 
     # 2. Update TimStreams links if domain changed
+    known_timst_domains = ["ehgembxe.cfd", "grandemx.org", "exmxbxe.cfd", "timst.top"]
+    def is_timstreams_url(u):
+        if not u: return False
+        return any(d in u for d in known_timst_domains) or bool(re.search(r'/[a-z0-9]{8}-\d{4}', u))
+
     for ch in channels:
         b1 = ch.get("backupStreamUrl")
         b2 = ch.get("backupStreamUrl2")
 
-        if b1 and ("exmxbxe.cfd" in b1 or "grandemx.org" in b1):
+        if b1 and is_timstreams_url(b1):
             path = urlparse(b1).path
             new_b1 = f"{active_timst}{path}"
             if new_b1 != b1:
                 ch["backupStreamUrl"] = new_b1
                 changes_count += 1
 
-        if b2 and ("exmxbxe.cfd" in b2 or "grandemx.org" in b2):
+        if b2 and is_timstreams_url(b2):
             path = urlparse(b2).path
             new_b2 = f"{active_timst}{path}"
             if new_b2 != b2:
