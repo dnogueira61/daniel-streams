@@ -81,11 +81,8 @@ class MainActivity : ComponentActivity() {
 
             if (!directUrl.isNullOrBlank()) {
                 putExtra("EXTRA_DIRECT_STREAM_URL", directUrl)
-            } else if (timstUrl != null) {
-                // Preferência prioritária para TimStreams conforme solicitado pelo utilizador
-                putExtra("EXTRA_DIRECT_STREAM_URL", timstUrl)
             } else if (channel.id.toIntOrNull() == null) {
-                putExtra("EXTRA_DIRECT_STREAM_URL", channel.backupStreamUrl)
+                putExtra("EXTRA_DIRECT_STREAM_URL", channel.backupStreamUrl ?: timstUrl)
             }
         }
         startActivity(intent)

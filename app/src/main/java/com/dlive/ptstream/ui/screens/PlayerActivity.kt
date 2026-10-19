@@ -261,7 +261,7 @@ class PlayerActivity : ComponentActivity() {
         gestureHud.visibility = View.GONE
     }
 
-    private val serverFolders = listOf("stream", "cast", "watch", "player", "plus")
+    private val serverFolders = listOf("stream", "player", "watch", "cast", "plus")
 
     // Auto-failover: ordered list of servers to try
     private var failoverServers: List<ServerOption> = emptyList()
@@ -306,7 +306,7 @@ class PlayerActivity : ComponentActivity() {
         android.util.Log.w("PlayerFailover", "Triggering failover due to: $reason")
         val isStallError = reason.startsWith("stall") || reason.contains("freeze")
         if (streamLoadedSuccessfully && !isStallError) {
-            val isHardError = reason.startsWith("http_error_") || reason == "network_error"
+            val isHardError = reason.startsWith("http_error_") || reason == "network_error" || reason.contains("sandbox")
             if (!isHardError) {
                 android.util.Log.i("PlayerFailover", "Stream já está a tocar com sucesso. A ignorar failover ($reason)")
                 return
@@ -382,10 +382,13 @@ class PlayerActivity : ComponentActivity() {
         backupDirectUrl = intent.getStringExtra("EXTRA_BACKUP_STREAM_URL")
         backupDirectUrl2 = intent.getStringExtra("EXTRA_BACKUP_STREAM_URL2")
 
-        val timstCandidate = listOfNotNull(directStreamUrl, backupDirectUrl, backupDirectUrl2)
-            .firstOrNull { it.contains("ehgembxe") || it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") }
-        if (timstCandidate != null && directStreamUrl == null) {
-            directStreamUrl = timstCandidate
+        // Se o canal tem ID DaddyLive, NÃO forçar directStreamUrl para que o DaddyLive seja o Servidor Principal
+        if (channelId.toIntOrNull() == null && directStreamUrl == null) {
+            val timstCandidate = listOfNotNull(backupDirectUrl, backupDirectUrl2)
+                .firstOrNull { it.contains("ehgembxe") || it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") }
+            if (timstCandidate != null) {
+                directStreamUrl = timstCandidate
+            }
         }
         activeDirectUrl = directStreamUrl
         isDirectStreamActive = (directStreamUrl != null)
@@ -979,15 +982,11 @@ class PlayerActivity : ComponentActivity() {
 
         val timstUrl = newChannel.timStreamsUrl
 
-        if (timstUrl != null) {
+        if (newChannel.id.toIntOrNull() == null) {
             isDirectStreamActive = true
-            activeDirectUrl = timstUrl
-            directStreamUrl = timstUrl
-            isBackupSelected = false
-        } else if (newChannel.id.toIntOrNull() == null) {
-            isDirectStreamActive = true
-            activeDirectUrl = newChannel.backupStreamUrl
-            directStreamUrl = newChannel.backupStreamUrl
+            val directBackup = newChannel.backupStreamUrl ?: timstUrl
+            activeDirectUrl = directBackup
+            directStreamUrl = directBackup
             isBackupSelected = false
         } else {
             isDirectStreamActive = false
@@ -1125,9 +1124,9 @@ class PlayerActivity : ComponentActivity() {
         } else {
             when (currentFolder) {
                 "stream" -> "S (DLive 1)"
-                "cast" -> "S (DLive 2)"
+                "player" -> "S (DLive 2)"
                 "watch" -> "S (DLive 3)"
-                "player" -> "S (Player)"
+                "cast" -> "S (DLive 4)"
                 "plus" -> "S (Plus)"
                 else -> "S (${currentFolder.uppercase()})"
             }
@@ -1203,14 +1202,113 @@ class PlayerActivity : ComponentActivity() {
             val startScript = """
                 (function() {
                     try {
-                        Object.defineProperty(document, 'referrer', {
-                            get: function() { return 'https://timst.top/'; },
-                            configurable: true
-                        });
+                        var host = window.location.hostname || '';
+                        if (host.indexOf('timst') !== -1 || host.indexOf('cfd') !== -1 || host.indexOf('grandemx') !== -1) {
+                            Object.defineProperty(document, 'referrer', {
+                                get: function() { return 'https://timst.top/'; },
+                                configurable: true
+                            });
+                        }
                     } catch(e) {}
                     try {
                         window.stop = function() {};
                     } catch(e) {}
+
+                    // Neutralize iframe sandbox attributes completely
+                    try {
+                        var origSetAttr = Element.prototype.setAttribute;
+                        Element.prototype.setAttribute = function(name, value) {
+                            if (name && (name === 'sandbox' || name.toLowerCase() === 'sandbox')) {
+                                return;
+                            }
+                            return origSetAttr.apply(this, arguments);
+                        };
+                        var origHasAttr = Element.prototype.hasAttribute;
+                        Element.prototype.hasAttribute = function(name) {
+                            if (name && (name === 'sandbox' || name.toLowerCase() === 'sandbox')) {
+                                return false;
+                            }
+                            return origHasAttr.apply(this, arguments);
+                        };
+                        var origGetAttr = Element.prototype.getAttribute;
+                        Element.prototype.getAttribute = function(name) {
+                            if (name && (name === 'sandbox' || name.toLowerCase() === 'sandbox')) {
+                                return null;
+                            }
+                            return origGetAttr.apply(this, arguments);
+                        };
+                        if (window.HTMLIFrameElement && HTMLIFrameElement.prototype) {
+                            Object.defineProperty(HTMLIFrameElement.prototype, 'sandbox', {
+                                get: function() {
+                                    return {
+                                        add: function() {},
+                                        remove: function() {},
+                                        contains: function() { return false; },
+                                        toggle: function() { return false; },
+                                        value: ''
+                                    };
+                                },
+                                set: function() {},
+                                configurable: true
+                            });
+                        }
+                    } catch(e) {}
+
+                    try {
+                        if (window.frameElement) {
+                            window.frameElement.removeAttribute('sandbox');
+                        }
+                    } catch(e) {}
+
+                    function removeAllSandboxes() {
+                        try {
+                            var iframes = document.getElementsByTagName('iframe');
+                            for (var i = 0; i < iframes.length; i++) {
+                                if (iframes[i].hasAttribute && iframes[i].hasAttribute('sandbox')) {
+                                    iframes[i].removeAttribute('sandbox');
+                                }
+                            }
+                        } catch(e) {}
+                    }
+
+                    try {
+                        var observer = new MutationObserver(function(mutations) {
+                            for (var i = 0; i < mutations.length; i++) {
+                                var m = mutations[i];
+                                if (m.type === 'attributes' && m.attributeName && m.attributeName.toLowerCase() === 'sandbox') {
+                                    m.target.removeAttribute('sandbox');
+                                } else if (m.type === 'childList') {
+                                    for (var j = 0; j < m.addedNodes.length; j++) {
+                                        var node = m.addedNodes[j];
+                                        if (node.nodeType === 1) {
+                                            if (node.tagName === 'IFRAME') {
+                                                node.removeAttribute('sandbox');
+                                            }
+                                            var subIframes = node.querySelectorAll ? node.querySelectorAll('iframe') : [];
+                                            for (var k = 0; k < subIframes.length; k++) {
+                                                subIframes[k].removeAttribute('sandbox');
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        observer.observe(document.documentElement || document, {
+                            childList: true,
+                            subtree: true,
+                            attributes: true,
+                            attributeFilter: ['sandbox']
+                        });
+                    } catch(e) {}
+
+                    function checkSandboxError() {
+                        try {
+                            var text = (document.body && (document.body.innerText || document.body.textContent)) || '';
+                            if (text.indexOf('Remove sandbox') !== -1 || text.indexOf('sandbox atribute') !== -1) {
+                                reportFailover('sandbox_attribute_error');
+                            }
+                        } catch(e) {}
+                    }
 
                     window.open = function() { return null; };
                     window.alert = function() {};
@@ -1223,15 +1321,21 @@ class PlayerActivity : ComponentActivity() {
                         if (tag && tag.toLowerCase() === 'a') {
                             el.target = '_self';
                         }
+                        if (tag && tag.toLowerCase() === 'iframe') {
+                            try { el.removeAttribute('sandbox'); } catch(e) {}
+                        }
                         return el;
                     };
 
                     function cleanPlayer() {
+                        removeAllSandboxes();
                         var style = document.getElementById('dlive-clean-style');
                         if (!style) {
                             style = document.createElement('style');
                             style.id = 'dlive-clean-style';
-                            style.innerHTML = 'header, footer, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], #embedBtn, #embedModal, [id^="embed"], .jw-related, .jw-icon-share, iframe:not(#thatframe):not([id^="player"]):not(#streamPlayer) { display: none !important; } ' +
+                            var isDlive = (window.location.hostname || '').indexOf('dlive') !== -1;
+                            var iframeHideRule = isDlive ? 'iframe:not(#thatframe):not([id^="player"]):not(#streamPlayer) { display: none !important; } ' : '';
+                            style.innerHTML = 'header, footer, .sidebar, .navbar, .mobileBottomNav, #chatangoMount, .drawer, .api-container, [id^="histats"], #embedBtn, #embedModal, [id^="embed"], .jw-related, .jw-icon-share, ' + iframeHideRule +
                                               'html, body { margin:0 !important; padding:0 !important; background-color:#000 !important; overflow:hidden !important; width:100% !important; height:100% !important; } ' +
                                               'iframe#thatframe, .preview-wrap, #player, #player video, .jwplayer, .jw-wrapper, .jw-media, iframe#streamPlayer, .watch-player-wrapper, video#video, #player_prog, #player_prog video, .vjs-tech { position:fixed !important; top:0 !important; left:0 !important; width:100vw !important; height:100vh !important; z-index:2147483640 !important; pointer-events:auto !important; border:none !important; } ' +
                                               '#unmuteBtn, .unmute-btn, .embedme-unmute, [class*="unmute" i] { display: none !important; } ' +
@@ -1242,6 +1346,9 @@ class PlayerActivity : ComponentActivity() {
 
                     function kickstartAndUnmute() {
                         try {
+                            removeAllSandboxes();
+                            checkSandboxError();
+
                             // 1. Click 'Tap to play' message if present
                             var msg = document.getElementById('msg');
                             if (msg) {
@@ -2201,12 +2308,19 @@ class PlayerActivity : ComponentActivity() {
             }
             if (channelId.toIntOrNull() != null) {
                 options.add(ServerOption("Servidor Alternativo ${options.size} (DaddyLive - Player 1)", isDirect = false, folder = "stream"))
-                options.add(ServerOption("Servidor Alternativo ${options.size} (DaddyLive - Player 2 / Cast)", isDirect = false, folder = "cast"))
+                options.add(ServerOption("Servidor Alternativo ${options.size} (DaddyLive - Player 2)", isDirect = false, folder = "player"))
             }
             return options
         }
 
-        // 1. TimStreams backup (HIGHEST PRIORITY when available)
+        // 1. DaddyLive (Player 1 e Player 2) prioritários para canais normais DaddyLive
+        val hasDaddyLive = (currentChannel.id.toIntOrNull() != null) || (channelId.toIntOrNull() != null)
+        if (hasDaddyLive) {
+            options.add(ServerOption("Servidor Principal (DaddyLive - Player 1)", isDirect = false, folder = "stream"))
+            options.add(ServerOption("Servidor Alternativo 1 (DaddyLive - Player 2)", isDirect = false, folder = "player"))
+        }
+
+        // 2. TimStreams backup (1080p)
         val backupUrl = currentChannel.backupStreamUrl ?: backupDirectUrl
         val rawTimst = if (backupUrl != null && (backupUrl.contains("grandemx") || backupUrl.contains("exmxbxe") || backupUrl.contains("ehgembxe") || backupUrl.contains("timst"))) backupUrl
             else (currentChannel.backupStreamUrl2 ?: backupDirectUrl2)?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("ehgembxe") || it.contains("timst") }
@@ -2218,33 +2332,11 @@ class PlayerActivity : ComponentActivity() {
             u
         }
         if (timstUrl != null) {
-            options.add(ServerOption("Servidor Principal (TimStreams 1080p)", isDirect = true, directUrl = timstUrl))
+            val label = if (options.isEmpty()) "Servidor Principal (TimStreams 1080p)" else "Servidor Alternativo ${options.size} (TimStreams 1080p)"
+            options.add(ServerOption(label, isDirect = true, directUrl = timstUrl))
         }
 
-        // 2. DaddyLive (Player 1 e Player 2 como backups)
-        val hasDaddyLive = (currentChannel.id.toIntOrNull() != null) || (channelId.toIntOrNull() != null)
-        if (hasDaddyLive) {
-            val label1 = if (timstUrl != null) "Servidor Alternativo 1 (DaddyLive - Player 1)" else "Servidor Principal (DaddyLive - Player 1)"
-            options.add(ServerOption(label1, isDirect = false, folder = "stream"))
-
-            val label2 = if (timstUrl != null) "Servidor Alternativo 2 (DaddyLive - Player 2 / Cast)" else "Servidor Alternativo 1 (DaddyLive - Player 2 / Cast)"
-            options.add(ServerOption(label2, isDirect = false, folder = "cast"))
-        }
-
-        // 3. M3UPT / Official direct stream (Higher quality and stability)
-        val officialUrl = currentChannel.backupStreamUrl2?.takeIf {
-            it.contains("rtp.pt") || it.contains("impresa.pt") || it.contains("github.com") ||
-            it.contains("cloudfront") || it.contains("fastly") || it.contains("livextend")
-        } ?: currentChannel.backupStreamUrl?.takeIf {
-            it.contains("rtp.pt") || it.contains("impresa.pt") || it.contains("github.com") ||
-            it.contains("cloudfront") || it.contains("fastly") || it.contains("livextend")
-        }
-        if (officialUrl != null && options.none { it.directUrl == officialUrl }) {
-            val label = if (options.isEmpty()) "Servidor Oficial (Emissão Direta)" else "Servidor Alternativo ${options.size} (Emissão Direta)"
-            options.add(ServerOption(label, isDirect = true, directUrl = officialUrl))
-        }
-
-        // 4. Non-Timst direct backups (e.g. EpicSports, alternative direct streams)
+        // 3. EpicSports / Outras transmissões diretas alternativas
         val candidateBackups = listOfNotNull(
             currentChannel.backupStreamUrl,
             currentChannel.backupStreamUrl2,
@@ -2255,7 +2347,7 @@ class PlayerActivity : ComponentActivity() {
         for (bUrl in candidateBackups) {
             if (options.none { it.directUrl == bUrl }) {
                 val label = if (options.isEmpty()) {
-                    "Servidor Principal (Direto)"
+                    if (bUrl.contains("epicsports")) "Servidor Principal (EpicSports)" else "Servidor Principal (Direto)"
                 } else if (bUrl.contains("epicsports")) {
                     "Servidor Alternativo ${options.size} (EpicSports)"
                 } else {
@@ -2263,6 +2355,19 @@ class PlayerActivity : ComponentActivity() {
                 }
                 options.add(ServerOption(label, isDirect = true, directUrl = bUrl))
             }
+        }
+
+        // 4. M3UPT / Emissão Oficial Direta
+        val officialUrl = currentChannel.backupStreamUrl2?.takeIf {
+            it.contains("rtp.pt") || it.contains("impresa.pt") || it.contains("github.com") ||
+            it.contains("cloudfront") || it.contains("fastly") || it.contains("livextend")
+        } ?: currentChannel.backupStreamUrl?.takeIf {
+            it.contains("rtp.pt") || it.contains("impresa.pt") || it.contains("github.com") ||
+            it.contains("cloudfront") || it.contains("fastly") || it.contains("livextend")
+        }
+        if (officialUrl != null && options.none { it.directUrl == officialUrl }) {
+            val label = if (options.isEmpty()) "Servidor Oficial (Emissão Direta)" else "Servidor Alternativo ${options.size} (Emissão Direta)"
+            options.add(ServerOption(label, isDirect = true, directUrl = officialUrl))
         }
 
         return options
