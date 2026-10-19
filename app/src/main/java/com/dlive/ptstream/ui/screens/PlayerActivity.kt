@@ -382,13 +382,10 @@ class PlayerActivity : ComponentActivity() {
         backupDirectUrl = intent.getStringExtra("EXTRA_BACKUP_STREAM_URL")
         backupDirectUrl2 = intent.getStringExtra("EXTRA_BACKUP_STREAM_URL2")
 
-        // Se o canal tem ID DaddyLive, NÃO forçar directStreamUrl para que o DaddyLive seja o Servidor Principal
-        if (channelId.toIntOrNull() == null && directStreamUrl == null) {
-            val timstCandidate = listOfNotNull(backupDirectUrl, backupDirectUrl2)
-                .firstOrNull { it.contains("ehgembxe") || it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") }
-            if (timstCandidate != null) {
-                directStreamUrl = timstCandidate
-            }
+        val timstCandidate = listOfNotNull(directStreamUrl, backupDirectUrl, backupDirectUrl2)
+            .firstOrNull { it.contains("ehgembxe") || it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") }
+        if (timstCandidate != null && directStreamUrl == null) {
+            directStreamUrl = timstCandidate
         }
         activeDirectUrl = directStreamUrl
         isDirectStreamActive = (directStreamUrl != null)
@@ -982,9 +979,14 @@ class PlayerActivity : ComponentActivity() {
 
         val timstUrl = newChannel.timStreamsUrl
 
-        if (newChannel.id.toIntOrNull() == null) {
+        if (timstUrl != null) {
             isDirectStreamActive = true
-            val directBackup = newChannel.backupStreamUrl ?: timstUrl
+            activeDirectUrl = timstUrl
+            directStreamUrl = timstUrl
+            isBackupSelected = false
+        } else if (newChannel.id.toIntOrNull() == null) {
+            isDirectStreamActive = true
+            val directBackup = newChannel.backupStreamUrl
             activeDirectUrl = directBackup
             directStreamUrl = directBackup
             isBackupSelected = false
@@ -1633,8 +1635,9 @@ class PlayerActivity : ComponentActivity() {
                 startAutoUnmuteSequence()
                 injectPlaybackErrorWatcher(view)
                 handler.postDelayed({
-                    hideConnectingOverlay()
-                    markStreamSuccess()
+                    if (streamLoadedSuccessfully) {
+                        hideConnectingOverlay()
+                    }
                 }, 1800)
             }
 
@@ -2234,6 +2237,16 @@ class PlayerActivity : ComponentActivity() {
         if (failoverServers.isEmpty()) {
             failoverServers = buildFailoverList()
             currentFailoverIndex = 0
+            val initialOption = failoverServers.firstOrNull()
+            if (initialOption != null) {
+                isDirectStreamActive = initialOption.isDirect
+                activeDirectUrl = initialOption.directUrl
+                directStreamUrl = initialOption.directUrl
+                if (!initialOption.isDirect) {
+                    currentFolder = initialOption.folder ?: "stream"
+                }
+                updateServerBadgeText()
+            }
         }
 
         if (isDirectStreamActive && !activeDirectUrl.isNullOrBlank()) {
@@ -2295,15 +2308,27 @@ class PlayerActivity : ComponentActivity() {
 
         val options = mutableListOf<ServerOption>()
 
+        // 1. TimStreams (Servidor Principal 1080p prioritário quando disponível)
+        val backupUrl = currentChannel?.backupStreamUrl ?: backupDirectUrl
+        val rawTimst = if (backupUrl != null && (backupUrl.contains("grandemx") || backupUrl.contains("exmxbxe") || backupUrl.contains("ehgembxe") || backupUrl.contains("timst"))) backupUrl
+            else (currentChannel?.backupStreamUrl2 ?: backupDirectUrl2)?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("ehgembxe") || it.contains("timst") }
+            ?: directStreamUrl?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("ehgembxe") || it.contains("timst") }
+            ?: currentChannel?.timStreamsUrl
+
+        val timstUrl = rawTimst?.let { url ->
+            var u = url.trim()
+            if (u.contains("grandemx.org")) u = u.replace("https://grandemx.org", "https://ehgembxe.cfd").replace("http://grandemx.org", "https://ehgembxe.cfd")
+            if (u.contains("exmxbxe.cfd")) u = u.replace("https://exmxbxe.cfd", "https://ehgembxe.cfd").replace("http://exmxbxe.cfd", "https://ehgembxe.cfd")
+            u
+        }
+        if (timstUrl != null) {
+            options.add(ServerOption("Servidor Principal (TimStreams 1080p)", isDirect = true, directUrl = timstUrl))
+        }
+
         if (currentChannel == null) {
-            val list = listOfNotNull(directStreamUrl, backupDirectUrl, backupDirectUrl2)
+            val list = listOfNotNull(directStreamUrl, backupDirectUrl, backupDirectUrl2).filter { it != timstUrl }
             list.forEachIndexed { idx, url ->
-                val name = when {
-                    url.contains("ehgembxe") || url.contains("grandemx") || url.contains("exmxbxe") || url.contains("timst") -> "Servidor Principal (TimStreams 1080p)"
-                    idx == 0 -> "Servidor Principal (Direto)"
-                    idx == 1 -> "Servidor Alternativo 1 (Direto)"
-                    else -> "Servidor Reserva $idx (Direto)"
-                }
+                val name = if (options.isEmpty()) "Servidor Principal (Direto)" else "Servidor Alternativo ${options.size} (Direto)"
                 options.add(ServerOption(name, isDirect = true, directUrl = url))
             }
             if (channelId.toIntOrNull() != null) {
@@ -2313,27 +2338,14 @@ class PlayerActivity : ComponentActivity() {
             return options
         }
 
-        // 1. DaddyLive (Player 1 e Player 2) prioritários para canais normais DaddyLive
+        // 2. DaddyLive (Player 1 e Player 2) como fallback ou como principal caso não haja TimStreams
         val hasDaddyLive = (currentChannel.id.toIntOrNull() != null) || (channelId.toIntOrNull() != null)
         if (hasDaddyLive) {
-            options.add(ServerOption("Servidor Principal (DaddyLive - Player 1)", isDirect = false, folder = "stream"))
-            options.add(ServerOption("Servidor Alternativo 1 (DaddyLive - Player 2)", isDirect = false, folder = "player"))
-        }
+            val label1 = if (options.isEmpty()) "Servidor Principal (DaddyLive - Player 1)" else "Servidor Alternativo ${options.size} (DaddyLive - Player 1)"
+            options.add(ServerOption(label1, isDirect = false, folder = "stream"))
 
-        // 2. TimStreams backup (1080p)
-        val backupUrl = currentChannel.backupStreamUrl ?: backupDirectUrl
-        val rawTimst = if (backupUrl != null && (backupUrl.contains("grandemx") || backupUrl.contains("exmxbxe") || backupUrl.contains("ehgembxe") || backupUrl.contains("timst"))) backupUrl
-            else (currentChannel.backupStreamUrl2 ?: backupDirectUrl2)?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("ehgembxe") || it.contains("timst") }
-            ?: directStreamUrl?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("ehgembxe") || it.contains("timst") }
-        val timstUrl = rawTimst?.let { url ->
-            var u = url.trim()
-            if (u.contains("grandemx.org")) u = u.replace("https://grandemx.org", "https://ehgembxe.cfd").replace("http://grandemx.org", "https://ehgembxe.cfd")
-            if (u.contains("exmxbxe.cfd")) u = u.replace("https://exmxbxe.cfd", "https://ehgembxe.cfd").replace("http://exmxbxe.cfd", "https://ehgembxe.cfd")
-            u
-        }
-        if (timstUrl != null) {
-            val label = if (options.isEmpty()) "Servidor Principal (TimStreams 1080p)" else "Servidor Alternativo ${options.size} (TimStreams 1080p)"
-            options.add(ServerOption(label, isDirect = true, directUrl = timstUrl))
+            val label2 = "Servidor Alternativo ${options.size} (DaddyLive - Player 2)"
+            options.add(ServerOption(label2, isDirect = false, folder = "player"))
         }
 
         // 3. EpicSports / Outras transmissões diretas alternativas

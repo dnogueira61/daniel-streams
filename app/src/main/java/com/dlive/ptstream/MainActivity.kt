@@ -81,8 +81,10 @@ class MainActivity : ComponentActivity() {
 
             if (!directUrl.isNullOrBlank()) {
                 putExtra("EXTRA_DIRECT_STREAM_URL", directUrl)
+            } else if (timstUrl != null) {
+                putExtra("EXTRA_DIRECT_STREAM_URL", timstUrl)
             } else if (channel.id.toIntOrNull() == null) {
-                putExtra("EXTRA_DIRECT_STREAM_URL", channel.backupStreamUrl ?: timstUrl)
+                putExtra("EXTRA_DIRECT_STREAM_URL", channel.backupStreamUrl)
             }
         }
         startActivity(intent)
