@@ -1,9 +1,11 @@
 package com.dlive.ptstream.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -162,10 +164,16 @@ fun EpgDetailPanel(
             }
 
             // Botão de Favorito
+            var isFavFocused by remember { mutableStateOf(false) }
             IconButton(
                 onClick = onToggleFavorite,
                 modifier = Modifier
                     .clip(CircleShape)
+                    .onFocusChanged { isFavFocused = it.isFocused }
+                    .then(
+                        if (isFavFocused) Modifier.border(2.dp, Color(0xFF38BDF8), CircleShape)
+                        else Modifier
+                    )
                     .background(if (channel.isFavorite) Color(0x33F59E0B) else theme.surfaceVariant)
             ) {
                 Icon(
@@ -199,6 +207,9 @@ fun EpgDetailPanel(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT
                             )
+                            isFocusable = false
+                            isFocusableInTouchMode = false
+                            descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
                             settings.apply {
                                 javaScriptEnabled = true
                                 domStorageEnabled = true
@@ -218,6 +229,14 @@ fun EpgDetailPanel(
                             }
                             loadUrl(previewUrl)
                         }
+                    },
+                    onRelease = { wv ->
+                        try {
+                            wv.stopLoading()
+                            wv.loadUrl("about:blank")
+                            wv.clearHistory()
+                            wv.destroy()
+                        } catch (_: Exception) {}
                     },
                     modifier = Modifier.fillMaxSize()
                 )
@@ -407,13 +426,16 @@ fun EpgDetailPanel(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Botão Principal "Assistir Canal"
+            var isPlayFocused by remember { mutableStateOf(false) }
             Button(
                 onClick = { onPlayClick(null) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(46.dp),
+                    .height(46.dp)
+                    .onFocusChanged { isPlayFocused = it.isFocused },
                 colors = ButtonDefaults.buttonColors(containerColor = theme.primary),
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(10.dp),
+                border = if (isPlayFocused) BorderStroke(2.5.dp, Color(0xFF38BDF8)) else null
             ) {
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
@@ -439,35 +461,59 @@ fun EpgDetailPanel(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
+                    var isServer1Focused by remember { mutableStateOf(false) }
                     OutlinedButton(
                         onClick = { onPlayClick(null) },
-                        modifier = Modifier.weight(1f).height(36.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(36.dp)
+                            .onFocusChanged { isServer1Focused = it.isFocused },
                         contentPadding = PaddingValues(horizontal = 6.dp),
                         shape = RoundedCornerShape(8.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, theme.border)
+                        border = if (isServer1Focused) {
+                            BorderStroke(2.dp, Color(0xFF38BDF8))
+                        } else {
+                            BorderStroke(1.dp, theme.border)
+                        }
                     ) {
                         Text("Servidor 1", fontSize = 11.sp, color = theme.textPrimary, fontWeight = FontWeight.SemiBold)
                     }
 
                     if (hasBackup1) {
+                        var isServer2Focused by remember { mutableStateOf(false) }
                         OutlinedButton(
                             onClick = { onPlayClick(channel.backupStreamUrl) },
-                            modifier = Modifier.weight(1f).height(36.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(36.dp)
+                                .onFocusChanged { isServer2Focused = it.isFocused },
                             contentPadding = PaddingValues(horizontal = 6.dp),
                             shape = RoundedCornerShape(8.dp),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, theme.border)
+                            border = if (isServer2Focused) {
+                                BorderStroke(2.dp, Color(0xFF38BDF8))
+                            } else {
+                                BorderStroke(1.dp, theme.border)
+                            }
                         ) {
                             Text("Servidor 2", fontSize = 11.sp, color = theme.textPrimary, fontWeight = FontWeight.SemiBold)
                         }
                     }
 
                     if (hasBackup2) {
+                        var isServer3Focused by remember { mutableStateOf(false) }
                         OutlinedButton(
                             onClick = { onPlayClick(channel.backupStreamUrl2) },
-                            modifier = Modifier.weight(1f).height(36.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(36.dp)
+                                .onFocusChanged { isServer3Focused = it.isFocused },
                             contentPadding = PaddingValues(horizontal = 6.dp),
                             shape = RoundedCornerShape(8.dp),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, theme.border)
+                            border = if (isServer3Focused) {
+                                BorderStroke(2.dp, Color(0xFF38BDF8))
+                            } else {
+                                BorderStroke(1.dp, theme.border)
+                            }
                         ) {
                             Text("Servidor 3", fontSize = 11.sp, color = theme.textPrimary, fontWeight = FontWeight.SemiBold)
                         }

@@ -555,8 +555,8 @@ class ChannelRepository(private val context: Context) {
         val timstMirrors = listOf(
             getTimstBaseUrl(),
             "https://ehgembxe.cfd",
-            DEFAULT_TIMST_BASE_URL,
-            "https://grandemx.org"
+            "https://timst.top",
+            DEFAULT_TIMST_BASE_URL
         ).distinct()
 
         val workingTimst = runBlocking(Dispatchers.IO) {

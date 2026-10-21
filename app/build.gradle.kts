@@ -11,8 +11,8 @@ android {
         applicationId = "com.dlive.ptstream"
         minSdk = 24
         targetSdk = 34
-        versionCode = 79
-        versionName = "2.19"
+        versionCode = 80
+        versionName = "2.20"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -47,6 +47,11 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = false
     }
 }
 

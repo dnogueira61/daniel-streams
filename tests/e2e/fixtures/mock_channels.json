@@ -1,0 +1,54 @@
+[
+  {
+    "id": "49",
+    "name": "Sky Sports Main Event HD",
+    "category": "UK",
+    "country": "UK",
+    "logo": "https://example.com/logo49.png",
+    "streamUrl": "https://dlive.sx/stream/stream-49.php"
+  },
+  {
+    "id": "719",
+    "name": "RTP 1 HD",
+    "category": "Portugal",
+    "country": "PT",
+    "isPt": true,
+    "logo": "https://example.com/rtp1.png",
+    "backupStreamUrl": "https://streaming-live.rtp.pt/liverepeater/smil:rtp1HD.smil/playlist.m3u8"
+  },
+  {
+    "id": "722",
+    "name": "SIC HD",
+    "category": "Portugal",
+    "country": "PT",
+    "isPt": true,
+    "logo": "https://example.com/sic.png",
+    "backupStreamUrl": "https://sic.live.impresa.pt/sic1080p.m3u8"
+  },
+  {
+    "id": "860",
+    "name": "Sport TV 1 HD",
+    "category": "Portugal",
+    "country": "PT",
+    "isPt": true,
+    "logo": "https://example.com/spt1.png",
+    "backupStreamUrl": "https://ehgembxe.cfd/oqq5c86g-7521",
+    "backupStreamUrl2": "https://epicsports-tv.com/eu.html?id=43633"
+  },
+  {
+    "id": "canal11-pt",
+    "name": "Canal 11 HD",
+    "category": "Portugal",
+    "country": "PT",
+    "isPt": true,
+    "logo": "https://example.com/c11.png",
+    "backupStreamUrl": "https://dy4isoelz3s0x.cloudfront.net/0_hd.m3u8"
+  },
+  {
+    "id": "9999",
+    "name": "Malformed Channel Without Streams",
+    "category": "TEST",
+    "country": "XX",
+    "isPt": false
+  }
+]

@@ -77,6 +77,26 @@ class PlayerActivity : ComponentActivity() {
     companion object {
         private var activeInstance: WeakReference<PlayerActivity>? = null
 
+        private val AD_BLOCK_PATTERNS = hashSetOf(
+            "piousshiners", "nanisms", "histats", "premiumvertising",
+            "dzlhwcoblmc", "azrmpjyh", "smartbanner", "adsco",
+            "popads", "popunder", "creativecdn", "doubleclick",
+            "googlesyndication", "monetag", "trafficjunky",
+            "adservice", "chatango", "onclicksuper", "syndication",
+            "exdynsrv", "adsystem", "adnxs", "burstyflavia",
+            "profitableratecpmnetwork", "cleverwebserver", "adsboosters",
+            "reliedhounder", "canine.tools", "plausible",
+            "disable-devtool", "aclib",
+            // Additional high-impact streaming ad networks & trackers
+            "adsterra", "propellerads", "exoclick", "hilltopads",
+            "adcash", "yllix", "clickadu", "juicyads", "trafficstars",
+            "effectivecpmgate", "highcpmgate", "whos.amung.us",
+            "scorecardresearch", "onclickmega", "alwingulla",
+            "deloplen", "coinhive", "adkeep", "inpagepush",
+            "bet365", "1xbet", "betano", "betfair", "mostbet", "melbet"
+        )
+        private val EMPTY_JS_RESPONSE = WebResourceResponse("application/javascript", "UTF-8", ByteArrayInputStream(ByteArray(0)))
+
         fun closeActivePip() {
             activeInstance?.get()?.let { activity ->
                 try {
@@ -96,6 +116,7 @@ class PlayerActivity : ComponentActivity() {
     }
 
     private lateinit var drawerLayout: DrawerLayout
+    private lateinit var playerRoot: RelativeLayout
     private lateinit var webView: WebView
     private lateinit var customViewContainer: FrameLayout
     private lateinit var progressBar: ProgressBar
@@ -239,6 +260,9 @@ class PlayerActivity : ComponentActivity() {
 
     private val handler = Handler(Looper.getMainLooper())
     private var activeDialog: Dialog? = null
+    private var isWebViewDestroyed = false
+    private var renderCrashCount = 0
+    private var lastRenderCrashTime = 0L
 
     private val overlayHideRunnable = Runnable {
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -298,22 +322,29 @@ class PlayerActivity : ComponentActivity() {
 
     private fun showSilentRecoveryHud(serverName: String) {
         runOnUiThread {
+            tvConnectingStatus.text = "⚡ A estabilizar sinal... ($serverName)"
+            try {
+                tvConnectingStatus.setTextColor(android.graphics.Color.parseColor("#38BDF8"))
+            } catch (_: Exception) {}
             Toast.makeText(this@PlayerActivity, "⚡ A estabilizar sinal... ($serverName)", Toast.LENGTH_SHORT).show()
         }
     }
 
     fun triggerFailoverDueToPlaybackError(reason: String) {
         android.util.Log.w("PlayerFailover", "Triggering failover due to: $reason")
+        if (reason.contains("render")) {
+            streamLoadedSuccessfully = false
+        }
         val isStallError = reason.startsWith("stall") || reason.contains("freeze")
         if (streamLoadedSuccessfully && !isStallError) {
-            val isHardError = reason.startsWith("http_error_") || reason == "network_error" || reason.contains("sandbox")
+            val isHardError = reason.startsWith("http_error_") || reason == "network_error" || reason.contains("sandbox") || reason.contains("render")
             if (!isHardError) {
                 android.util.Log.i("PlayerFailover", "Stream já está a tocar com sucesso. A ignorar failover ($reason)")
                 return
             }
         }
         val now = System.currentTimeMillis()
-        if (now - lastFailoverTime < 1800L) return
+        if (now - lastFailoverTime < 1800L && !reason.contains("render")) return
         lastFailoverTime = now
 
         handler.removeCallbacks(failoverTimeoutRunnable)
@@ -328,6 +359,13 @@ class PlayerActivity : ComponentActivity() {
                     "⚡ Erro na stream. A tentar ${next.label}..."
                 }
                 Toast.makeText(this@PlayerActivity, msg, Toast.LENGTH_SHORT).show()
+                tvConnectingStatus.text = "⚡ A mudar para ${next.label}..."
+                try {
+                    tvConnectingStatus.setTextColor(android.graphics.Color.parseColor("#38BDF8"))
+                } catch (_: Exception) {}
+                if (connectingOverlay.visibility != View.VISIBLE) {
+                    showSilentRecoveryHud(next.label)
+                }
                 applyServerOption(next, currentFailoverIndex)
             }
         } else {
@@ -349,7 +387,6 @@ class PlayerActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         activeInstance = WeakReference(this)
         setContentView(R.layout.activity_player)
-        try { WebView(this).resumeTimers() } catch (_: Exception) {}
 
         val screenFilter = IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_OFF)
@@ -420,6 +457,7 @@ class PlayerActivity : ComponentActivity() {
     @SuppressLint("ClickableViewAccessibility")
     private fun initViews() {
         drawerLayout = findViewById(R.id.drawerLayout)
+        playerRoot = findViewById(R.id.playerRoot)
         webView = findViewById(R.id.webView)
         webView.isFocusable = false
         webView.isFocusableInTouchMode = false
@@ -575,7 +613,18 @@ class PlayerActivity : ComponentActivity() {
         connectingOverlay.visibility = View.VISIBLE
         connectingOverlay.alpha = 1f
         tvConnectingChannel.text = name
-        tvConnectingStatus.text = "A ligar à transmissão..."
+        if (currentFailoverIndex > 0 && currentFailoverIndex < failoverServers.size) {
+            val next = failoverServers[currentFailoverIndex]
+            tvConnectingStatus.text = "⚡ A mudar para ${next.label}..."
+            try {
+                tvConnectingStatus.setTextColor(android.graphics.Color.parseColor("#38BDF8"))
+            } catch (_: Exception) {}
+        } else {
+            tvConnectingStatus.text = "A ligar à transmissão..."
+            try {
+                tvConnectingStatus.setTextColor(android.graphics.Color.WHITE)
+            } catch (_: Exception) {}
+        }
 
         val localLogo = ChannelLogoHelper.getLocalLogoRes(name)
         val onlineLogo = ChannelLogoHelper.getLogoUrl(name)
@@ -712,7 +761,7 @@ class PlayerActivity : ComponentActivity() {
             imm?.showSoftInput(etDrawerSearch, InputMethodManager.SHOW_IMPLICIT)
         }
         etDrawerSearch.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
+            if (hasFocus && !isTv) {
                 val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
                 imm?.showSoftInput(etDrawerSearch, InputMethodManager.SHOW_IMPLICIT)
             }
@@ -978,13 +1027,24 @@ class PlayerActivity : ComponentActivity() {
         repository.setLastWatchedChannelId(channelId)
 
         val timstUrl = newChannel.timStreamsUrl
+        val isDirectBroadcast = newChannel.backupStreamUrl?.let { url ->
+            val lower = url.lowercase()
+            lower.contains(".m3u8") ||
+            lower.contains("rtp.pt") ||
+            lower.contains("impresa.pt") ||
+            lower.contains("iol.pt") ||
+            lower.contains("epicsports") ||
+            lower.contains("cloudfront") ||
+            lower.contains("fastly") ||
+            newChannel.isPortuguese
+        } ?: false
 
         if (timstUrl != null) {
             isDirectStreamActive = true
             activeDirectUrl = timstUrl
             directStreamUrl = timstUrl
             isBackupSelected = false
-        } else if (newChannel.id.toIntOrNull() == null) {
+        } else if (isDirectBroadcast || newChannel.id.toIntOrNull() == null) {
             isDirectStreamActive = true
             val directBackup = newChannel.backupStreamUrl
             activeDirectUrl = directBackup
@@ -1200,8 +1260,7 @@ class PlayerActivity : ComponentActivity() {
         webView.isClickable = true
         webView.addJavascriptInterface(FailoverBridge(), "AndroidFailover")
 
-        if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
-            val startScript = """
+        val startScript = """
                 (function() {
                     try {
                         var host = window.location.hostname || '';
@@ -1225,6 +1284,15 @@ class PlayerActivity : ComponentActivity() {
                             }
                             return origSetAttr.apply(this, arguments);
                         };
+                        var origSetAttrNS = Element.prototype.setAttributeNS;
+                        if (origSetAttrNS) {
+                            Element.prototype.setAttributeNS = function(ns, name, value) {
+                                if (name && (name === 'sandbox' || name.toLowerCase() === 'sandbox')) {
+                                    return;
+                                }
+                                return origSetAttrNS.apply(this, arguments);
+                            };
+                        }
                         var origHasAttr = Element.prototype.hasAttribute;
                         Element.prototype.hasAttribute = function(name) {
                             if (name && (name === 'sandbox' || name.toLowerCase() === 'sandbox')) {
@@ -1239,6 +1307,15 @@ class PlayerActivity : ComponentActivity() {
                             }
                             return origGetAttr.apply(this, arguments);
                         };
+                        var origToggleAttr = Element.prototype.toggleAttribute;
+                        if (origToggleAttr) {
+                            Element.prototype.toggleAttribute = function(name, force) {
+                                if (name && (name === 'sandbox' || name.toLowerCase() === 'sandbox')) {
+                                    return false;
+                                }
+                                return origToggleAttr.apply(this, arguments);
+                            };
+                        }
                         if (window.HTMLIFrameElement && HTMLIFrameElement.prototype) {
                             Object.defineProperty(HTMLIFrameElement.prototype, 'sandbox', {
                                 get: function() {
@@ -1256,9 +1333,18 @@ class PlayerActivity : ComponentActivity() {
                         }
                     } catch(e) {}
 
+                    function unSandboxIframe(ifr) {
+                        if (!ifr) return;
+                        var hadSandbox = ifr.hasAttribute && ifr.hasAttribute('sandbox');
+                        try { ifr.removeAttribute('sandbox'); } catch(e) {}
+                        if (ifr.src && ifr.src.indexOf('http') === 0) {
+                            try { ifr.src = ifr.src; } catch(e) {}
+                        }
+                    }
+
                     try {
                         if (window.frameElement) {
-                            window.frameElement.removeAttribute('sandbox');
+                            unSandboxIframe(window.frameElement);
                         }
                     } catch(e) {}
 
@@ -1266,9 +1352,7 @@ class PlayerActivity : ComponentActivity() {
                         try {
                             var iframes = document.getElementsByTagName('iframe');
                             for (var i = 0; i < iframes.length; i++) {
-                                if (iframes[i].hasAttribute && iframes[i].hasAttribute('sandbox')) {
-                                    iframes[i].removeAttribute('sandbox');
-                                }
+                                unSandboxIframe(iframes[i]);
                             }
                         } catch(e) {}
                     }
@@ -1278,17 +1362,17 @@ class PlayerActivity : ComponentActivity() {
                             for (var i = 0; i < mutations.length; i++) {
                                 var m = mutations[i];
                                 if (m.type === 'attributes' && m.attributeName && m.attributeName.toLowerCase() === 'sandbox') {
-                                    m.target.removeAttribute('sandbox');
+                                    unSandboxIframe(m.target);
                                 } else if (m.type === 'childList') {
                                     for (var j = 0; j < m.addedNodes.length; j++) {
                                         var node = m.addedNodes[j];
                                         if (node.nodeType === 1) {
                                             if (node.tagName === 'IFRAME') {
-                                                node.removeAttribute('sandbox');
+                                                unSandboxIframe(node);
                                             }
                                             var subIframes = node.querySelectorAll ? node.querySelectorAll('iframe') : [];
                                             for (var k = 0; k < subIframes.length; k++) {
-                                                subIframes[k].removeAttribute('sandbox');
+                                                unSandboxIframe(subIframes[k]);
                                             }
                                         }
                                     }
@@ -1312,7 +1396,15 @@ class PlayerActivity : ComponentActivity() {
                         } catch(e) {}
                     }
 
-                    window.open = function() { return null; };
+                    try {
+                        Object.defineProperty(window, 'open', {
+                            value: function() { return null; },
+                            writable: false,
+                            configurable: false
+                        });
+                    } catch(e) {
+                        window.open = function() { return null; };
+                    }
                     window.alert = function() {};
                     window.confirm = function() { return true; };
                     window.prompt = function() { return null; };
@@ -1324,7 +1416,7 @@ class PlayerActivity : ComponentActivity() {
                             el.target = '_self';
                         }
                         if (tag && tag.toLowerCase() === 'iframe') {
-                            try { el.removeAttribute('sandbox'); } catch(e) {}
+                            unSandboxIframe(el);
                         }
                         return el;
                     };
@@ -1529,6 +1621,8 @@ class PlayerActivity : ComponentActivity() {
                     }
                 })();
             """.trimIndent()
+
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
             try {
                 WebViewCompat.addDocumentStartJavaScript(webView, startScript, setOf("*"))
             } catch (e: Exception) {
@@ -1537,38 +1631,51 @@ class PlayerActivity : ComponentActivity() {
         }
 
         webView.webViewClient = object : WebViewClient() {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                if (!WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+                    view?.evaluateJavascript(startScript, null)
+                }
+            }
+
             override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
                 val rawUrl = request?.url?.toString() ?: return null
                 val urlLower = rawUrl.lowercase()
-                val adBlockPatterns = listOf(
-                    "piousshiners", "nanisms", "histats", "premiumvertising",
-                    "dzlhwcoblmc", "azrmpjyh", "smartbanner", "adsco",
-                    "popads", "popunder", "creativecdn", "doubleclick",
-                    "googlesyndication", "monetag", "trafficjunky",
-                    "adservice", "chatango", "onclicksuper", "syndication",
-                    "exdynsrv", "adsystem", "adnxs", "burstyflavia",
-                    "profitableratecpmnetwork", "cleverwebserver", "adsboosters",
-                    "reliedhounder", "canine.tools", "plausible",
-                    "disable-devtool", "aclib"
-                )
-                if (adBlockPatterns.any { urlLower.contains(it) }) {
-                    return WebResourceResponse("application/javascript", "UTF-8", ByteArrayInputStream(ByteArray(0)))
+                for (pattern in AD_BLOCK_PATTERNS) {
+                    if (urlLower.contains(pattern)) {
+                        return EMPTY_JS_RESPONSE
+                    }
                 }
                 return super.shouldInterceptRequest(view, request)
             }
 
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                val url = request?.url?.toString() ?: return false
-                val host = request.url?.host?.lowercase() ?: ""
+                val reqUri = request?.url ?: return false
+                val url = reqUri.toString()
+                if (url.isBlank()) return true
+                val scheme = reqUri.scheme?.lowercase() ?: ""
+                val host = reqUri.host?.lowercase() ?: ""
 
-                if (!request.isForMainFrame) {
-                    return false
+                // 1. Block dangerous/external schemes from breaking WebView
+                if (scheme != "http" && scheme != "https" && scheme != "about" && scheme != "data" && scheme != "blob") {
+                    android.util.Log.w("PlayerActivity", "Blocked external scheme navigation: $scheme ($url)")
+                    return true // Intercept & block
                 }
 
+                // 2. Subframe navigation safety check
+                if (!request.isForMainFrame) {
+                    // Block subframe if it matches ad patterns
+                    if (AD_BLOCK_PATTERNS.any { host.contains(it) || url.lowercase().contains(it) }) {
+                        return true
+                    }
+                    return false // Allow internal stream subframes
+                }
+
+                // 3. Main Frame navigation whitelist (Strict Domain Matches)
                 val currentTimstHost = try { Uri.parse(repository.getTimstBaseUrl()).host?.lowercase() ?: "" } catch (_: Exception) { "" }
                 val currentBaseHost = try { Uri.parse(repository.getBaseUrl()).host?.lowercase() ?: "" } catch (_: Exception) { "" }
 
-                val isAllowed = host.contains("dlive") ||
+                val isAllowedHost = host.contains("dlive") ||
                         host.contains("daddylive") ||
                         host.contains("thedaddy") ||
                         host.contains("dlhd") ||
@@ -1593,36 +1700,82 @@ class PlayerActivity : ComponentActivity() {
                         host.contains("ppv") ||
                         host.contains("ppvservices") ||
                         host.contains("cdn-lab") ||
+                        host.contains("streamed.pk") ||
+                        host.contains("embed.st") ||
+                        host.contains("epicsports-tv.com") ||
+                        host.contains("rtp.pt") ||
+                        host.contains("sic.pt") ||
+                        host.contains("iol.pt") ||
+                        host.contains("portocanal.sapo.pt") ||
+                        host.contains("canal11.pt") ||
+                        host.contains("cloudfront.net") ||
+                        host.contains("fastly.net") ||
+                        host.contains("livextend.pt") ||
+                        host.contains("jsdelivr.net") ||
                         (currentTimstHost.isNotEmpty() && host.contains(currentTimstHost)) ||
-                        (currentBaseHost.isNotEmpty() && host.contains(currentBaseHost)) ||
-                        host.endsWith(".cfd") ||
-                        host.endsWith(".pk") ||
-                        host.endsWith(".cx") ||
-                        host.endsWith(".st") ||
-                        host.endsWith(".top") ||
-                        host.endsWith(".sbs") ||
-                        host.endsWith(".ru") ||
-                        host.endsWith(".org") ||
+                        (currentBaseHost.isNotEmpty() && host.contains(currentBaseHost))
+
+                val isAllowed = isAllowedHost ||
                         url.startsWith("blob:") ||
                         url.startsWith("data:")
 
                 if (!isAllowed) {
-                    return true
+                    android.util.Log.w("PlayerActivity", "Blocked unauthorized redirect to host: $host ($url)")
+                    return true // Intercept & block
                 }
                 return false
             }
 
             override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
                 val didCrash = detail?.didCrash() ?: true
-                android.util.Log.e("PlayerActivity", "WebView renderer process gone (crashed=$didCrash)")
+                val now = System.currentTimeMillis()
+                android.util.Log.e("PlayerActivity", "WebView renderer gone (crashed=$didCrash)")
+                isWebViewDestroyed = true
+                streamLoadedSuccessfully = false
+
                 try {
                     (view?.parent as? ViewGroup)?.removeView(view)
                     view?.destroy()
                 } catch (_: Exception) {}
+
                 runOnUiThread {
                     if (!isFinishing && !isDestroyed) {
-                        Toast.makeText(this@PlayerActivity, "A restabelecer motor de vídeo...", Toast.LENGTH_SHORT).show()
-                        recreate()
+                        if (now - lastRenderCrashTime < 15000L) {
+                            renderCrashCount++
+                        } else {
+                            renderCrashCount = 1
+                        }
+                        lastRenderCrashTime = now
+
+                        if (renderCrashCount > 3) {
+                            Toast.makeText(this@PlayerActivity, "⚠️ O motor gráfico falhou repetidamente. A voltar...", Toast.LENGTH_LONG).show()
+                            finish()
+                            return@runOnUiThread
+                        }
+
+                        // Re-create and attach fresh WebView on renderer crash recovery
+                        try {
+                            val newWebView = WebView(this@PlayerActivity).apply {
+                                id = R.id.webView
+                                layoutParams = RelativeLayout.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.MATCH_PARENT
+                                ).apply {
+                                    addRule(RelativeLayout.BELOW, R.id.playerHeader)
+                                }
+                            }
+                            val root = if (::playerRoot.isInitialized) playerRoot else findViewById(R.id.playerRoot)
+                            root.addView(newWebView, 0)
+                            webView = newWebView
+                            isWebViewDestroyed = false
+                            setupWebView()
+                        } catch (e: Exception) {
+                            android.util.Log.e("PlayerActivity", "Error re-creating WebView after renderer crash", e)
+                        }
+
+                        // Advance to next server instead of repeating the crash
+                        Toast.makeText(this@PlayerActivity, "⚡ A recuperar de falha no motor de vídeo...", Toast.LENGTH_SHORT).show()
+                        triggerFailoverDueToPlaybackError("render_process_crashed")
                     }
                 }
                 return true
@@ -2338,7 +2491,48 @@ class PlayerActivity : ComponentActivity() {
             return options
         }
 
-        // 2. DaddyLive (Player 1 e Player 2) como fallback ou como principal caso não haja TimStreams
+        val isPortugueseChannel = currentChannel.isPortuguese ||
+            currentChannel.country.equals("PT", ignoreCase = true) ||
+            Channel.isPortugueseChannelName(currentChannel.name)
+
+        fun isOfficialDirectBroadcast(url: String?): Boolean {
+            if (url.isNullOrBlank()) return false
+            if (url == timstUrl || Channel.isTimStreamsUrl(url)) return false
+            val lower = url.lowercase()
+            return lower.contains(".m3u8") ||
+                    lower.contains("rtp.pt") ||
+                    lower.contains("impresa.pt") ||
+                    lower.contains("iol.pt") ||
+                    lower.contains("cloudfront") ||
+                    lower.contains("fastly") ||
+                    lower.contains("canal11") ||
+                    lower.contains("portocanal") ||
+                    lower.contains("livextend") ||
+                    lower.contains("github.com") ||
+                    (isPortugueseChannel && !lower.contains("dlive.sx") && !lower.contains("epicsports"))
+        }
+
+        // 2. Transmissão Oficial M3U8 / Emissão Direta Prioritária para Canais Nacionais
+        val officialCandidates = listOfNotNull(
+            currentChannel.backupStreamUrl,
+            currentChannel.backupStreamUrl2,
+            backupDirectUrl,
+            backupDirectUrl2,
+            directStreamUrl
+        ).filter { isOfficialDirectBroadcast(it) }
+
+        for (officialUrl in officialCandidates) {
+            if (options.none { it.directUrl == officialUrl }) {
+                val label = if (options.isEmpty()) {
+                    "Servidor Principal (Transmissão Oficial M3U8)"
+                } else {
+                    "Servidor Alternativo ${options.size} (Transmissão Oficial M3U8)"
+                }
+                options.add(ServerOption(label, isDirect = true, directUrl = officialUrl))
+            }
+        }
+
+        // 3. DaddyLive (Player 1 e Player 2) como fallback ou como principal caso não haja TimStreams/Oficial
         val hasDaddyLive = (currentChannel.id.toIntOrNull() != null) || (channelId.toIntOrNull() != null)
         if (hasDaddyLive) {
             val label1 = if (options.isEmpty()) "Servidor Principal (DaddyLive - Player 1)" else "Servidor Alternativo ${options.size} (DaddyLive - Player 1)"
@@ -2348,15 +2542,19 @@ class PlayerActivity : ComponentActivity() {
             options.add(ServerOption(label2, isDirect = false, folder = "player"))
         }
 
-        // 3. EpicSports / Outras transmissões diretas alternativas
-        val candidateBackups = listOfNotNull(
+        // 4. EpicSports / Outras transmissões diretas alternativas
+        val remainingBackups = listOfNotNull(
             currentChannel.backupStreamUrl,
             currentChannel.backupStreamUrl2,
             backupDirectUrl,
-            backupDirectUrl2
-        ).filter { !it.contains("exmxbxe") && !it.contains("ehgembxe") && !it.contains("grandemx") && !it.contains("timst") }
+            backupDirectUrl2,
+            directStreamUrl
+        ).filter { url ->
+            !Channel.isTimStreamsUrl(url) &&
+            !isOfficialDirectBroadcast(url)
+        }
 
-        for (bUrl in candidateBackups) {
+        for (bUrl in remainingBackups) {
             if (options.none { it.directUrl == bUrl }) {
                 val label = if (options.isEmpty()) {
                     if (bUrl.contains("epicsports")) "Servidor Principal (EpicSports)" else "Servidor Principal (Direto)"
@@ -2367,19 +2565,6 @@ class PlayerActivity : ComponentActivity() {
                 }
                 options.add(ServerOption(label, isDirect = true, directUrl = bUrl))
             }
-        }
-
-        // 4. M3UPT / Emissão Oficial Direta
-        val officialUrl = currentChannel.backupStreamUrl2?.takeIf {
-            it.contains("rtp.pt") || it.contains("impresa.pt") || it.contains("github.com") ||
-            it.contains("cloudfront") || it.contains("fastly") || it.contains("livextend")
-        } ?: currentChannel.backupStreamUrl?.takeIf {
-            it.contains("rtp.pt") || it.contains("impresa.pt") || it.contains("github.com") ||
-            it.contains("cloudfront") || it.contains("fastly") || it.contains("livextend")
-        }
-        if (officialUrl != null && options.none { it.directUrl == officialUrl }) {
-            val label = if (options.isEmpty()) "Servidor Oficial (Emissão Direta)" else "Servidor Alternativo ${options.size} (Emissão Direta)"
-            options.add(ServerOption(label, isDirect = true, directUrl = officialUrl))
         }
 
         return options
@@ -3521,12 +3706,48 @@ class PlayerActivity : ComponentActivity() {
         }
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         handler.removeCallbacksAndMessages(null)
+
+        // 1. Cancel infinite animators
+        breathingAnimator?.cancel()
+        breathingAnimator = null
+
+        // 2. Dismiss active dialog to avoid WindowLeaked
         try {
-            pauseMediaPlayback()
-            webView.stopLoading()
-            webView.loadUrl("about:blank")
-            webView.destroy()
+            activeDialog?.dismiss()
+            activeDialog = null
         } catch (_: Exception) {}
+
+        // 3. Clear custom view callback
+        if (customView != null) {
+            try {
+                customViewContainer.removeView(customView)
+            } catch (_: Exception) {}
+            customView = null
+            try {
+                customViewCallback?.onCustomViewHidden()
+            } catch (_: Exception) {}
+            customViewCallback = null
+        }
+
+        // 4. Safe WebView teardown
+        if (!isWebViewDestroyed) {
+            isWebViewDestroyed = true
+            try {
+                pauseMediaPlayback()
+            } catch (_: Exception) {}
+            try {
+                (webView.parent as? ViewGroup)?.removeView(webView)
+                webView.removeJavascriptInterface("AndroidFailover")
+                webView.stopLoading()
+                webView.webViewClient = WebViewClient()
+                webView.webChromeClient = WebChromeClient()
+                webView.loadUrl("about:blank")
+                webView.clearHistory()
+                webView.removeAllViews()
+                webView.destroy()
+            } catch (_: Exception) {}
+        }
+
         super.onDestroy()
     }
 }

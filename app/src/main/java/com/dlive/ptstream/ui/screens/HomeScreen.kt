@@ -369,11 +369,17 @@ fun HomeScreen(
 
                         // Pill 2: Categorias (Todos ▾)
                         Box(modifier = if (!showSearch) Modifier.wrapContentSize() else Modifier) {
+                            var isCategoryFocused by remember { mutableStateOf(false) }
                             Surface(
                                 onClick = { categoryDropdownOpen = true },
+                                modifier = Modifier.onFocusChanged { isCategoryFocused = it.isFocused },
                                 shape = RoundedCornerShape(20.dp),
                                 color = if (selectedCategory != "Todos") Color(0x3338BDF8) else Color.White,
-                                border = BorderStroke(1.dp, if (selectedCategory != "Todos") Color(0xFF38BDF8) else Color.White)
+                                border = if (isCategoryFocused) {
+                                    BorderStroke(2.5.dp, Color(0xFF38BDF8))
+                                } else {
+                                    BorderStroke(1.dp, if (selectedCategory != "Todos") Color(0xFF38BDF8) else Color.White)
+                                }
                             ) {
                                 Row(
                                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),

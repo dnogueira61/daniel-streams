@@ -79,11 +79,23 @@ class MainActivity : ComponentActivity() {
                 putExtra("EXTRA_BACKUP_STREAM_URL2", channel.backupStreamUrl2)
             }
 
+            val isDirectBroadcast = channel.backupStreamUrl?.let { url ->
+                val lower = url.lowercase()
+                lower.contains(".m3u8") ||
+                lower.contains("rtp.pt") ||
+                lower.contains("impresa.pt") ||
+                lower.contains("iol.pt") ||
+                lower.contains("epicsports") ||
+                lower.contains("cloudfront") ||
+                lower.contains("fastly") ||
+                channel.isPortuguese
+            } ?: false
+
             if (!directUrl.isNullOrBlank()) {
                 putExtra("EXTRA_DIRECT_STREAM_URL", directUrl)
             } else if (timstUrl != null) {
                 putExtra("EXTRA_DIRECT_STREAM_URL", timstUrl)
-            } else if (channel.id.toIntOrNull() == null) {
+            } else if (isDirectBroadcast || channel.id.toIntOrNull() == null) {
                 putExtra("EXTRA_DIRECT_STREAM_URL", channel.backupStreamUrl)
             }
         }
