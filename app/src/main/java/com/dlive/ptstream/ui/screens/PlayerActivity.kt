@@ -291,7 +291,7 @@ class PlayerActivity : ComponentActivity() {
     private var failoverServers: List<ServerOption> = emptyList()
     private var currentFailoverIndex = 0
     private var streamLoadedSuccessfully = false
-    private val failoverTimeoutMs = 4500L // 4.5 seconds before trying next server
+    private val failoverTimeoutMs = 12000L // 4.5 seconds before trying next server
     private var lastFailoverTime = 0L
 
     inner class FailoverBridge {
@@ -1262,20 +1262,41 @@ class PlayerActivity : ComponentActivity() {
 
         val startScript = """
                 (function() {
-                    try {
-                        Object.defineProperty(document, 'referrer', {
-                            get: function() { return 'https://timst.cfd/'; },
-                            configurable: true
-                        });
-                    } catch(e) {}
-                    try {
-                        if (window.origin === 'null' || !window.origin) {
-                            Object.defineProperty(window, 'origin', {
-                                get: function() { return 'https://timst.cfd'; },
+                    var host = '';
+                    try { host = (window.location && window.location.hostname ? window.location.hostname : '').toLowerCase(); } catch(e) {}
+
+                    // 1. DADDYLIVE / DEMBED / WIDEIPTV / DLHD
+                    if (host.indexOf('dlive') !== -1 || host.indexOf('dlhd') !== -1 || host.indexOf('daddylive') !== -1 || host.indexOf('dembed') !== -1 || host.indexOf('wideiptv') !== -1 || host.indexOf('cowedd') !== -1) {
+                        try {
+                            Object.defineProperty(document, 'referrer', {
+                                get: function() { return 'https://dlive.sx/'; },
                                 configurable: true
                             });
-                        }
-                    } catch(e) {}
+                        } catch(e) {}
+                        try {
+                            Object.defineProperty(window, 'frameElement', {
+                                get: function() { return null; },
+                                configurable: true
+                            });
+                        } catch(e) {}
+                    }
+                    // 2. TIMSTREAMS (ehgembxe.cfd, timst.top, timst.cfd, grandemx)
+                    else if (host.indexOf('timst') !== -1 || host.indexOf('cfd') !== -1 || host.indexOf('grandemx') !== -1) {
+                        try {
+                            Object.defineProperty(document, 'referrer', {
+                                get: function() { return 'https://timst.cfd/'; },
+                                configurable: true
+                            });
+                        } catch(e) {}
+                        try {
+                            if (window.origin === 'null' || !window.origin) {
+                                Object.defineProperty(window, 'origin', {
+                                    get: function() { return 'https://timst.cfd'; },
+                                    configurable: true
+                                });
+                            }
+                        } catch(e) {}
+                    }
                     try {
                         window.stop = function() {};
                     } catch(e) {}
@@ -1475,6 +1496,10 @@ class PlayerActivity : ComponentActivity() {
                                                 window.AndroidFailover.onPlaybackStarted();
                                             }
                                         } catch(e) {}
+                                        try {
+                                            if (window.top && window.top !== window) window.top.postMessage('PLAYBACK_STARTED', '*');
+                                            if (window.parent && window.parent !== window) window.parent.postMessage('PLAYBACK_STARTED', '*');
+                                        } catch(e) {}
                                     });
                                 }
                                 if (v.paused) {
@@ -1531,7 +1556,13 @@ class PlayerActivity : ComponentActivity() {
                     window.addEventListener('message', function(ev) {
                         if (!ev || !ev.data) return;
                         var d = ev.data;
-                        if (d === 'FORCE_UNMUTE' || (d && d.type === 'FORCE_UNMUTE') || d === 'FORCE_PLAY' || (d && d.type === 'FORCE_PLAY')) {
+                        if (d === 'PLAYBACK_STARTED' || (d && d.type === 'PLAYBACK_STARTED') || d === 'STREAM_STARTED' || (d && d.type === 'STREAM_STARTED')) {
+                            try {
+                                if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackStarted === 'function') {
+                                    window.AndroidFailover.onPlaybackStarted();
+                                }
+                            } catch(e) {}
+                        } else if (d === 'FORCE_UNMUTE' || (d && d.type === 'FORCE_UNMUTE') || d === 'FORCE_PLAY' || (d && d.type === 'FORCE_PLAY')) {
                             kickstartAndUnmute();
                         } else if (d === 'TOGGLE_PLAY_PAUSE' || (d && d.type === 'TOGGLE_PLAY_PAUSE')) {
                             try {
@@ -1615,12 +1646,7 @@ class PlayerActivity : ComponentActivity() {
                         } catch(e) {}
                     }
 
-                    window.addEventListener('error', function(e) {
-                        var msg = (e && e.message ? e.message : '').toLowerCase();
-                        if (msg.indexOf('playback') !== -1 || msg.indexOf('stream') !== -1 || msg.indexOf('media') !== -1) {
-                            reportFailover('window_error: ' + msg);
-                        }
-                    }, true);
+                    // Removed reckless global error interceptor that triggered false failovers on ad network errors
 
                     if (document.readyState === 'loading') {
                         document.addEventListener('DOMContentLoaded', cleanPlayer);
@@ -1968,8 +1994,10 @@ class PlayerActivity : ComponentActivity() {
                     '.player-error', '.playback-error'
                 ];
 
+                var _watcherStartTime = Date.now();
                 function scanDom(doc) {
                     if (!doc || reported) return;
+                    if (Date.now() - _watcherStartTime < 4500) return; // 4.5s grace period for cold-start retries
                     try {
                         for (var s = 0; s < errorSelectors.length; s++) {
                             var el = doc.querySelector(errorSelectors[s]);
@@ -2458,7 +2486,8 @@ class PlayerActivity : ComponentActivity() {
 
         val baseUrl = repository.getBaseUrl()
         val url = "$baseUrl/$currentFolder/stream-$channelId.php"
-        webView.loadUrl(url)
+        val dliveHeaders = mapOf("Referer" to "$baseUrl/")
+        webView.loadUrl(url, dliveHeaders)
         // Start failover timeout for WebView streams too
         handler.postDelayed(failoverTimeoutRunnable, failoverTimeoutMs)
     }
