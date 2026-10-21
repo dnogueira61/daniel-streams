@@ -1263,10 +1263,15 @@ class PlayerActivity : ComponentActivity() {
         val startScript = """
                 (function() {
                     try {
-                        var host = window.location.hostname || '';
-                        if (host.indexOf('timst') !== -1 || host.indexOf('cfd') !== -1 || host.indexOf('grandemx') !== -1) {
-                            Object.defineProperty(document, 'referrer', {
-                                get: function() { return 'https://timst.top/'; },
+                        Object.defineProperty(document, 'referrer', {
+                            get: function() { return 'https://timst.cfd/'; },
+                            configurable: true
+                        });
+                    } catch(e) {}
+                    try {
+                        if (window.origin === 'null' || !window.origin) {
+                            Object.defineProperty(window, 'origin', {
+                                get: function() { return 'https://timst.cfd'; },
                                 configurable: true
                             });
                         }
@@ -1324,6 +1329,9 @@ class PlayerActivity : ComponentActivity() {
                                         remove: function() {},
                                         contains: function() { return false; },
                                         toggle: function() { return false; },
+                                        supports: function() { return true; },
+                                        item: function() { return null; },
+                                        length: 0,
                                         value: ''
                                     };
                                 },
@@ -1335,11 +1343,11 @@ class PlayerActivity : ComponentActivity() {
 
                     function unSandboxIframe(ifr) {
                         if (!ifr) return;
-                        var hadSandbox = ifr.hasAttribute && ifr.hasAttribute('sandbox');
-                        try { ifr.removeAttribute('sandbox'); } catch(e) {}
-                        if (ifr.src && ifr.src.indexOf('http') === 0) {
-                            try { ifr.src = ifr.src; } catch(e) {}
-                        }
+                        try {
+                            if (ifr.hasAttribute && ifr.hasAttribute('sandbox')) {
+                                ifr.removeAttribute('sandbox');
+                            }
+                        } catch(e) {}
                     }
 
                     try {
@@ -2410,7 +2418,7 @@ class PlayerActivity : ComponentActivity() {
                     if (isFinishing || isDestroyed) return@launch
                     if (playUrl.isNotBlank()) {
                         android.util.Log.d("PlayerActivity", "Loading TimStreams embedded play page: $playUrl")
-                        val referer = "${repository.getTimstBaseUrl()}/"
+                        val referer = "https://timst.cfd/"
                         val headers = mapOf("Referer" to referer)
                         webView.loadUrl(playUrl, headers)
                         handler.postDelayed(failoverTimeoutRunnable, failoverTimeoutMs)
