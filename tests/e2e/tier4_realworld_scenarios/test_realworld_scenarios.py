@@ -29,18 +29,14 @@ def build_channel_server_options_spec(channel: Dict[str, Any]) -> List[Dict[str,
         (not ch_id.isdigit())
     )
 
-    # 1. TimStreams if present
-    if backup1 and ("ehgembxe" in backup1 or "timst" in backup1):
-        options.append({"label": "Servidor 1080p (TimStreams)", "url": backup1, "type": "timst"})
-
-    # 2. Official Direct M3U8 Stream (PRIORITIZED FOR NATIONAL CHANNELS)
+    # 1. Official Direct M3U8 Stream (PRIORITIZED FOR NATIONAL CHANNELS)
     if is_direct_broadcast and backup1 and not ("ehgembxe" in backup1 or "timst" in backup1):
         options.append({"label": "Servidor Principal (Transmissão Oficial M3U8)", "url": backup1, "type": "direct_m3u8"})
 
-    # 3. DaddyLive Player 1 & 2 for numeric channels
+    # 2. DaddyLive Player 1 & 2 for numeric channels (PRIORITIZED OVER TIMSTREAMS)
     if ch_id.isdigit() and int(ch_id) > 0:
         options.append({
-            "label": f"Servidor Alternativo {len(options) + 1} (DaddyLive - Player 1)",
+            "label": "Servidor Principal (DaddyLive - Player 1)" if not options else f"Servidor Alternativo {len(options) + 1} (DaddyLive - Player 1)",
             "url": f"https://dlive.sx/stream/stream-{ch_id}.php",
             "type": "daddylive_p1"
         })
@@ -50,6 +46,9 @@ def build_channel_server_options_spec(channel: Dict[str, Any]) -> List[Dict[str,
             "type": "daddylive_p2"
         })
 
+    # 3. TimStreams fallback if present
+    if backup1 and ("ehgembxe" in backup1 or "timst" in backup1):
+        options.append({"label": f"Servidor Alternativo {len(options) + 1} (TimStreams 1080p)", "url": backup1, "type": "timst"})
     # 4. EpicSports or other backups
     if backup2:
         options.append({"label": f"Servidor Alternativo {len(options) + 1} (EpicSports)", "url": backup2, "type": "epicsports"})

@@ -2498,7 +2498,6 @@ class PlayerActivity : ComponentActivity() {
 
         val options = mutableListOf<ServerOption>()
 
-        // 1. TimStreams (Servidor Principal 1080p prioritário quando disponível)
         val backupUrl = currentChannel?.backupStreamUrl ?: backupDirectUrl
         val rawTimst = if (backupUrl != null && (backupUrl.contains("grandemx") || backupUrl.contains("exmxbxe") || backupUrl.contains("ehgembxe") || backupUrl.contains("timst"))) backupUrl
             else (currentChannel?.backupStreamUrl2 ?: backupDirectUrl2)?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("ehgembxe") || it.contains("timst") }
@@ -2511,19 +2510,20 @@ class PlayerActivity : ComponentActivity() {
             if (u.contains("exmxbxe.cfd")) u = u.replace("https://exmxbxe.cfd", "https://ehgembxe.cfd").replace("http://exmxbxe.cfd", "https://ehgembxe.cfd")
             u
         }
-        if (timstUrl != null) {
-            options.add(ServerOption("Servidor Principal (TimStreams 1080p)", isDirect = true, directUrl = timstUrl))
-        }
 
         if (currentChannel == null) {
+            if (channelId.toIntOrNull() != null) {
+                options.add(ServerOption("Servidor Principal (DaddyLive - Player 1)", isDirect = false, folder = "stream"))
+                options.add(ServerOption("Servidor Alternativo 1 (DaddyLive - Player 2)", isDirect = false, folder = "player"))
+            }
+            if (timstUrl != null) {
+                val name = if (options.isEmpty()) "Servidor Principal (TimStreams 1080p)" else "Servidor Alternativo ${options.size} (TimStreams 1080p)"
+                options.add(ServerOption(name, isDirect = true, directUrl = timstUrl))
+            }
             val list = listOfNotNull(directStreamUrl, backupDirectUrl, backupDirectUrl2).filter { it != timstUrl }
             list.forEachIndexed { idx, url ->
                 val name = if (options.isEmpty()) "Servidor Principal (Direto)" else "Servidor Alternativo ${options.size} (Direto)"
                 options.add(ServerOption(name, isDirect = true, directUrl = url))
-            }
-            if (channelId.toIntOrNull() != null) {
-                options.add(ServerOption("Servidor Alternativo ${options.size} (DaddyLive - Player 1)", isDirect = false, folder = "stream"))
-                options.add(ServerOption("Servidor Alternativo ${options.size} (DaddyLive - Player 2)", isDirect = false, folder = "player"))
             }
             return options
         }
@@ -2549,7 +2549,7 @@ class PlayerActivity : ComponentActivity() {
                     (isPortugueseChannel && !lower.contains("dlive.sx") && !lower.contains("epicsports"))
         }
 
-        // 2. Transmissão Oficial M3U8 / Emissão Direta Prioritária para Canais Nacionais
+        // 1. Transmissão Oficial M3U8 / Emissão Direta Prioritária para Canais Nacionais
         val officialCandidates = listOfNotNull(
             currentChannel.backupStreamUrl,
             currentChannel.backupStreamUrl2,
@@ -2569,7 +2569,7 @@ class PlayerActivity : ComponentActivity() {
             }
         }
 
-        // 3. DaddyLive (Player 1 e Player 2) como fallback ou como principal caso não haja TimStreams/Oficial
+        // 2. DaddyLive (Player 1 e Player 2) - PRIORITÁRIO POR DEFEITO (substitui TimStreams que está instável)
         val hasDaddyLive = (currentChannel.id.toIntOrNull() != null) || (channelId.toIntOrNull() != null)
         if (hasDaddyLive) {
             val label1 = if (options.isEmpty()) "Servidor Principal (DaddyLive - Player 1)" else "Servidor Alternativo ${options.size} (DaddyLive - Player 1)"
@@ -2577,6 +2577,16 @@ class PlayerActivity : ComponentActivity() {
 
             val label2 = "Servidor Alternativo ${options.size} (DaddyLive - Player 2)"
             options.add(ServerOption(label2, isDirect = false, folder = "player"))
+        }
+
+        // 3. TimStreams (Fallback 1080p quando disponível)
+        if (timstUrl != null && options.none { it.directUrl == timstUrl }) {
+            val labelTimst = if (options.isEmpty()) {
+                "Servidor Principal (TimStreams 1080p)"
+            } else {
+                "Servidor Alternativo ${options.size} (TimStreams 1080p)"
+            }
+            options.add(ServerOption(labelTimst, isDirect = true, directUrl = timstUrl))
         }
 
         // 4. EpicSports / Outras transmissões diretas alternativas
