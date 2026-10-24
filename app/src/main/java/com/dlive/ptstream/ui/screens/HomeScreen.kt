@@ -2843,6 +2843,26 @@ fun SettingsDialog(
                 // SEÇÃO 1: REPRODUÇÃO & PLAYER
                 Text("📺 REPRODUÇÃO & PLAYER", color = Color(0xFF38BDF8), fontSize = 12.sp, fontWeight = FontWeight.Bold)
 
+                var timstPrimary by remember { mutableStateOf(repository.isTimStreamsPrimary()) }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                        Text("Priorizar TimStreams 1080p (Experimental)", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Define o TimStreams como servidor principal de arranque. Desative se o TimStreams estiver instável ou offline.", color = TextSecondary, fontSize = 11.sp)
+                    }
+                    Switch(
+                        checked = timstPrimary,
+                        onCheckedChange = { enabled ->
+                            timstPrimary = enabled
+                            repository.setTimStreamsPrimary(enabled)
+                        },
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF38BDF8))
+                    )
+                }
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,

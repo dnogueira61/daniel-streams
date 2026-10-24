@@ -2511,14 +2511,28 @@ class PlayerActivity : ComponentActivity() {
             u
         }
 
+        val prioritizeTimst = repository.isTimStreamsPrimary()
+
         if (currentChannel == null) {
-            if (channelId.toIntOrNull() != null) {
-                options.add(ServerOption("Servidor Principal (DaddyLive - Player 1)", isDirect = false, folder = "stream"))
-                options.add(ServerOption("Servidor Alternativo 1 (DaddyLive - Player 2)", isDirect = false, folder = "player"))
-            }
-            if (timstUrl != null) {
-                val name = if (options.isEmpty()) "Servidor Principal (TimStreams 1080p)" else "Servidor Alternativo ${options.size} (TimStreams 1080p)"
-                options.add(ServerOption(name, isDirect = true, directUrl = timstUrl))
+            if (prioritizeTimst) {
+                if (timstUrl != null) {
+                    val name = if (options.isEmpty()) "Servidor Principal (TimStreams 1080p)" else "Servidor Alternativo ${options.size} (TimStreams 1080p)"
+                    options.add(ServerOption(name, isDirect = true, directUrl = timstUrl))
+                }
+                if (channelId.toIntOrNull() != null) {
+                    val label1 = if (options.isEmpty()) "Servidor Principal (DaddyLive - Player 1)" else "Servidor Alternativo ${options.size} (DaddyLive - Player 1)"
+                    options.add(ServerOption(label1, isDirect = false, folder = "stream"))
+                    options.add(ServerOption("Servidor Alternativo ${options.size} (DaddyLive - Player 2)", isDirect = false, folder = "player"))
+                }
+            } else {
+                if (channelId.toIntOrNull() != null) {
+                    options.add(ServerOption("Servidor Principal (DaddyLive - Player 1)", isDirect = false, folder = "stream"))
+                    options.add(ServerOption("Servidor Alternativo 1 (DaddyLive - Player 2)", isDirect = false, folder = "player"))
+                }
+                if (timstUrl != null) {
+                    val name = if (options.isEmpty()) "Servidor Principal (TimStreams 1080p)" else "Servidor Alternativo ${options.size} (TimStreams 1080p)"
+                    options.add(ServerOption(name, isDirect = true, directUrl = timstUrl))
+                }
             }
             val list = listOfNotNull(directStreamUrl, backupDirectUrl, backupDirectUrl2).filter { it != timstUrl }
             list.forEachIndexed { idx, url ->
@@ -2569,24 +2583,41 @@ class PlayerActivity : ComponentActivity() {
             }
         }
 
-        // 2. DaddyLive (Player 1 e Player 2) - PRIORITÁRIO POR DEFEITO (substitui TimStreams que está instável)
         val hasDaddyLive = (currentChannel.id.toIntOrNull() != null) || (channelId.toIntOrNull() != null)
-        if (hasDaddyLive) {
-            val label1 = if (options.isEmpty()) "Servidor Principal (DaddyLive - Player 1)" else "Servidor Alternativo ${options.size} (DaddyLive - Player 1)"
-            options.add(ServerOption(label1, isDirect = false, folder = "stream"))
-
-            val label2 = "Servidor Alternativo ${options.size} (DaddyLive - Player 2)"
-            options.add(ServerOption(label2, isDirect = false, folder = "player"))
-        }
-
-        // 3. TimStreams (Fallback 1080p quando disponível)
-        if (timstUrl != null && options.none { it.directUrl == timstUrl }) {
-            val labelTimst = if (options.isEmpty()) {
-                "Servidor Principal (TimStreams 1080p)"
-            } else {
-                "Servidor Alternativo ${options.size} (TimStreams 1080p)"
+        if (prioritizeTimst) {
+            // Se o utilizador ativou "Priorizar TimStreams", TimStreams vem primeiro que DaddyLive
+            if (timstUrl != null && options.none { it.directUrl == timstUrl }) {
+                val labelTimst = if (options.isEmpty()) {
+                    "Servidor Principal (TimStreams 1080p)"
+                } else {
+                    "Servidor Alternativo ${options.size} (TimStreams 1080p)"
+                }
+                options.add(ServerOption(labelTimst, isDirect = true, directUrl = timstUrl))
             }
-            options.add(ServerOption(labelTimst, isDirect = true, directUrl = timstUrl))
+            if (hasDaddyLive) {
+                val label1 = if (options.isEmpty()) "Servidor Principal (DaddyLive - Player 1)" else "Servidor Alternativo ${options.size} (DaddyLive - Player 1)"
+                options.add(ServerOption(label1, isDirect = false, folder = "stream"))
+
+                val label2 = "Servidor Alternativo ${options.size} (DaddyLive - Player 2)"
+                options.add(ServerOption(label2, isDirect = false, folder = "player"))
+            }
+        } else {
+            // Por defeito: DaddyLive (Player 1 e Player 2) prioritário sobre TimStreams
+            if (hasDaddyLive) {
+                val label1 = if (options.isEmpty()) "Servidor Principal (DaddyLive - Player 1)" else "Servidor Alternativo ${options.size} (DaddyLive - Player 1)"
+                options.add(ServerOption(label1, isDirect = false, folder = "stream"))
+
+                val label2 = "Servidor Alternativo ${options.size} (DaddyLive - Player 2)"
+                options.add(ServerOption(label2, isDirect = false, folder = "player"))
+            }
+            if (timstUrl != null && options.none { it.directUrl == timstUrl }) {
+                val labelTimst = if (options.isEmpty()) {
+                    "Servidor Principal (TimStreams 1080p)"
+                } else {
+                    "Servidor Alternativo ${options.size} (TimStreams 1080p)"
+                }
+                options.add(ServerOption(labelTimst, isDirect = true, directUrl = timstUrl))
+            }
         }
 
         // 4. EpicSports / Outras transmissões diretas alternativas
@@ -3143,6 +3174,19 @@ class PlayerActivity : ComponentActivity() {
             setPadding(0, 10, 0, 14)
         }
         dialogView.addView(swUnmute)
+
+        // 2. TimStreams Priority Toggle
+        val swTimstPrimary = Switch(this).apply {
+            text = "⚡ Priorizar TimStreams 1080p (Experimental)"
+            setTextColor(Color.WHITE)
+            isChecked = repository.isTimStreamsPrimary()
+            setPadding(0, 10, 0, 14)
+        }
+        swTimstPrimary.setOnCheckedChangeListener { _, isChecked ->
+            repository.setTimStreamsPrimary(isChecked)
+            failoverServers = buildFailoverList()
+        }
+        dialogView.addView(swTimstPrimary)
 
         // 3. Auto Resume Last Channel
         val swAutoResume = Switch(this).apply {
