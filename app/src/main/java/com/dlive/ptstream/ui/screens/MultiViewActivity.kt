@@ -541,8 +541,14 @@ class MultiViewActivity : ComponentActivity() {
             }
 
             wv.webViewClient = object : WebViewClient() {
+                override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
+                    super.onPageStarted(view, url, favicon)
+                    injectSandboxNeutralizer(view)
+                }
+
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
+                    injectSandboxNeutralizer(view)
                     injectCleanPlayerStyle(view)
                     if (index == activeAudioSlotIndex) {
                         unmuteVideo(view)
@@ -564,7 +570,10 @@ class MultiViewActivity : ComponentActivity() {
             var targetUrl = data.url
             val headers = mutableMapOf<String, String>()
 
-            if (!data.isDirect && data.channelId != null) {
+            if (targetUrl.contains("embed.st") || targetUrl.contains("streamed")) {
+                headers["Referer"] = "https://streamed.pk/"
+                headers["Origin"] = "https://streamed.pk"
+            } else if (!data.isDirect && data.channelId != null) {
                 val baseUrl = repository.getBaseUrl()
                 val folder = repository.getDefaultServer()
                 targetUrl = "$baseUrl/$folder/stream-${data.channelId}.php"
@@ -573,6 +582,8 @@ class MultiViewActivity : ComponentActivity() {
                 headers["Referer"] = "https://dlive.sx/"
             } else if (targetUrl.contains("timst") || targetUrl.contains("ehgembxe")) {
                 headers["Referer"] = "https://timst.top/"
+            } else {
+                headers["Referer"] = "https://dlive.sx/"
             }
 
             wv.loadUrl(targetUrl, headers)
@@ -609,6 +620,69 @@ class MultiViewActivity : ComponentActivity() {
                 "(function(){ var vids = document.querySelectorAll('video'); for(var i=0; i<vids.length; i++){ vids[i].muted = true; } })();",
                 null
             )
+        }
+
+        private fun injectSandboxNeutralizer(view: WebView?) {
+            val js = """
+                (function() {
+                    try {
+                        Object.defineProperty(window, 'frameElement', {
+                            get: function() { return null; },
+                            configurable: true
+                        });
+                    } catch(e) {}
+                    try {
+                        var origSetAttr = Element.prototype.setAttribute;
+                        Element.prototype.setAttribute = function(name, value) {
+                            if (name && (name === 'sandbox' || name.toLowerCase() === 'sandbox')) return;
+                            return origSetAttr.apply(this, arguments);
+                        };
+                        var origHasAttr = Element.prototype.hasAttribute;
+                        Element.prototype.hasAttribute = function(name) {
+                            if (name && (name === 'sandbox' || name.toLowerCase() === 'sandbox')) return false;
+                            return origHasAttr.apply(this, arguments);
+                        };
+                        var origGetAttr = Element.prototype.getAttribute;
+                        Element.prototype.getAttribute = function(name) {
+                            if (name && (name === 'sandbox' || name.toLowerCase() === 'sandbox')) return null;
+                            return origGetAttr.apply(this, arguments);
+                        };
+                        if (window.HTMLIFrameElement && HTMLIFrameElement.prototype) {
+                            Object.defineProperty(HTMLIFrameElement.prototype, 'sandbox', {
+                                get: function() {
+                                    return {
+                                        add: function() {},
+                                        remove: function() {},
+                                        contains: function() { return false; },
+                                        toggle: function() { return false; },
+                                        supports: function() { return true; },
+                                        item: function() { return null; },
+                                        length: 0,
+                                        value: ''
+                                    };
+                                },
+                                set: function() {},
+                                configurable: true
+                            });
+                        }
+                    } catch(e) {}
+                    function removeSandboxes() {
+                        try {
+                            var ifrs = document.getElementsByTagName('iframe');
+                            for (var i = 0; i < ifrs.length; i++) {
+                                ifrs[i].removeAttribute('sandbox');
+                                ifrs[i].setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
+                            }
+                        } catch(e) {}
+                    }
+                    removeSandboxes();
+                    try {
+                        var obs = new MutationObserver(function() { removeSandboxes(); });
+                        obs.observe(document.documentElement || document, { childList: true, subtree: true, attributes: true, attributeFilter: ['sandbox'] });
+                    } catch(e) {}
+                })();
+            """.trimIndent()
+            view?.evaluateJavascript(js, null)
         }
 
         private fun injectCleanPlayerStyle(view: WebView?) {

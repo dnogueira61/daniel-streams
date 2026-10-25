@@ -293,7 +293,7 @@ class PlayerActivity : ComponentActivity() {
     private var failoverServers: List<ServerOption> = emptyList()
     private var currentFailoverIndex = 0
     private var streamLoadedSuccessfully = false
-    private val failoverTimeoutMs = 12000L // 4.5 seconds before trying next server
+    private val failoverTimeoutMs = 25000L // 4.5 seconds before trying next server
     private var lastFailoverTime = 0L
 
     inner class FailoverBridge {
@@ -346,7 +346,7 @@ class PlayerActivity : ComponentActivity() {
             }
         }
         val now = System.currentTimeMillis()
-        if (now - lastFailoverTime < 1800L && !reason.contains("render")) return
+        if (now - lastFailoverTime < 8000L && !reason.contains("render")) return
         lastFailoverTime = now
 
         handler.removeCallbacks(failoverTimeoutRunnable)
@@ -1623,7 +1623,7 @@ class PlayerActivity : ComponentActivity() {
                                             if (pos > _lastProgressTime + 0.1) {
                                                 _lastProgressTime = pos;
                                                 _lastProgressMs = Date.now();
-                                            } else if (Date.now() - _lastProgressMs > 4000) {
+                                            } else if (Date.now() - _lastProgressMs > 18000) {
                                                 _stallReported = true;
                                                 reportFailover('stall_jwplayer_freeze');
                                             }
@@ -1645,7 +1645,8 @@ class PlayerActivity : ComponentActivity() {
                                 if (cur > _lastProgressTime + 0.1) {
                                     _lastProgressTime = cur;
                                     _lastProgressMs = Date.now();
-                                } else if (Date.now() - _lastProgressMs > 4000) {
+                                } else if (Date.now() - _lastProgressMs > 18000) {
+                                    try { if (v && typeof v.play === 'function') v.play(); } catch(e) {}
                                     _stallReported = true;
                                     reportFailover('stall_video_freeze');
                                 }
@@ -2326,11 +2327,11 @@ class PlayerActivity : ComponentActivity() {
                         streamPlaying = true;
                     });
 
-                    // Stall detector: se o vídeo estiver a tocar mas o tempo parar de avançar > 3.5s
+                    // Stall detector: só aciona failover se o vídeo parar de avançar > 18s contínuos
                     setInterval(function() {
                         if (stallTriggered) return;
                         if (streamPlaying && !video.paused) {
-                            if (Date.now() - lastTimeMs > 3500) {
+                            if (Date.now() - lastTimeMs > 18000) {
                                 stallTriggered = true;
                                 try {
                                     if (window.AndroidFailover && typeof window.AndroidFailover.onPlaybackStalled === 'function') {
