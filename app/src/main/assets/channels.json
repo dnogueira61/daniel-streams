@@ -186,7 +186,7 @@
     "category": "Generalistas",
     "isPt": true,
     "backupStreamUrl": "https://raw.githubusercontent.com/LITUATUI/M3UPT/main/M3U/TVI.m3u8",
-    "backupStreamUrl2": "https://video-auth7.iol.pt/live_tvi/live_tvi/edge_servers/tvi-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMjUvMjAyNiA4OjEyOjE4IEFNJmhhc2hfdmFsdWU9QnBDa2ZjVytjUFIvaG4xMitBdkJtQT09JnZhbGlkbWludXRlcz0xNDQwJmlkPTIzNDFjNmJmLWMxYmEtNDY2NS05YzM3LTI1YmViMDNlNjNmMw=="
+    "backupStreamUrl2": "https://video-auth7.iol.pt/live_tvi/live_tvi/edge_servers/tvi-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMjUvMjAyNiAxMjoxMzoyMyBQTSZoYXNoX3ZhbHVlPVBJRldqMy8rUkdIZHhhY0hzTTNENEE9PSZ2YWxpZG1pbnV0ZXM9MTQ0MCZpZD1mMGRhMTE0MS00MDRiLTQ1ZDYtOThhYi1kZTI5M2FjNmM1ODA="
   },
   {
     "id": "721",
@@ -213,7 +213,7 @@
     "category": "Generalistas",
     "isPt": true,
     "backupStreamUrl": "https://raw.githubusercontent.com/LITUATUI/M3UPT/main/M3U/CNN_Portugal.m3u8",
-    "backupStreamUrl2": "https://video-auth1.iol.pt/live_cnn/live_cnn/edge_servers/cnn-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMjUvMjAyNiA4OjEyOjE4IEFNJmhhc2hfdmFsdWU9QnBDa2ZjVytjUFIvaG4xMitBdkJtQT09JnZhbGlkbWludXRlcz0xNDQwJmlkPTIzNDFjNmJmLWMxYmEtNDY2NS05YzM3LTI1YmViMDNlNjNmMw=="
+    "backupStreamUrl2": "https://video-auth1.iol.pt/live_cnn/live_cnn/edge_servers/cnn-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTAvMjUvMjAyNiAxMjoxMzoyMyBQTSZoYXNoX3ZhbHVlPVBJRldqMy8rUkdIZHhhY0hzTTNENEE9PSZ2YWxpZG1pbnV0ZXM9MTQ0MCZpZD1mMGRhMTE0MS00MDRiLTQ1ZDYtOThhYi1kZTI5M2FjNmM1ODA="
   },
   {
     "id": "porto-canal-pt",
