@@ -253,6 +253,8 @@ class PlayerActivity : ComponentActivity() {
     private var directStreamUrl: String? = null
     private var backupDirectUrl: String? = null
     private var backupDirectUrl2: String? = null
+    private var eventStreamNames: ArrayList<String>? = null
+    private var eventStreamUrls: ArrayList<String>? = null
     private var isBackupSelected: Boolean = false
     private var activeDirectUrl: String? = null
     private var isDirectStreamActive: Boolean = false
@@ -418,6 +420,8 @@ class PlayerActivity : ComponentActivity() {
         directStreamUrl = intent.getStringExtra("EXTRA_DIRECT_STREAM_URL")
         backupDirectUrl = intent.getStringExtra("EXTRA_BACKUP_STREAM_URL")
         backupDirectUrl2 = intent.getStringExtra("EXTRA_BACKUP_STREAM_URL2")
+        eventStreamNames = intent.getStringArrayListExtra("EXTRA_EVENT_STREAM_NAMES")
+        eventStreamUrls = intent.getStringArrayListExtra("EXTRA_EVENT_STREAM_URLS")
 
         val timstCandidate = listOfNotNull(directStreamUrl, backupDirectUrl, backupDirectUrl2)
             .firstOrNull { it.contains("ehgembxe") || it.contains("exmxbxe") || it.contains("timst") || it.contains("grandemx") }
@@ -2497,6 +2501,40 @@ class PlayerActivity : ComponentActivity() {
             ?: repository.getAllCachedChannels().firstOrNull { it.id == channelId }
 
         val options = mutableListOf<ServerOption>()
+
+        // Opções de streams para eventos desportivos em direto (TimStreams / Internacionais)
+        if (channelId.startsWith("event_")) {
+            val eventId = channelId.removePrefix("event_")
+            val liveEvent = repository.getLiveEvents().firstOrNull { it.id == eventId }
+            val urls = eventStreamUrls?.takeIf { it.isNotEmpty() }
+                ?: ArrayList(liveEvent?.streams?.map { it.url } ?: emptyList())
+            val names = eventStreamNames?.takeIf { it.isNotEmpty() }
+                ?: ArrayList(liveEvent?.streams?.map { it.name } ?: emptyList())
+
+            if (urls.isNotEmpty()) {
+                val activeUrl = directStreamUrl ?: urls.firstOrNull()
+                if (activeUrl != null) {
+                    val activeIdx = urls.indexOf(activeUrl)
+                    val activeName = if (activeIdx >= 0 && activeIdx < names.size) names[activeIdx] else "Principal"
+                    options.add(ServerOption("Servidor Principal ($activeName)", isDirect = true, directUrl = activeUrl))
+                }
+                urls.forEachIndexed { idx, url ->
+                    if (options.none { it.directUrl == url }) {
+                        val sName = if (idx < names.size) names[idx] else "Stream ${idx + 1}"
+                        val label = "Servidor Alternativo ${options.size} ($sName)"
+                        options.add(ServerOption(label, isDirect = true, directUrl = url))
+                    }
+                }
+                listOfNotNull(backupDirectUrl, backupDirectUrl2).forEach { bUrl ->
+                    if (options.none { it.directUrl == bUrl }) {
+                        options.add(ServerOption("Servidor Alternativo ${options.size} (Reserva)", isDirect = true, directUrl = bUrl))
+                    }
+                }
+                if (options.isNotEmpty()) {
+                    return options
+                }
+            }
+        }
 
         val backupUrl = currentChannel?.backupStreamUrl ?: backupDirectUrl
         val rawTimst = if (backupUrl != null && (backupUrl.contains("grandemx") || backupUrl.contains("exmxbxe") || backupUrl.contains("ehgembxe") || backupUrl.contains("timst"))) backupUrl

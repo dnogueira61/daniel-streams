@@ -40,6 +40,13 @@
         </activity>
 
         <activity
+            android:name=".ui.screens.MultiViewActivity"
+            android:exported="false"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode"
+            android:theme="@style/Theme.DLivePTStream.Player" />
+
+        <activity
             android:name=".ui.screens.PlayerActivity"
             android:exported="false"
             android:supportsPictureInPicture="true"

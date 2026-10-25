@@ -138,6 +138,7 @@ fun HomeScreen(
 
     var focusedOrSelectedChannel by remember { mutableStateOf<Channel?>(null) }
     var selectedChannelForSheet by remember { mutableStateOf<Channel?>(null) }
+    var selectedEventForStreams by remember { mutableStateOf<Pair<LiveEvent, List<Channel>>?>(null) }
     var channelToMove by remember { mutableStateOf<Channel?>(null) }
     var draggedChannelId by remember { mutableStateOf<String?>(null) }
     var dragOffsetY by remember { mutableFloatStateOf(0f) }
@@ -268,6 +269,22 @@ fun HomeScreen(
                                         tint = if (searchFocused) Color(0xFF38BDF8) else TextPrimary
                                     )
                                 }
+                            }
+                            var multiViewFocused by remember { mutableStateOf(false) }
+                            IconButton(
+                                onClick = {
+                                    context.startActivity(Intent(context, MultiViewActivity::class.java))
+                                },
+                                modifier = Modifier
+                                    .onFocusChanged { multiViewFocused = it.isFocused }
+                                    .focusable()
+                                    .background(if (multiViewFocused) Color(0x3338BDF8) else Color.Transparent, CircleShape)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.GridView,
+                                    contentDescription = "MultiView",
+                                    tint = if (multiViewFocused) Color(0xFF38BDF8) else Color(0xFF38BDF8)
+                                )
                             }
                             var settingsFocused by remember { mutableStateOf(false) }
                             IconButton(
@@ -571,13 +588,20 @@ fun HomeScreen(
                     ) {
                         val subOptions = listOf(
                             "Jogos" to "🔥 Jogos Hoje (${filteredEvents.size})",
-                            "Canais" to "📺 Canais de Desporto (${sportsChannels.size})"
+                            "Canais" to "📺 Canais de Desporto (${sportsChannels.size})",
+                            "MultiView" to "🔲 MultiView (Multiecrã)"
                         )
                         items(subOptions) { (key, label) ->
                             val isSelected = gamesSubFilter == key
                             FilterChip(
                                 selected = isSelected,
-                                onClick = { gamesSubFilter = key },
+                                onClick = {
+                                    if (key == "MultiView") {
+                                        context.startActivity(Intent(context, MultiViewActivity::class.java))
+                                    } else {
+                                        gamesSubFilter = key
+                                    }
+                                },
                                 label = { Text(label, fontSize = 12.sp) },
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = RedPrimary,
@@ -910,36 +934,29 @@ fun HomeScreen(
                                     }
                                 }
 
-                                val onPlayEvent: (LiveEvent, List<Channel>) -> Unit = { event, matchedChannels ->
-                                    // 1. Procurar canal PT correspondente (preferência Sport TV 1..6, DAZN PT, depois restantes)
-                                    val sportTvChannel = matchedChannels.firstOrNull { it.isPortuguese && it.name.contains("Sport TV", ignoreCase = true) }
-                                    val anyPtChannel = sportTvChannel ?: matchedChannels.firstOrNull { it.isPortuguese }
+                                val launchDirectEventStream: (LiveEvent, EventStream) -> Unit = { event, stream ->
+                                    PlayerActivity.closeActivePip()
+                                    val intent = Intent(context, PlayerActivity::class.java).apply {
+                                        putExtra("EXTRA_CHANNEL_ID", "event_${event.id}")
+                                        putExtra("EXTRA_CHANNEL_NAME", SportsMatchHelper.translateToPt(event.name))
+                                        putExtra("EXTRA_DIRECT_STREAM_URL", stream.url)
+                                        val streamNames = ArrayList(event.streams.map { it.name })
+                                        val streamUrls = ArrayList(event.streams.map { it.url })
+                                        putStringArrayListExtra("EXTRA_EVENT_STREAM_NAMES", streamNames)
+                                        putStringArrayListExtra("EXTRA_EVENT_STREAM_URLS", streamUrls)
+                                    }
+                                    context.startActivity(intent)
+                                }
 
-                                    if (anyPtChannel != null) {
-                                        // Prioridade 1: Canal PT com transmissão oficial e todas as opções de fallback (DaddyLive 1, DaddyLive 2, TimStreams, EpicSports)
+                                val onPlayEvent: (LiveEvent, List<Channel>) -> Unit = { event, matchedChannels ->
+                                    if (event.streams.size > 1 || (matchedChannels.isNotEmpty() && event.streams.isNotEmpty())) {
+                                        selectedEventForStreams = Pair(event, matchedChannels)
+                                    } else if (matchedChannels.isNotEmpty()) {
+                                        val sportTvChannel = matchedChannels.firstOrNull { it.isPortuguese && it.name.contains("Sport TV", ignoreCase = true) }
+                                        val anyPtChannel = sportTvChannel ?: matchedChannels.firstOrNull { it.isPortuguese } ?: matchedChannels.first()
                                         onChannelClick(anyPtChannel, null)
-                                    } else {
-                                        // Prioridade 2: Transmissões diretas do evento
-                                        val ptStream = event.streams.firstOrNull {
-                                            it.name.contains("Sport TV", ignoreCase = true) ||
-                                            it.name.contains("DAZN PT", ignoreCase = true) ||
-                                            it.name.contains("PT", ignoreCase = true) ||
-                                            it.name.contains("Português", ignoreCase = true) ||
-                                            it.name.contains("Portuguese", ignoreCase = true)
-                                        }
-                                        val streamUrl = ptStream?.url ?: event.streams.firstOrNull()?.url ?: ""
-                                        val otherStreams = event.streams.filter { it.url != streamUrl }
-                                        val backupUrl = otherStreams.firstOrNull()?.url
-                                        val backupUrl2 = if (otherStreams.size > 1) otherStreams[1].url else null
-                                        PlayerActivity.closeActivePip()
-                                        val intent = Intent(context, PlayerActivity::class.java).apply {
-                                            putExtra("EXTRA_CHANNEL_ID", "event_${event.id}")
-                                            putExtra("EXTRA_CHANNEL_NAME", SportsMatchHelper.translateToPt(event.name))
-                                            putExtra("EXTRA_DIRECT_STREAM_URL", streamUrl)
-                                            if (backupUrl != null) putExtra("EXTRA_BACKUP_STREAM_URL", backupUrl)
-                                            if (backupUrl2 != null) putExtra("EXTRA_BACKUP_STREAM_URL2", backupUrl2)
-                                        }
-                                        context.startActivity(intent)
+                                    } else if (event.streams.isNotEmpty()) {
+                                        launchDirectEventStream(event, event.streams.first())
                                     }
                                 }
 
@@ -1374,6 +1391,37 @@ fun HomeScreen(
                 }
             }
         }
+    }
+
+    if (selectedEventForStreams != null) {
+        val (curEvent, curMatched) = selectedEventForStreams!!
+        EventStreamSelectorDialog(
+            event = curEvent,
+            matchedChannels = curMatched,
+            onDismiss = { selectedEventForStreams = null },
+            onSelectChannel = { ch ->
+                selectedEventForStreams = null
+                onChannelClick(ch, null)
+            },
+            onSelectStream = { ev, st ->
+                selectedEventForStreams = null
+                PlayerActivity.closeActivePip()
+                val intent = Intent(context, PlayerActivity::class.java).apply {
+                    putExtra("EXTRA_CHANNEL_ID", "event_${ev.id}")
+                    putExtra("EXTRA_CHANNEL_NAME", SportsMatchHelper.translateToPt(ev.name))
+                    putExtra("EXTRA_DIRECT_STREAM_URL", st.url)
+                    val streamNames = ArrayList(ev.streams.map { it.name })
+                    val streamUrls = ArrayList(ev.streams.map { it.url })
+                    putStringArrayListExtra("EXTRA_EVENT_STREAM_NAMES", streamNames)
+                    putStringArrayListExtra("EXTRA_EVENT_STREAM_URLS", streamUrls)
+                }
+                context.startActivity(intent)
+            },
+            onOpenInMultiView = {
+                selectedEventForStreams = null
+                context.startActivity(Intent(context, MultiViewActivity::class.java))
+            }
+        )
     }
 
     if (selectedChannelForSheet != null) {
@@ -3407,5 +3455,204 @@ fun AppUpdateDialog(
         },
         containerColor = SurfaceDark,
         shape = RoundedCornerShape(16.dp)
+    )
+}
+
+
+@Composable
+fun EventStreamSelectorDialog(
+    event: LiveEvent,
+    matchedChannels: List<Channel>,
+    onDismiss: () -> Unit,
+    onSelectChannel: (Channel) -> Unit,
+    onSelectStream: (LiveEvent, EventStream) -> Unit,
+    onOpenInMultiView: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Opções de Transmissão",
+                        color = Color(0xFF38BDF8),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
+                        Icon(Icons.Default.Close, contentDescription = "Fechar", tint = TextSecondary)
+                    }
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = SportsMatchHelper.translateToPt(event.name),
+                    color = TextPrimary,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    TagBadge(text = event.genreName, color = if (event.isSoccer) RedPrimary else AccentGreen)
+                    if (event.time.isNotBlank()) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        TagBadge(text = event.time, color = if (event.time.startsWith("🔴")) RedPrimary else TextSecondary)
+                    }
+                    if (event.viewers > 0) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("• ${event.viewers} a assistir", color = TextSecondary, fontSize = 11.sp)
+                    }
+                }
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Section 1: Transmissão em Portugal (se houver canal PT correspondente)
+                if (matchedChannels.isNotEmpty()) {
+                    Text(
+                        text = "🇵🇹 TRANSMISSÃO EM PORTUGAL",
+                        color = Color(0xFF38BDF8),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    matchedChannels.forEach { channel ->
+                        var isFocused by remember { mutableStateOf(false) }
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .border(1.dp, if (isFocused) Color(0xFF38BDF8) else BorderDark, RoundedCornerShape(8.dp))
+                                .onFocusChanged { isFocused = it.isFocused }
+                                .focusable()
+                                .clickable { onSelectChannel(channel) },
+                            color = if (isFocused) SurfaceVariantDark else SurfaceDark
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("📺", fontSize = 16.sp)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column {
+                                        Text(
+                                            text = channel.name,
+                                            color = TextPrimary,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            text = "Canal PT Oficial • DaddyLive & Servidores Alternativos",
+                                            color = TextSecondary,
+                                            fontSize = 11.sp
+                                        )
+                                    }
+                                }
+                                Icon(Icons.Default.PlayArrow, contentDescription = null, tint = RedPrimary)
+                            }
+                        }
+                    }
+                }
+
+                // Section 2: Opções Internacionais & TimStreams
+                Text(
+                    text = "⚡ OPÇÕES INTERNACIONAIS & TIMSTREAMS (${event.streams.size})",
+                    color = Color(0xFF38BDF8),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                if (event.streams.isEmpty()) {
+                    Text(
+                        text = "Não existem streams diretas adicionais no momento.",
+                        color = TextSecondary,
+                        fontSize = 12.sp
+                    )
+                } else {
+                    event.streams.forEachIndexed { idx, stream ->
+                        var isStreamFocused by remember { mutableStateOf(false) }
+                        val isTimst = stream.url.contains("ehgembxe") || stream.url.contains("timst") || stream.url.contains("grandemx")
+                        val isStreamed = stream.url.contains("embed.st") || stream.url.contains("streamed")
+                        val sourceBadge = if (isTimst) "⚡ TimStreams" else if (isStreamed) "🌐 Streamed" else "🏆 Feed ${idx + 1}"
+
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .border(1.dp, if (isStreamFocused) Color(0xFF38BDF8) else BorderDark, RoundedCornerShape(8.dp))
+                                .onFocusChanged { isStreamFocused = it.isFocused }
+                                .focusable()
+                                .clickable { onSelectStream(event, stream) },
+                            color = if (isStreamFocused) SurfaceVariantDark else SurfaceDark
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = sourceBadge,
+                                            color = if (isTimst) Color(0xFF38BDF8) else Color(0xFF10B981),
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = stream.name,
+                                        color = TextPrimary,
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                                Button(
+                                    onClick = { onSelectStream(event, stream) },
+                                    colors = ButtonDefaults.buttonColors(containerColor = RedPrimary),
+                                    shape = RoundedCornerShape(6.dp),
+                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                                ) {
+                                    Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(14.dp), tint = Color.White)
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Ver", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onOpenInMultiView,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Icon(Icons.Default.GridView, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Abrir em MultiView", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Fechar", color = TextSecondary)
+            }
+        },
+        containerColor = LocalCustomColors.current.surface,
+        shape = RoundedCornerShape(12.dp)
     )
 }
