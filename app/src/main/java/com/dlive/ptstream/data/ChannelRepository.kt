@@ -608,6 +608,34 @@ class ChannelRepository(private val context: Context) {
             .replace("pt", "")
     }
 
+    fun fetchStreamedStreamDetails(source: String, sourceId: String): List<EventStream> {
+        val list = mutableListOf<EventStream>()
+        try {
+            val url = "https://streamed.pk/api/stream/$source/$sourceId"
+            val conn = (URL(url).openConnection() as HttpURLConnection).apply {
+                connectTimeout = 3500
+                readTimeout = 3500
+                setRequestProperty("User-Agent", "Mozilla/5.0")
+                setRequestProperty("Referer", "https://streamed.pk/")
+            }
+            if (conn.responseCode == HttpURLConnection.HTTP_OK) {
+                val jsonStr = conn.inputStream.bufferedReader().use { it.readText() }
+                val arr = JsonParser.parseString(jsonStr).asJsonArray
+                for (item in arr) {
+                    if (!item.isJsonObject) continue
+                    val obj = item.asJsonObject
+                    val lang = obj.get("language")?.asString ?: "Stream"
+                    val hd = obj.get("hd")?.asBoolean ?: false
+                    val embedUrl = obj.get("embedUrl")?.asString ?: continue
+                    val sNo = obj.get("streamNo")?.asInt ?: 1
+                    val hdTag = if (hd) " [HD]" else ""
+                    list.add(EventStream("$lang (Stream $sNo)$hdTag", embedUrl))
+                }
+            }
+        } catch (_: Exception) {}
+        return list
+    }
+
     /**
      * Obter Jogos em Direto do TimStreams (Futebol prioritário)
      */
@@ -816,93 +844,127 @@ class ChannelRepository(private val context: Context) {
             }
 
 
-            // Also fetch from Streamed (streamed.pk / strmd.link active mirror)
+            // 2. Integração Streamed.pk (API REST Oficial e Aberta documentada em streamed.pk/docs)
             try {
-                val streamedConn = (URL("https://streamed.pk/api/matches/all-today").openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 6000
-                    readTimeout = 6000
-                    setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
-                    setRequestProperty("Referer", "https://streamed.pk/")
-                }
-                if (streamedConn.responseCode == HttpURLConnection.HTTP_OK) {
-                    val strmJson = streamedConn.inputStream.bufferedReader().use { it.readText() }
-                    val strmArray = JsonParser.parseString(strmJson).asJsonArray
-                    for (item in strmArray) {
-                        val obj = item.asJsonObject
-                        val id = obj.get("id")?.asString ?: continue
-                        val title = obj.get("title")?.asString ?: continue
-                        val category = obj.get("category")?.asString ?: "sports"
-                        val poster = obj.get("poster")?.asString?.let {
-                            if (it.startsWith("/")) "https://streamed.pk$it" else it
-                        }
-                        val sourcesArr = obj.getAsJsonArray("sources")
+                val streamedEndpoints = listOf(
+                    "https://streamed.pk/api/matches/all",
+                    "https://streamed.pk/api/matches/football",
+                    "https://streamed.pk/api/matches/live"
+                )
+                for (sEndpoint in streamedEndpoints) {
+                    val streamedConn = (URL(sEndpoint).openConnection() as HttpURLConnection).apply {
+                        connectTimeout = 4000
+                        readTimeout = 4000
+                        setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+                        setRequestProperty("Referer", "https://streamed.pk/")
+                    }
+                    if (streamedConn.responseCode == HttpURLConnection.HTTP_OK) {
+                        val strmJson = streamedConn.inputStream.bufferedReader().use { it.readText() }
+                        val strmArray = JsonParser.parseString(strmJson).asJsonArray
+                        for (item in strmArray) {
+                            if (!item.isJsonObject) continue
+                            val obj = item.asJsonObject
+                            val id = obj.get("id")?.asString ?: continue
+                            val title = obj.get("title")?.asString ?: continue
+                            val category = obj.get("category")?.asString ?: "sports"
+                            val poster = obj.get("poster")?.asString?.let {
+                                if (it.startsWith("/")) "https://streamed.pk$it" else it
+                            }
+                            val sourcesArr = obj.getAsJsonArray("sources")
 
-                        val streamedStreams = mutableListOf<EventStream>()
-                        if (sourcesArr != null) {
-                            for (s in sourcesArr) {
-                                val sObj = s.asJsonObject
-                                val srcName = sObj.get("source")?.asString ?: "server"
-                                val srcId = sObj.get("id")?.asString ?: continue
-                                val embedUrl = "https://embed.st/embed/$srcName/$srcId/1"
-                                streamedStreams.add(EventStream("Streamed (${srcName.uppercase()})", embedUrl))
+                            val streamedStreams = mutableListOf<EventStream>()
+                            if (sourcesArr != null) {
+                                for (s in sourcesArr) {
+                                    if (!s.isJsonObject) continue
+                                    val sObj = s.asJsonObject
+                                    val srcName = sObj.get("source")?.asString ?: "server"
+                                    val srcId = sObj.get("id")?.asString ?: continue
+
+                                    // Para jogos de futebol, obter detalhe de idiomas (ESPN+, DAZN, etc.) e HD
+                                    val isFootball = category.contains("football", ignoreCase = true) || category.contains("soccer", ignoreCase = true)
+                                    if (isFootball && streamedStreams.size < 6) {
+                                        val detailed = fetchStreamedStreamDetails(srcName, srcId)
+                                        if (detailed.isNotEmpty()) {
+                                            streamedStreams.addAll(detailed)
+                                            continue
+                                        }
+                                    }
+
+                                    val embedUrl1 = "https://embed.st/embed/$srcName/$srcId/1"
+                                    val embedUrl2 = "https://embed.st/embed/$srcName/$srcId/2"
+                                    streamedStreams.add(EventStream("Streamed (${srcName.uppercase()} 1)", embedUrl1))
+                                    streamedStreams.add(EventStream("Streamed (${srcName.uppercase()} 2)", embedUrl2))
+                                }
+                            }
+                            if (streamedStreams.isEmpty()) continue
+
+                            val isSoccer = category.lowercase() in listOf("football", "soccer") ||
+                                    title.contains(" vs ", ignoreCase = true) ||
+                                    title.contains(" - ", ignoreCase = true)
+
+                            val genreId = when (category.lowercase()) {
+                                "football", "soccer" -> 1
+                                "motor-sports", "motorsports" -> 2
+                                "fighting", "mma", "boxing" -> 3
+                                "basketball" -> 7
+                                "tennis" -> 10
+                                "american-football" -> 8
+                                else -> if (isSoccer) 1 else 99
+                            }
+                            val genreName = when (genreId) {
+                                1 -> "⚽ Futebol"
+                                2 -> "🏎️ Motores"
+                                3 -> "🥊 Desportos Combate"
+                                7 -> "🏀 Basquetebol"
+                                8 -> "🏈 Futebol Americano"
+                                10 -> "🎾 Ténis"
+                                else -> "🏆 Desporto"
+                            }
+
+                            val dateRaw = obj.get("date")?.asLong ?: 0L
+                            val startMs = if (dateRaw in 1..99999999999L) dateRaw * 1000L else dateRaw
+                            val timeDisplay = if (startMs > 0L) formatMatchTime(startMs) else "Hoje"
+
+                            // Unificar e fundir streams com eventos já existentes (do TimStreams ou DaddyLive)
+                            val existingIndex = eventsList.indexOfFirst {
+                                val n1 = it.name.lowercase().replace(" ", "").replace("@", "vs").replace("-", "vs").replace(".", "")
+                                val n2 = title.lowercase().replace(" ", "").replace("@", "vs").replace("-", "vs").replace(".", "")
+                                n1.contains(n2) || n2.contains(n1)
+                            }
+
+                            if (existingIndex >= 0) {
+                                val existing = eventsList[existingIndex]
+                                val combined = existing.streams + streamedStreams.filter { st -> existing.streams.none { it.url == st.url } }
+                                val bestTs = if (existing.startTimestamp > 0L) existing.startTimestamp else startMs
+                                val bestTime = if (existing.time.isNotBlank() && existing.time != "Hoje" && existing.time != "24/7") existing.time else timeDisplay
+                                eventsList[existingIndex] = existing.copy(
+                                    streams = combined,
+                                    startTimestamp = bestTs,
+                                    time = bestTime,
+                                    logo = existing.logo ?: poster
+                                )
+                            } else {
+                                eventsList.add(
+                                    LiveEvent(
+                                        id = "strmd-$id",
+                                        name = title,
+                                        logo = poster,
+                                        genre = genreId,
+                                        genreName = genreName,
+                                        time = timeDisplay,
+                                        viewers = if (obj.get("popular")?.asBoolean == true) 500 else 250,
+                                        streams = streamedStreams,
+                                        isSoccer = isSoccer,
+                                        startTimestamp = startMs
+                                    )
+                                )
                             }
                         }
-                        if (streamedStreams.isEmpty()) continue
-
-                        val genreName = when (category.lowercase()) {
-                            "football", "soccer" -> "⚽ Futebol"
-                            "basketball" -> "🏀 Basquetebol"
-                            "hockey" -> "🏒 Hóquei"
-                            "baseball" -> "⚾ Basebol"
-                            "tennis" -> "🎾 Ténis"
-                            "motor-sports", "motorsports" -> "🏎️ Motores"
-                            "fighting", "mma", "boxing" -> "🥊 Desportos Combate"
-                            "american-football" -> "🏈 Futebol Americano"
-                            else -> "🏆 Desporto"
-                        }
-                        val isSoccer = category.lowercase() in listOf("football", "soccer")
-
-                        // Match against existing events (e.g. from TimStreams) to merge alternative streams
-                        val existingIndex = eventsList.indexOfFirst {
-                            val n1 = it.name.lowercase().replace(" ", "").replace("@", "vs").replace("-", "vs").replace(".", "")
-                            val n2 = title.lowercase().replace(" ", "").replace("@", "vs").replace("-", "vs").replace(".", "")
-                            n1.contains(n2) || n2.contains(n1)
-                        }
-
-                        val dateRaw = obj.get("date")?.asLong ?: 0L
-                        val startMs = if (dateRaw in 1..99999999999L) dateRaw * 1000L else dateRaw
-                        val timeDisplay = formatMatchTime(startMs)
-
-                        if (existingIndex >= 0) {
-                            val existing = eventsList[existingIndex]
-                            val combined = existing.streams + streamedStreams
-                            val bestTs = if (existing.startTimestamp > 0L) existing.startTimestamp else startMs
-                            val bestTime = if (existing.time.isNotBlank() && existing.time != "Hoje" && existing.time != "24/7") existing.time else timeDisplay
-                            eventsList[existingIndex] = existing.copy(
-                                streams = combined,
-                                startTimestamp = bestTs,
-                                time = bestTime
-                            )
-                        } else {
-                            eventsList.add(
-                                LiveEvent(
-                                    id = "strmd-$id",
-                                    name = title,
-                                    logo = poster,
-                                    genre = if (isSoccer) 1 else 99,
-                                    genreName = genreName,
-                                    time = timeDisplay,
-                                    viewers = 250,
-                                    streams = streamedStreams,
-                                    isSoccer = isSoccer,
-                                    startTimestamp = startMs
-                                )
-                            )
-                        }
+                        if (eventsList.isNotEmpty()) break
                     }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                // Streamed fallback logging
             }
 
             // Also fetch from StreamFree (strmfree.st)
