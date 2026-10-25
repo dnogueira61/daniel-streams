@@ -1202,9 +1202,10 @@ class PlayerActivity : ComponentActivity() {
             when (currentFolder) {
                 "stream" -> "S (DLive 1)"
                 "player" -> "S (DLive 2)"
-                "watch" -> "S (DLive 3)"
-                "cast" -> "S (DLive 4)"
-                "plus" -> "S (Plus)"
+                "cast" -> "S (DLive 3)"
+                "watch" -> "S (DLive 4)"
+                "plus" -> "S (DLive 5)"
+                "casting" -> "S (DLive 6)"
                 else -> "S (${currentFolder.uppercase()})"
             }
         }
@@ -2569,14 +2570,33 @@ class PlayerActivity : ComponentActivity() {
                     options.add(ServerOption(name, isDirect = true, directUrl = timstUrl))
                 }
                 if (channelId.toIntOrNull() != null) {
-                    val label1 = if (options.isEmpty()) "Servidor Principal (DaddyLive - Player 1)" else "Servidor Alternativo ${options.size} (DaddyLive - Player 1)"
-                    options.add(ServerOption(label1, isDirect = false, folder = "stream"))
-                    options.add(ServerOption("Servidor Alternativo ${options.size} (DaddyLive - Player 2)", isDirect = false, folder = "player"))
+                    val dliveFolders = listOf(
+                        Pair("stream", "DaddyLive - Player 1"),
+                        Pair("player", "DaddyLive - Player 2"),
+                        Pair("cast", "DaddyLive - Player 3 (Cast)"),
+                        Pair("watch", "DaddyLive - Player 4 (Watch)"),
+                        Pair("plus", "DaddyLive - Player 5 (Plus)"),
+                        Pair("casting", "DaddyLive - Player 6 (Casting)")
+                    )
+                    dliveFolders.forEach { (fld, desc) ->
+                        val label = if (options.isEmpty()) "Servidor Principal ($desc)" else "Servidor Alternativo ${options.size} ($desc)"
+                        options.add(ServerOption(label, isDirect = false, folder = fld))
+                    }
                 }
             } else {
                 if (channelId.toIntOrNull() != null) {
-                    options.add(ServerOption("Servidor Principal (DaddyLive - Player 1)", isDirect = false, folder = "stream"))
-                    options.add(ServerOption("Servidor Alternativo 1 (DaddyLive - Player 2)", isDirect = false, folder = "player"))
+                    val dliveFolders = listOf(
+                        Pair("stream", "DaddyLive - Player 1"),
+                        Pair("player", "DaddyLive - Player 2"),
+                        Pair("cast", "DaddyLive - Player 3 (Cast)"),
+                        Pair("watch", "DaddyLive - Player 4 (Watch)"),
+                        Pair("plus", "DaddyLive - Player 5 (Plus)"),
+                        Pair("casting", "DaddyLive - Player 6 (Casting)")
+                    )
+                    dliveFolders.forEach { (fld, desc) ->
+                        val label = if (options.isEmpty()) "Servidor Principal ($desc)" else "Servidor Alternativo ${options.size} ($desc)"
+                        options.add(ServerOption(label, isDirect = false, folder = fld))
+                    }
                 }
                 if (timstUrl != null) {
                     val name = if (options.isEmpty()) "Servidor Principal (TimStreams 1080p)" else "Servidor Alternativo ${options.size} (TimStreams 1080p)"
@@ -2644,20 +2664,34 @@ class PlayerActivity : ComponentActivity() {
                 options.add(ServerOption(labelTimst, isDirect = true, directUrl = timstUrl))
             }
             if (hasDaddyLive) {
-                val label1 = if (options.isEmpty()) "Servidor Principal (DaddyLive - Player 1)" else "Servidor Alternativo ${options.size} (DaddyLive - Player 1)"
-                options.add(ServerOption(label1, isDirect = false, folder = "stream"))
-
-                val label2 = "Servidor Alternativo ${options.size} (DaddyLive - Player 2)"
-                options.add(ServerOption(label2, isDirect = false, folder = "player"))
+                val dliveFolders = listOf(
+                    Pair("stream", "DaddyLive - Player 1"),
+                    Pair("player", "DaddyLive - Player 2"),
+                    Pair("cast", "DaddyLive - Player 3 (Cast)"),
+                    Pair("watch", "DaddyLive - Player 4 (Watch)"),
+                    Pair("plus", "DaddyLive - Player 5 (Plus)"),
+                    Pair("casting", "DaddyLive - Player 6 (Casting)")
+                )
+                dliveFolders.forEach { (fld, desc) ->
+                    val label = if (options.isEmpty()) "Servidor Principal ($desc)" else "Servidor Alternativo ${options.size} ($desc)"
+                    options.add(ServerOption(label, isDirect = false, folder = fld))
+                }
             }
         } else {
-            // Por defeito: DaddyLive (Player 1 e Player 2) prioritário sobre TimStreams
+            // Por defeito: DaddyLive (Player 1 a 6) prioritário sobre TimStreams
             if (hasDaddyLive) {
-                val label1 = if (options.isEmpty()) "Servidor Principal (DaddyLive - Player 1)" else "Servidor Alternativo ${options.size} (DaddyLive - Player 1)"
-                options.add(ServerOption(label1, isDirect = false, folder = "stream"))
-
-                val label2 = "Servidor Alternativo ${options.size} (DaddyLive - Player 2)"
-                options.add(ServerOption(label2, isDirect = false, folder = "player"))
+                val dliveFolders = listOf(
+                    Pair("stream", "DaddyLive - Player 1"),
+                    Pair("player", "DaddyLive - Player 2"),
+                    Pair("cast", "DaddyLive - Player 3 (Cast)"),
+                    Pair("watch", "DaddyLive - Player 4 (Watch)"),
+                    Pair("plus", "DaddyLive - Player 5 (Plus)"),
+                    Pair("casting", "DaddyLive - Player 6 (Casting)")
+                )
+                dliveFolders.forEach { (fld, desc) ->
+                    val label = if (options.isEmpty()) "Servidor Principal ($desc)" else "Servidor Alternativo ${options.size} ($desc)"
+                    options.add(ServerOption(label, isDirect = false, folder = fld))
+                }
             }
             if (timstUrl != null && options.none { it.directUrl == timstUrl }) {
                 val labelTimst = if (options.isEmpty()) {

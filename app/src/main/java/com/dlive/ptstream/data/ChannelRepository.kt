@@ -3,6 +3,7 @@ package com.dlive.ptstream.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
+import com.google.gson.JsonArray
 import com.google.gson.JsonParser
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
@@ -716,6 +717,103 @@ class ChannelRepository(private val context: Context) {
                 // Try next mirror
             }
         }
+
+            // Contingência DaddyLive: Se TimStreams estiver em baixo ou sem eventos, recorrer a schedule-generated.json
+            if (eventsList.isEmpty()) {
+                val dliveMirrors = listOf(
+                    "${getBaseUrl()}/schedule/schedule-generated.json",
+                    "https://thedaddy.pk/schedule/schedule-generated.json",
+                    "https://dlive.sx/schedule/schedule-generated.json"
+                )
+                for (dliveUrl in dliveMirrors) {
+                    try {
+                        val conn = (URL(dliveUrl).openConnection() as HttpURLConnection).apply {
+                            connectTimeout = 4000
+                            readTimeout = 4000
+                            setRequestProperty("User-Agent", "Mozilla/5.0")
+                            setRequestProperty("Referer", "${getBaseUrl()}/")
+                        }
+                        if (conn.responseCode == HttpURLConnection.HTTP_OK) {
+                            val jsonStr = conn.inputStream.bufferedReader().use { it.readText() }
+                            val root = JsonParser.parseString(jsonStr).asJsonObject
+                            for ((_, dayElem) in root.entrySet()) {
+                                if (!dayElem.isJsonObject) continue
+                                val dayObj = dayElem.asJsonObject
+                                for ((catKey, catElem) in dayObj.entrySet()) {
+                                    if (!catElem.isJsonArray) continue
+                                    val cleanCat = catKey.replace(Regex("<[^>]+>"), "").trim()
+                                    val isSoccerCat = cleanCat.contains("soccer", ignoreCase = true) || cleanCat.contains("football", ignoreCase = true)
+                                    val genreId = when {
+                                        isSoccerCat -> 1
+                                        cleanCat.contains("motor", ignoreCase = true) || cleanCat.contains("f1", ignoreCase = true) -> 2
+                                        cleanCat.contains("combat", ignoreCase = true) || cleanCat.contains("ufc", ignoreCase = true) -> 3
+                                        cleanCat.contains("basket", ignoreCase = true) || cleanCat.contains("nba", ignoreCase = true) -> 7
+                                        cleanCat.contains("tennis", ignoreCase = true) -> 10
+                                        else -> 99
+                                    }
+                                    val genreName = when (genreId) {
+                                        1 -> "⚽ Futebol"
+                                        2 -> "🏎️ Motores"
+                                        3 -> "🥊 Desportos Combate"
+                                        7 -> "🏀 Basquetebol"
+                                        10 -> "🎾 Ténis"
+                                        else -> "🏆 $cleanCat"
+                                    }
+
+                                    for (evElem in catElem.asJsonArray) {
+                                        if (!evElem.isJsonObject) continue
+                                        val evObj = evElem.asJsonObject
+                                        val evName = evObj.get("event")?.asString ?: continue
+                                        val evTime = evObj.get("time")?.asString ?: ""
+                                        val startMs = parseTimeToTimestamp(evTime)
+                                        val timeDisplay = if (startMs > 0L) formatMatchTime(startMs) else evTime
+
+                                        val streamsList = mutableListOf<EventStream>()
+                                        val chArr = evObj.getAsJsonArray("channels")
+                                        val ch2Arr = evObj.getAsJsonArray("channels2")
+
+                                        val parseArr = { arr: JsonArray? ->
+                                            if (arr != null) {
+                                                for (c in arr) {
+                                                    if (!c.isJsonObject) continue
+                                                    val cObj = c.asJsonObject
+                                                    val chName = cObj.get("channel_name")?.asString ?: "DaddyLive"
+                                                    val chId = cObj.get("channel_id")?.asString ?: continue
+                                                    streamsList.add(EventStream(chName, "${getBaseUrl()}/stream/stream-$chId.php"))
+                                                }
+                                            }
+                                        }
+                                        parseArr(chArr)
+                                        parseArr(ch2Arr)
+
+                                        val isSoccer = isSoccerCat || evName.contains(" vs ", ignoreCase = true) || evName.contains(" - ", ignoreCase = true)
+
+                                        eventsList.add(
+                                            LiveEvent(
+                                                id = "dl_${eventsList.size}_${evName.hashCode()}",
+                                                name = evName,
+                                                logo = null,
+                                                genre = genreId,
+                                                genreName = genreName,
+                                                time = timeDisplay,
+                                                viewers = 0,
+                                                streams = streamsList,
+                                                isSoccer = isSoccer,
+                                                startTimestamp = startMs
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                            if (eventsList.isNotEmpty()) {
+                                break
+                            }
+                        }
+                    } catch (_: Exception) {
+                        // Try next dlive schedule mirror
+                    }
+                }
+            }
 
 
             // Also fetch from Streamed (streamed.pk / strmd.link active mirror)
