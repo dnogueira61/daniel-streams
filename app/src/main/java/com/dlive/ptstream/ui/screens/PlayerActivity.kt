@@ -461,6 +461,9 @@ class PlayerActivity : ComponentActivity() {
     @SuppressLint("ClickableViewAccessibility")
     private fun initViews() {
         drawerLayout = findViewById(R.id.drawerLayout)
+        if (isTv && !repository.isTvDrawerDpadEnabled()) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+        }
         playerRoot = findViewById(R.id.playerRoot)
         webView = findViewById(R.id.webView)
         webView.isFocusable = false
@@ -799,6 +802,11 @@ class PlayerActivity : ComponentActivity() {
                 scrollToActiveChannel()
                 rvDrawerChannels.postDelayed({ scrollToActiveChannel() }, 100)
             }
+            override fun onDrawerClosed(drawerView: View) {
+                if (isTv && !repository.isTvDrawerDpadEnabled()) {
+                    drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+                }
+            }
         })
 
         syncDrawerToActiveChannel()
@@ -869,6 +877,9 @@ class PlayerActivity : ComponentActivity() {
         syncDrawerToActiveChannel()
 
         // 3. Open drawer
+        if (isTv && !repository.isTvDrawerDpadEnabled()) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+        }
         drawerLayout.openDrawer(GravityCompat.START)
 
         // 4. Scroll immediately and post-animation to guarantee correct channel position
@@ -2907,7 +2918,9 @@ class PlayerActivity : ComponentActivity() {
                         if (focused == etDrawerSearch) {
                             return super.dispatchKeyEvent(event)
                         }
-                        cycleDrawerTab(forward = true)
+                        if (!isTv || repository.isTvDrawerDpadEnabled()) {
+                            cycleDrawerTab(forward = true)
+                        }
                         return true
                     } else if (isOverlayVisible) {
                         resetOverlayHideTimer()
@@ -2925,13 +2938,17 @@ class PlayerActivity : ComponentActivity() {
                         if (focused == etDrawerSearch) {
                             return super.dispatchKeyEvent(event)
                         }
-                        cycleDrawerTab(forward = false)
+                        if (!isTv || repository.isTvDrawerDpadEnabled()) {
+                            cycleDrawerTab(forward = false)
+                        }
                         return true
                     } else if (isOverlayVisible) {
                         resetOverlayHideTimer()
                         return super.dispatchKeyEvent(event)
                     } else {
-                        openDrawer()
+                        if (!isTv || repository.isTvDrawerDpadEnabled()) {
+                            openDrawer()
+                        }
                         return true
                     }
                 }
@@ -2956,7 +2973,9 @@ class PlayerActivity : ComponentActivity() {
 
                 KeyEvent.KEYCODE_CHANNEL_UP, KeyEvent.KEYCODE_PAGE_UP -> {
                     if (isDrawerOpen) {
-                        cycleDrawerTab(forward = false)
+                        if (!isTv || repository.isTvDrawerDpadEnabled()) {
+                            cycleDrawerTab(forward = false)
+                        }
                         return true
                     }
                     zapPreviousChannel()
@@ -2980,7 +2999,9 @@ class PlayerActivity : ComponentActivity() {
 
                 KeyEvent.KEYCODE_CHANNEL_DOWN, KeyEvent.KEYCODE_PAGE_DOWN -> {
                     if (isDrawerOpen) {
-                        cycleDrawerTab(forward = true)
+                        if (!isTv || repository.isTvDrawerDpadEnabled()) {
+                            cycleDrawerTab(forward = true)
+                        }
                         return true
                     }
                     zapNextChannel()
@@ -3247,6 +3268,24 @@ class PlayerActivity : ComponentActivity() {
             updateClockDisplay()
         }
         dialogView.addView(swClock)
+
+        if (isTv) {
+            val swTvDrawer = Switch(this).apply {
+                text = "◀️ Abrir Menu Lateral com Seta Esquerda"
+                setTextColor(Color.WHITE)
+                isChecked = repository.isTvDrawerDpadEnabled()
+                setPadding(0, 10, 0, 14)
+            }
+            swTvDrawer.setOnCheckedChangeListener { _, isChecked ->
+                repository.setTvDrawerDpadEnabled(isChecked)
+                if (!isChecked) {
+                    drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+                } else {
+                    drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+                }
+            }
+            dialogView.addView(swTvDrawer)
+        }
 
         // 5. Back Button / PiP
         if (!isTv) {

@@ -48,6 +48,7 @@ class ChannelRepository(private val context: Context) {
     private val PREF_CHANNEL_VIEW_MODE = "pref_channel_view_mode"
     private val PREF_SHOW_CLOCK = "pref_show_clock"
     private val PREF_TIMST_AS_PRIMARY = "pref_timst_as_primary"
+    private val PREF_TV_DRAWER_DPAD_ENABLED = "pref_tv_drawer_dpad_enabled"
     private val CACHE_FILE_NAME = "channels_cache.json"
 
     private var cachedChannels: List<Channel> = emptyList()
@@ -281,6 +282,9 @@ class ChannelRepository(private val context: Context) {
 
     fun isTimStreamsPrimary(): Boolean = prefs.getBoolean(PREF_TIMST_AS_PRIMARY, false)
     fun setTimStreamsPrimary(enabled: Boolean) = prefs.edit().putBoolean(PREF_TIMST_AS_PRIMARY, enabled).apply()
+
+    fun isTvDrawerDpadEnabled(): Boolean = prefs.getBoolean(PREF_TV_DRAWER_DPAD_ENABLED, false)
+    fun setTvDrawerDpadEnabled(enabled: Boolean) = prefs.edit().putBoolean(PREF_TV_DRAWER_DPAD_ENABLED, enabled).apply()
 
     fun isAutoUnmuteEnabled(): Boolean = prefs.getBoolean(PREF_AUTO_UNMUTE, true)
     fun setAutoUnmuteEnabled(enabled: Boolean) = prefs.edit().putBoolean(PREF_AUTO_UNMUTE, enabled).apply()

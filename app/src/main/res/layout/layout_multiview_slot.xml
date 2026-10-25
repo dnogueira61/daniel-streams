@@ -99,6 +99,16 @@
                 android:textStyle="bold" />
 
             <ImageButton
+                android:id="@+id/btnSlotSwap"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_rotate"
+                android:tint="#38BDF8"
+                android:focusable="true"
+                android:contentDescription="Trocar Jogo" />
+
+            <ImageButton
                 android:id="@+id/btnSlotAudio"
                 android:layout_width="28dp"
                 android:layout_height="28dp"

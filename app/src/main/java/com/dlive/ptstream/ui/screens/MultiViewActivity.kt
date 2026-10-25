@@ -32,6 +32,8 @@ import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -80,6 +82,8 @@ class MultiViewActivity : ComponentActivity() {
         repository = ChannelRepository(this)
 
         initViews()
+
+        autoPopulateTopLiveMatches()
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -202,28 +206,171 @@ class MultiViewActivity : ComponentActivity() {
         fullscreenSlotIndex = -1
     }
 
+    private fun autoPopulateTopLiveMatches() {
+        val existing = repository.getLiveEvents()
+        if (existing.isNotEmpty()) {
+            populateSlotsWithEvents(existing)
+        } else {
+            lifecycleScope.launch {
+                repository.fetchLiveMatches(lifecycleScope) { events ->
+                    populateSlotsWithEvents(events)
+                }
+            }
+        }
+    }
+
+    private fun calculateMatchScore(ev: LiveEvent, isRunning: Boolean, now: Long): Int {
+        var score = 0
+        if (isRunning) {
+            score += 10000
+        } else if (ev.startTimestamp > 0L && (ev.startTimestamp - now in 0..(60 * 60 * 1000L))) {
+            score += 5000
+        }
+
+        if (ev.isHighlight) {
+            score += 4000 - minOf(ev.highlightPriority * 20, 1000)
+        }
+
+        val n = ev.name.lowercase()
+        val majorKeywords = listOf(
+            "champions", "liga dos campeões", "benfica", "porto", "sporting", "braga",
+            "derby", "dérbi", "clássico", "classico", "real madrid", "barcelona",
+            "liverpool", "arsenal", "man city", "chelsea", "bayern", "psg",
+            "juventus", "inter", "milan", "atletico", "premier league", "la liga", "serie a"
+        )
+        if (majorKeywords.any { n.contains(it) }) {
+            score += 3000
+        }
+
+        if (SportsMatchHelper.isSoccerEvent(ev)) {
+            score += 1500
+        }
+
+        if (ev.streams.isNotEmpty()) {
+            score += 500
+        }
+
+        score += minOf(ev.viewers / 10, 500)
+        return score
+    }
+
+    private fun populateSlotsWithEvents(events: List<LiveEvent>) {
+        val now = System.currentTimeMillis()
+        val ptChannels = repository.getAllCachedChannels().filter { it.isPortuguese }
+
+        // Ranking live events:
+        val rankedMatches = events.filter { ev ->
+            if (ev.startTimestamp > 0L && (now - ev.startTimestamp > 180 * 60 * 1000L)) false
+            else true
+        }.sortedWith { a, b ->
+            val aRunning = a.startTimestamp > 0L && (now in (a.startTimestamp - 15 * 60 * 1000L)..(a.startTimestamp + 150 * 60 * 1000L))
+            val bRunning = b.startTimestamp > 0L && (now in (b.startTimestamp - 15 * 60 * 1000L)..(b.startTimestamp + 150 * 60 * 1000L))
+            val aScore = calculateMatchScore(a, aRunning, now)
+            val bScore = calculateMatchScore(b, bRunning, now)
+            bScore.compareTo(aScore)
+        }
+
+        val topOptions = mutableListOf<SlotData>()
+
+        for (ev in rankedMatches) {
+            val title = SportsMatchHelper.translateToPt(ev.name)
+            if (ev.streams.isNotEmpty()) {
+                val st = ev.streams.first()
+                topOptions.add(
+                    SlotData(
+                        title = "⚽ $title (${st.name})",
+                        url = st.url,
+                        isDirect = true
+                    )
+                )
+            } else {
+                val matched = ptChannels.firstOrNull { ch ->
+                    ev.name.contains(ch.name, ignoreCase = true) || ch.name.contains(ev.name, ignoreCase = true)
+                }
+                if (matched != null) {
+                    val streamUrl = matched.backupStreamUrl ?: "https://dlive.sx/stream/stream-${matched.id}.php"
+                    topOptions.add(
+                        SlotData(
+                            title = "⚽ $title (${matched.name})",
+                            url = streamUrl,
+                            isDirect = !streamUrl.contains("stream-"),
+                            channelId = matched.id
+                        )
+                    )
+                }
+            }
+            if (topOptions.size >= 4) break
+        }
+
+        // Se houver menos de 4 jogos ao vivo no momento, preencher com os canais desportivos principais PT
+        if (topOptions.size < 4) {
+            val topSports = ptChannels.filter { ch ->
+                val n = ch.name.lowercase()
+                n.contains("sport tv 1") || n.contains("sport tv 2") || n.contains("sport tv 3") ||
+                n.contains("dazn 1") || n.contains("dazn 2") || n.contains("eleven 1") || n.contains("eleven 2") ||
+                n.contains("benfica") || n.contains("canal 11")
+            }.sortedBy { repository.getSportTvOrder(it.name) }
+
+            for (ch in topSports) {
+                if (topOptions.any { it.channelId == ch.id }) continue
+                val streamUrl = ch.backupStreamUrl ?: "https://dlive.sx/stream/stream-${ch.id}.php"
+                topOptions.add(
+                    SlotData(
+                        title = "🇵🇹 ${ch.name}",
+                        url = streamUrl,
+                        isDirect = !streamUrl.contains("stream-"),
+                        channelId = ch.id
+                    )
+                )
+                if (topOptions.size >= 4) break
+            }
+        }
+
+        // Carrega automaticamente nos ecrãs vazios
+        val maxSlots = if (is4ScreensMode) 4 else 2
+        for (i in 0 until minOf(maxSlots, topOptions.size)) {
+            if (!slots[i].isActive) {
+                slots[i].loadStream(topOptions[i])
+            }
+        }
+
+        setAudioActiveSlot(0)
+        updateFeedsCounter()
+    }
+
     private fun openFeedPickerDialog(slotIndex: Int) {
+        val now = System.currentTimeMillis()
         val liveEvents = repository.getLiveEvents()
         val ptChannels = repository.getAllCachedChannels().filter { it.isPortuguese }
         val intlChannels = repository.getAllCachedChannels().filter { !it.isPortuguese && (it.category.contains("Desporto", ignoreCase = true) || it.name.contains("sport", ignoreCase = true)) }
 
+        // Ordenar eventos por relevância (jogos em direto, Champions League, clássicos, derbys no topo)
+        val sortedEvents = liveEvents.sortedWith { a, b ->
+            val aRunning = a.startTimestamp > 0L && (now in (a.startTimestamp - 15 * 60 * 1000L)..(a.startTimestamp + 150 * 60 * 1000L))
+            val bRunning = b.startTimestamp > 0L && (now in (b.startTimestamp - 15 * 60 * 1000L)..(b.startTimestamp + 150 * 60 * 1000L))
+            val aScore = calculateMatchScore(a, aRunning, now)
+            val bScore = calculateMatchScore(b, bRunning, now)
+            bScore.compareTo(aScore)
+        }
+
         val options = mutableListOf<SlotData>()
 
-        // 1. Jogos Hoje
-        for (ev in liveEvents) {
+        // 1. Jogos Hoje / Em Direto prioritários
+        for (ev in sortedEvents) {
             val title = SportsMatchHelper.translateToPt(ev.name)
+            val isRunning = ev.startTimestamp > 0L && (now in (ev.startTimestamp - 15 * 60 * 1000L)..(ev.startTimestamp + 150 * 60 * 1000L))
+            val prefix = if (isRunning) "🔴 [EM DIRETO]" else "⚽"
             if (ev.streams.isNotEmpty()) {
                 for (st in ev.streams) {
                     options.add(
                         SlotData(
-                            title = "⚽ $title (${st.name})",
+                            title = "$prefix $title (${st.name})",
                             url = st.url,
                             isDirect = true
                         )
                     )
                 }
             } else {
-                // If event has no direct streams, find matched channel
                 val matched = ptChannels.firstOrNull { ch ->
                     ev.name.contains(ch.name, ignoreCase = true) || ch.name.contains(ev.name, ignoreCase = true)
                 }
@@ -231,7 +378,7 @@ class MultiViewActivity : ComponentActivity() {
                     val streamUrl = matched.backupStreamUrl ?: "https://dlive.sx/stream/stream-${matched.id}.php"
                     options.add(
                         SlotData(
-                            title = "⚽ $title (${matched.name})",
+                            title = "$prefix $title (${matched.name})",
                             url = streamUrl,
                             isDirect = !streamUrl.contains("stream-"),
                             channelId = matched.id
@@ -270,7 +417,7 @@ class MultiViewActivity : ComponentActivity() {
         val titles = options.map { it.title }.toTypedArray()
 
         AlertDialog.Builder(this)
-            .setTitle("Selecionar Transmissão para Ecrã ${slotIndex + 1}")
+            .setTitle("Trocar Ecrã ${slotIndex + 1}: Escolher Jogo ou Canal")
             .setItems(titles) { _, which ->
                 val selected = options[which]
                 slots[slotIndex].loadStream(selected)
@@ -316,6 +463,10 @@ class MultiViewActivity : ComponentActivity() {
             view.findViewById<TextView>(R.id.tvEmptySlotNumber)?.text = "Ecrã ${index + 1}"
 
             llEmptyView?.setOnClickListener {
+                openFeedPickerDialog(index)
+            }
+
+            view.findViewById<ImageButton>(R.id.btnSlotSwap)?.setOnClickListener {
                 openFeedPickerDialog(index)
             }
 

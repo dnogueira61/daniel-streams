@@ -2651,6 +2651,7 @@ fun SettingsDialog(
     var channelViewMode by remember { mutableStateOf(repository.getChannelViewMode()) }
     var showClockSetting by remember { mutableStateOf(repository.isShowClockEnabled()) }
     var autoPip by remember { mutableStateOf(repository.isAutoPipOnBack()) }
+    var tvDrawerDpad by remember { mutableStateOf(repository.isTvDrawerDpadEnabled()) }
 
     var isSyncingChannels by remember { mutableStateOf(false) }
     var syncChannelsMsg by remember { mutableStateOf<String?>(null) }
@@ -2814,6 +2815,27 @@ fun SettingsDialog(
                                 )
                             }
                         }
+                    }
+                }
+
+                if (repository.isTv()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                            Text("Menu Lateral com Seta Esquerda (TV)", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                            Text("Desligado para zapping rápido e sem saltos entre separadores de canais.", color = TextSecondary, fontSize = 11.sp)
+                        }
+                        Switch(
+                            checked = tvDrawerDpad,
+                            onCheckedChange = { enabled ->
+                                tvDrawerDpad = enabled
+                                repository.setTvDrawerDpadEnabled(enabled)
+                            },
+                            colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF38BDF8))
+                        )
                     }
                 }
 
