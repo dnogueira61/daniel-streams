@@ -1,0 +1,192 @@
+{
+	"info": {
+		"_postman_id": "dlive-stream-health-suite-v1",
+		"name": "DanielStreams - Stream & API Health Automation",
+		"description": "Suite de validação automatizada de integridade das APIs e servidores de vídeo (DaddyLive, TimStreams, PPV/StreamFree)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. DaddyLive Schedule Fallback JSON",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test('Response is valid JSON with day schedules', function () {",
+							"    var data = pm.response.json();",
+							"    pm.expect(Object.keys(data).length).to.be.above(0);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "Mozilla/5.0"
+					},
+					{
+						"key": "Referer",
+						"value": "https://thedaddy.pk/"
+					}
+				],
+				"url": {
+					"raw": "https://thedaddy.pk/schedule/schedule-generated.json",
+					"protocol": "https",
+					"host": ["thedaddy", "pk"],
+					"path": ["schedule", "schedule-generated.json"]
+				}
+			}
+		},
+		{
+			"name": "2. DaddyLive Player 1 (stream)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test('Contains video player embed or script container', function () {",
+							"    pm.expect(pm.response.text()).to.include('iframe');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "Mozilla/5.0"
+					},
+					{
+						"key": "Referer",
+						"value": "https://thedaddy.pk/"
+					}
+				],
+				"url": {
+					"raw": "https://thedaddy.pk/stream/stream-49.php",
+					"protocol": "https",
+					"host": ["thedaddy", "pk"],
+					"path": ["stream", "stream-49.php"]
+				}
+			}
+		},
+		{
+			"name": "3. DaddyLive Player 2 (player)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "Mozilla/5.0"
+					},
+					{
+						"key": "Referer",
+						"value": "https://thedaddy.pk/"
+					}
+				],
+				"url": {
+					"raw": "https://thedaddy.pk/player/stream-49.php",
+					"protocol": "https",
+					"host": ["thedaddy", "pk"],
+					"path": ["player", "stream-49.php"]
+				}
+			}
+		},
+		{
+			"name": "4. DaddyLive Player 3 (cast)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "Mozilla/5.0"
+					},
+					{
+						"key": "Referer",
+						"value": "https://thedaddy.pk/"
+					}
+				],
+				"url": {
+					"raw": "https://thedaddy.pk/cast/stream-49.php",
+					"protocol": "https",
+					"host": ["thedaddy", "pk"],
+					"path": ["cast", "stream-49.php"]
+				}
+			}
+		},
+		{
+			"name": "5. DaddyLive Player 4 (watch)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "Mozilla/5.0"
+					},
+					{
+						"key": "Referer",
+						"value": "https://thedaddy.pk/"
+					}
+				],
+				"url": {
+					"raw": "https://thedaddy.pk/watch/stream-49.php",
+					"protocol": "https",
+					"host": ["thedaddy", "pk"],
+					"path": ["watch", "stream-49.php"]
+				}
+			}
+		}
+	]
+}

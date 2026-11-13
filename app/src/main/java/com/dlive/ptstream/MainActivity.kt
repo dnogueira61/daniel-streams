@@ -22,6 +22,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.dlive.ptstream.monitoring.AppTelemetry.init(this)
 
         channelRepository = ChannelRepository(this)
         channelRepository.syncChannelsFromWeb(lifecycleScope)

@@ -21,6 +21,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Node.js for Postman / Newman
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Postman Stream & API Health Check
+        run: |
+          npx --yes newman run postman/stream_health_collection.json --timeout-request 8000
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -43,4 +52,3 @@ jobs:
             git pull --rebase --autostash origin main
             git push origin main
           fi
-

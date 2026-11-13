@@ -352,8 +352,10 @@ class PlayerActivity : ComponentActivity() {
         handler.removeCallbacks(failoverTimeoutRunnable)
 
         if (currentFailoverIndex < failoverServers.size - 1) {
+            val prevServer = failoverServers.getOrNull(currentFailoverIndex)?.label
             currentFailoverIndex++
             val next = failoverServers[currentFailoverIndex]
+            com.dlive.ptstream.monitoring.AppTelemetry.recordFailover(channelName, prevServer, next.label, reason)
             runOnUiThread {
                 val msg = if (isStallError) {
                     "⚡ Sinal estagnado. A mudar para ${next.label}..."
@@ -371,6 +373,7 @@ class PlayerActivity : ComponentActivity() {
                 applyServerOption(next, currentFailoverIndex)
             }
         } else {
+            com.dlive.ptstream.monitoring.AppTelemetry.recordPlaybackFailure(channelName, failoverServers.getOrNull(currentFailoverIndex)?.label, reason, activeDirectUrl)
             runOnUiThread {
                 hideConnectingOverlay()
                 Toast.makeText(this@PlayerActivity, "⚠️ Todas as transmissões deste canal falharam", Toast.LENGTH_LONG).show()
