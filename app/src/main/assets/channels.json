@@ -90,22 +90,13 @@
     "backupStreamUrl2": "https://epicsports-tv.com/eu.html?id=33068"
   },
   {
-    "id": "720",
-    "name": "RTP 2 HD",
-    "country": "PT",
-    "category": "Generalistas",
-    "isPt": true,
-    "backupStreamUrl": "https://streaming-live.rtp.pt/liverepeater/rtp2HD.smil/playlist.m3u8",
-    "backupStreamUrl2": "https://epicsports-tv.com/eu.html?id=33069"
-  },
-  {
     "id": "723",
     "name": "TVI HD",
     "country": "PT",
     "category": "Generalistas",
     "isPt": true,
     "backupStreamUrl": "https://raw.githubusercontent.com/LITUATUI/M3UPT/main/M3U/TVI.m3u8",
-    "backupStreamUrl2": "https://video-auth5.iol.pt/live_tvi/live_tvi/edge_servers/tvi-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTEvMTkvMjAyNiAxMjoxMjoyMCBQTSZoYXNoX3ZhbHVlPXVsTDNkU0hkeFhpOUp1TThyWGhVTnc9PSZ2YWxpZG1pbnV0ZXM9MTQ0MCZpZD1jOWZmY2M1Ny1mNjAyLTQ3OWMtOTcyOS0wNzJiNWMxNDkwZjE="
+    "backupStreamUrl2": "https://video-auth5.iol.pt/live_tvi/live_tvi/edge_servers/tvi-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTEvMTkvMjAyNiA2OjEwOjQzIFBNJmhhc2hfdmFsdWU9M2xmYTZVdWFUN2NmczJrTklEUU80dz09JnZhbGlkbWludXRlcz0xNDQwJmlkPWQ5Y2Y1YTc0LTE1NWYtNDhjZi05YTYwLTE1ZDg2ODA5NDFjMg=="
   },
   {
     "id": "721",
@@ -123,7 +114,7 @@
     "category": "Generalistas",
     "isPt": true,
     "backupStreamUrl": "https://raw.githubusercontent.com/LITUATUI/M3UPT/main/M3U/CNN_Portugal.m3u8",
-    "backupStreamUrl2": "https://video-auth1.iol.pt/live_cnn/live_cnn/edge_servers/cnn-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTEvMTkvMjAyNiAxMjoxMjoyMCBQTSZoYXNoX3ZhbHVlPXVsTDNkU0hkeFhpOUp1TThyWGhVTnc9PSZ2YWxpZG1pbnV0ZXM9MTQ0MCZpZD1jOWZmY2M1Ny1mNjAyLTQ3OWMtOTcyOS0wNzJiNWMxNDkwZjE="
+    "backupStreamUrl2": "https://video-auth1.iol.pt/live_cnn/live_cnn/edge_servers/cnn-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTEvMTkvMjAyNiA2OjEwOjQzIFBNJmhhc2hfdmFsdWU9M2xmYTZVdWFUN2NmczJrTklEUU80dz09JnZhbGlkbWludXRlcz0xNDQwJmlkPWQ5Y2Y1YTc0LTE1NWYtNDhjZi05YTYwLTE1ZDg2ODA5NDFjMg=="
   },
   {
     "id": "porto-canal-pt",
@@ -151,6 +142,26 @@
     "isPt": true,
     "backupStreamUrl": "https://ehgembxe.cfd/eymmdvm3-8294",
     "backupStreamUrl2": "https://epicsports-tv.com/eu.html?id=33092"
+  },
+  {
+    "id": "artv-pt",
+    "name": "ARTV",
+    "country": "PT",
+    "category": "Generalistas",
+    "isPt": true,
+    "backupStreamUrl": "https://playout175.livextend.cloud/livenlin4/_definst_/2liveartvpub2/playlist.m3u8",
+    "backupStreamUrl2": null,
+    "originalCategory": "Generalistas"
+  },
+  {
+    "id": "720",
+    "name": "RTP 2 HD",
+    "country": "PT",
+    "category": "Em Manutenção",
+    "isPt": true,
+    "backupStreamUrl": "https://streaming-live.rtp.pt/liverepeater/rtp2HD.smil/playlist.m3u8",
+    "backupStreamUrl2": "https://epicsports-tv.com/eu.html?id=33069",
+    "originalCategory": "Generalistas"
   },
   {
     "id": "291",
@@ -210,16 +221,6 @@
     "isPt": true,
     "backupStreamUrl": "https://sic.live.impresa.pt/sic1080p.m3u8",
     "backupStreamUrl2": "https://epicsports-tv.com/eu.html?id=4233",
-    "originalCategory": "Generalistas"
-  },
-  {
-    "id": "artv-pt",
-    "name": "ARTV",
-    "country": "PT",
-    "category": "Em Manutenção",
-    "isPt": true,
-    "backupStreamUrl": "https://playout175.livextend.cloud/livenlin4/_definst_/2liveartvpub2/playlist.m3u8",
-    "backupStreamUrl2": null,
     "originalCategory": "Generalistas"
   },
   {
