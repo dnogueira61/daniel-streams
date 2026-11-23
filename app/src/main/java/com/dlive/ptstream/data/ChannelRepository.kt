@@ -56,7 +56,8 @@ class ChannelRepository(private val context: Context) {
     private var liveEvents: List<LiveEvent> = emptyList()
 
     companion object {
-        const val DEFAULT_TIMST_BASE_URL = "https://timst.top"
+        const val DEFAULT_DADDYLIVE_BASE_URL = "https://thedaddy.pk"
+        const val DEFAULT_TIMST_BASE_URL = "https://shoewiki.click"
         const val FALLBACK_TIMST_BASE_URL = "https://tim-streams.com"
 
         private val FOOTBALL_PATTERN = Regex(
@@ -360,7 +361,14 @@ class ChannelRepository(private val context: Context) {
         recordChannelWatched(channelId)
     }
 
-    fun getBaseUrl(): String = prefs.getString(PREF_BASE_URL, "https://dlive.sx") ?: "https://dlive.sx"
+    fun getBaseUrl(): String {
+        val saved = prefs.getString(PREF_BASE_URL, null)?.trim()
+        if (saved.isNullOrBlank() || saved.contains("dlive.sx") || saved.contains("dlstreams.st")) {
+            setBaseUrl(DEFAULT_DADDYLIVE_BASE_URL)
+            return DEFAULT_DADDYLIVE_BASE_URL
+        }
+        return saved
+    }
     fun setBaseUrl(newUrl: String) {
         val clean = if (newUrl.endsWith("/")) newUrl.dropLast(1) else newUrl
         prefs.edit().putString(PREF_BASE_URL, clean).apply()
@@ -368,7 +376,7 @@ class ChannelRepository(private val context: Context) {
 
     fun getTimstBaseUrl(): String {
         val saved = prefs.getString(PREF_TIMST_BASE_URL, null)?.trim()
-        if (saved.isNullOrBlank() || saved.contains("grandemx.org") || saved.contains("exmxbxe.cfd") || saved.contains("timst.cfd") || saved.contains("tim-streams.com")) {
+        if (saved.isNullOrBlank() || saved.contains("grandemx.org") || saved.contains("exmxbxe.cfd") || saved.contains("timst.cfd") || saved.contains("tim-streams.com") || saved.contains("timst.top") || saved.contains("ehgembxe.cfd")) {
             setTimstBaseUrl(DEFAULT_TIMST_BASE_URL)
             return DEFAULT_TIMST_BASE_URL
         }
@@ -471,11 +479,18 @@ class ChannelRepository(private val context: Context) {
     private fun normalizeStreamUrl(url: String?): String? {
         if (url == null) return null
         var u = url.trim()
+        val timstBase = getTimstBaseUrl()
         if (u.contains("grandemx.org")) {
-            u = u.replace("https://grandemx.org", "https://ehgembxe.cfd").replace("http://grandemx.org", "https://ehgembxe.cfd")
+            u = u.replace("https://grandemx.org", timstBase).replace("http://grandemx.org", timstBase)
         }
         if (u.contains("exmxbxe.cfd")) {
-            u = u.replace("https://exmxbxe.cfd", "https://ehgembxe.cfd").replace("http://exmxbxe.cfd", "https://ehgembxe.cfd")
+            u = u.replace("https://exmxbxe.cfd", timstBase).replace("http://exmxbxe.cfd", timstBase)
+        }
+        if (u.contains("ehgembxe.cfd")) {
+            u = u.replace("https://ehgembxe.cfd", timstBase).replace("http://ehgembxe.cfd", timstBase)
+        }
+        if (u.contains("timst.top")) {
+            u = u.replace("https://timst.top", timstBase).replace("http://timst.top", timstBase)
         }
         return u
     }
@@ -525,11 +540,10 @@ class ChannelRepository(private val context: Context) {
     fun autoDetectWorkingDomains() {
         val mirrors = listOf(
             getBaseUrl(),
+            DEFAULT_DADDYLIVE_BASE_URL,
             "https://dlhd.pk",
-            "https://dlhd.st",
-            "https://dlstreams.st",
-            "https://dlive.sx"
-        ).distinct()
+            "https://dlhd.st"
+        ).filter { !it.contains("dlive.sx") && !it.contains("dlstreams.st") }.distinct()
 
         val workingMirror = runBlocking(Dispatchers.IO) {
             val deferreds = mirrors.map { m ->
@@ -538,8 +552,8 @@ class ChannelRepository(private val context: Context) {
                         val u = URL(m)
                         val conn = (u.openConnection() as HttpURLConnection).apply {
                             instanceFollowRedirects = false
-                            connectTimeout = 2500
-                            readTimeout = 2500
+                            connectTimeout = 3000
+                            readTimeout = 3000
                             requestMethod = "HEAD"
                             setRequestProperty("User-Agent", "Mozilla/5.0")
                         }
@@ -563,10 +577,10 @@ class ChannelRepository(private val context: Context) {
 
         val timstMirrors = listOf(
             getTimstBaseUrl(),
-            "https://ehgembxe.cfd",
-            "https://timst.top",
-            DEFAULT_TIMST_BASE_URL
-        ).distinct()
+            DEFAULT_TIMST_BASE_URL,
+            "https://shoewiki.click",
+            "https://ehgembxe.cfd"
+        ).filter { !it.contains("timst.top") && !it.contains("grandemx.org") && !it.contains("exmxbxe.cfd") }.distinct()
 
         val workingTimst = runBlocking(Dispatchers.IO) {
             val deferreds = timstMirrors.map { tm ->

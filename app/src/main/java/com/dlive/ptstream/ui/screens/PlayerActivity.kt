@@ -2553,15 +2553,18 @@ class PlayerActivity : ComponentActivity() {
         }
 
         val backupUrl = currentChannel?.backupStreamUrl ?: backupDirectUrl
-        val rawTimst = if (backupUrl != null && (backupUrl.contains("grandemx") || backupUrl.contains("exmxbxe") || backupUrl.contains("ehgembxe") || backupUrl.contains("timst"))) backupUrl
-            else (currentChannel?.backupStreamUrl2 ?: backupDirectUrl2)?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("ehgembxe") || it.contains("timst") }
-            ?: directStreamUrl?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("ehgembxe") || it.contains("timst") }
+        val rawTimst = if (backupUrl != null && (backupUrl.contains("grandemx") || backupUrl.contains("exmxbxe") || backupUrl.contains("ehgembxe") || backupUrl.contains("timst") || backupUrl.contains("shoewiki"))) backupUrl
+            else (currentChannel?.backupStreamUrl2 ?: backupDirectUrl2)?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("ehgembxe") || it.contains("timst") || it.contains("shoewiki") }
+            ?: directStreamUrl?.takeIf { it.contains("grandemx") || it.contains("exmxbxe") || it.contains("ehgembxe") || it.contains("timst") || it.contains("shoewiki") }
             ?: currentChannel?.timStreamsUrl
 
+        val activeTimstBase = repository.getTimstBaseUrl()
         val timstUrl = rawTimst?.let { url ->
             var u = url.trim()
-            if (u.contains("grandemx.org")) u = u.replace("https://grandemx.org", "https://ehgembxe.cfd").replace("http://grandemx.org", "https://ehgembxe.cfd")
-            if (u.contains("exmxbxe.cfd")) u = u.replace("https://exmxbxe.cfd", "https://ehgembxe.cfd").replace("http://exmxbxe.cfd", "https://ehgembxe.cfd")
+            if (u.contains("grandemx.org")) u = u.replace("https://grandemx.org", activeTimstBase).replace("http://grandemx.org", activeTimstBase)
+            if (u.contains("exmxbxe.cfd")) u = u.replace("https://exmxbxe.cfd", activeTimstBase).replace("http://exmxbxe.cfd", activeTimstBase)
+            if (u.contains("ehgembxe.cfd")) u = u.replace("https://ehgembxe.cfd", activeTimstBase).replace("http://ehgembxe.cfd", activeTimstBase)
+            if (u.contains("timst.top")) u = u.replace("https://timst.top", activeTimstBase).replace("http://timst.top", activeTimstBase)
             u
         }
 

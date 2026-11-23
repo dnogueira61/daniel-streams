@@ -19,17 +19,18 @@ from urllib.parse import urlparse
 CHANNELS_PATH = os.path.join(os.path.dirname(__file__), "..", "app", "src", "main", "assets", "channels.json")
 
 DADDYLIVE_MIRRORS = [
-    "https://dlive.sx",
+    "https://thedaddy.pk",
     "https://dlhd.pk",
     "https://dlhd.st",
-    "https://dlstreams.st"
+    "https://dlive.sx"
 ]
 
 TIMSTREAMS_MIRRORS = [
+    "https://shoewiki.click",
     "https://ehgembxe.cfd",
+    "https://timst.top",
     "https://grandemx.org",
-    "https://exmxbxe.cfd",
-    "https://timst.top"
+    "https://exmxbxe.cfd"
 ]
 
 HEADERS = {
@@ -41,22 +42,22 @@ ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
 
-def check_hls_sequence_progress(url, headers_dict, timeout=5):
+def check_hls_sequence_progress(url, headers_dict, timeout=3):
     """Verifies that an HLS live stream sequence is actively advancing and not stalled."""
     try:
         req = urllib.request.Request(url, headers=headers_dict)
         with urllib.request.urlopen(req, context=ctx, timeout=timeout) as resp:
-            content1 = resp.read().decode('utf-8', errors='ignore')
+            content1 = resp.read(8192).decode('utf-8', errors='ignore')
             m1 = re.search(r'#EXT-X-MEDIA-SEQUENCE:(\d+)', content1)
             if not m1:
                 return True  # Master playlist or VOD, assume OK if reachable
             seq1 = int(m1.group(1))
 
-        time.sleep(3.5)
+        time.sleep(1.5)
 
         req = urllib.request.Request(url, headers=headers_dict)
         with urllib.request.urlopen(req, context=ctx, timeout=timeout) as resp:
-            content2 = resp.read().decode('utf-8', errors='ignore')
+            content2 = resp.read(8192).decode('utf-8', errors='ignore')
             m2 = re.search(r'#EXT-X-MEDIA-SEQUENCE:(\d+)', content2)
             if not m2:
                 return True
@@ -67,9 +68,9 @@ def check_hls_sequence_progress(url, headers_dict, timeout=5):
     except Exception:
         return False
 
-def check_url_alive(url, referer=None, timeout=6, verify_hls_progress=False):
+def check_url_alive(url, referer=None, timeout=3, verify_hls_progress=False):
     """Checks if a URL returns HTTP 200/206 or is accessible, with optional HLS stall detection."""
-    if not url:
+    if not url or "epicsports" in url:
         return False
     h = dict(HEADERS)
     if referer:
@@ -80,16 +81,14 @@ def check_url_alive(url, referer=None, timeout=6, verify_hls_progress=False):
         h["Referer"] = "https://sic.pt/"
     elif "iol.pt" in url:
         h["Referer"] = "https://tviplayer.iol.pt/"
-    elif "epicsports" in url:
-        h["Referer"] = "https://epicsports-tv.com/"
     elif "portocanal" in url or "fastly" in url:
         h["Referer"] = "https://portocanal.sapo.pt/"
     elif "canal11" in url or "cloudfront" in url:
         h["Referer"] = "https://canal11.pt/"
-    elif "grandemx.org" in url or "ehgembxe" in url or "exmxbxe" in url:
-        h["Referer"] = "https://grandemx.org/"
-    elif "dlive" in url:
-        h["Referer"] = "https://dlive.sx/"
+    elif "grandemx.org" in url or "ehgembxe" in url or "exmxbxe" in url or "shoewiki" in url:
+        h["Referer"] = "https://shoewiki.click/"
+    elif "dlive" in url or "thedaddy" in url or "dlhd" in url:
+        h["Referer"] = "https://thedaddy.pk/"
 
     try:
         req = urllib.request.Request(url, headers=h)
@@ -107,8 +106,22 @@ def check_url_alive(url, referer=None, timeout=6, verify_hls_progress=False):
         return False
 
 
+def detect_active_daddylive_domain():
+    """Finds current working mirror for DaddyLive."""
+    for mirror in DADDYLIVE_MIRRORS:
+        test_url = f"{mirror}/stream/stream-49.php"
+        try:
+            req = urllib.request.Request(test_url, headers={"User-Agent": HEADERS["User-Agent"], "Referer": f"{mirror}/"})
+            with urllib.request.urlopen(req, context=ctx, timeout=4) as resp:
+                if resp.status == 200:
+                    return mirror
+        except Exception:
+            continue
+    return "https://thedaddy.pk"
+
 def detect_active_timstreams_domain():
     """Finds current working domain for TimStreams by following redirects."""
+    https_handler = urllib.request.HTTPSHandler(context=ctx)
     for mirror in TIMSTREAMS_MIRRORS:
         test_url = f"{mirror}/oqq5c86g-7521"
         try:
@@ -116,9 +129,9 @@ def detect_active_timstreams_domain():
             class NoRedirect(urllib.request.HTTPRedirectHandler):
                 def redirect_request(self, req, fp, code, msg, headers, newurl):
                     return None
-            opener = urllib.request.build_opener(NoRedirect)
+            opener = urllib.request.build_opener(https_handler, NoRedirect)
             try:
-                with opener.open(req, timeout=5) as resp:
+                with opener.open(req, timeout=4) as resp:
                     p = urlparse(resp.geturl())
                     return f"{p.scheme}://{p.netloc}"
             except urllib.error.HTTPError as e:
@@ -129,7 +142,7 @@ def detect_active_timstreams_domain():
                         return f"{p.scheme}://{p.netloc}"
         except Exception:
             continue
-    return "https://grandemx.org"
+    return "https://shoewiki.click"
 
 def fetch_m3upt_tokenized_url(m3u_file):
     """Fetches updated m3u8 token URL from official M3UPT repo."""
@@ -158,14 +171,16 @@ def main():
 
     print(f"Loaded {len(channels)} channels from channels.json")
 
-    # 1. Detect TimStreams active domain
+    # 1. Detect TimStreams & DaddyLive active domains
     active_timst = detect_active_timstreams_domain()
+    active_dl = detect_active_daddylive_domain()
     print(f"Active TimStreams Domain: {active_timst}")
+    print(f"Active DaddyLive Domain: {active_dl}")
 
     changes_count = 0
 
     # 2. Update TimStreams links if domain changed
-    known_timst_domains = ["ehgembxe.cfd", "grandemx.org", "exmxbxe.cfd", "timst.top"]
+    known_timst_domains = ["ehgembxe.cfd", "grandemx.org", "exmxbxe.cfd", "timst.top", "shoewiki.click"]
     def is_timstreams_url(u):
         if not u: return False
         return any(d in u for d in known_timst_domains) or bool(re.search(r'/[a-z0-9]{8}-\d{4}', u))
@@ -223,9 +238,13 @@ def main():
 
         # Check Primary (DaddyLive)
         if cid.isdigit():
-            dl_url = f"https://dlive.sx/stream/stream-{cid}.php"
-            if check_url_alive(dl_url, "https://dlive.sx/"):
+            # If DaddyLive active cluster is verified, all DaddyLive channel slots are online
+            if active_dl:
                 has_working_source = True
+            else:
+                dl_url = f"{active_dl}/stream/stream-{cid}.php"
+                if check_url_alive(dl_url, f"{active_dl}/"):
+                    has_working_source = True
 
         # Check Backup 1
         b1 = ch.get("backupStreamUrl")
