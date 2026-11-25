@@ -126,23 +126,13 @@
     "backupStreamUrl2": null
   },
   {
-    "id": "artv-pt",
-    "name": "ARTV",
-    "country": "PT",
-    "category": "Generalistas",
-    "isPt": true,
-    "backupStreamUrl": "https://playout175.livextend.cloud/livenlin4/_definst_/2liveartvpub2/playlist.m3u8",
-    "backupStreamUrl2": null,
-    "originalCategory": "Generalistas"
-  },
-  {
     "id": "cnn-pt",
     "name": "CNN Portugal",
     "country": "PT",
     "category": "Generalistas",
     "isPt": true,
     "backupStreamUrl": "https://raw.githubusercontent.com/LITUATUI/M3UPT/main/M3U/CNN_Portugal.m3u8",
-    "backupStreamUrl2": "https://video-auth1.iol.pt/live_cnn/live_cnn/edge_servers/cnn-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTEvMjQvMjAyNiA4Ojg6MTMgUE0maGFzaF92YWx1ZT1GRVdZYzJpOFJrWWlvK1FuK1dzL01BPT0mdmFsaWRtaW51dGVzPTE0NDAmaWQ9M2FiZDcxYWEtOTczMy00YmU1LTgxYTAtMmE0YzM2MGMwNjQy"
+    "backupStreamUrl2": "https://video-auth1.iol.pt/live_cnn/live_cnn/edge_servers/cnn-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTEvMjUvMjAyNiAyOjk6NiBQTSZoYXNoX3ZhbHVlPVZRbmtWOGpQQTBINHZHR2l4dFBDS3c9PSZ2YWxpZG1pbnV0ZXM9MTQ0MCZpZD1jZGIzYmRkMy0wOWJlLTQxZGQtOTlhMi1hMGNiOGRlZTkzN2M="
   },
   {
     "id": "porto-canal-pt",
@@ -205,7 +195,7 @@
     "category": "Generalistas",
     "isPt": true,
     "backupStreamUrl": "https://raw.githubusercontent.com/LITUATUI/M3UPT/main/M3U/TVI.m3u8",
-    "backupStreamUrl2": "https://video-auth5.iol.pt/live_tvi/live_tvi/edge_servers/tvi-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTEvMjQvMjAyNiA4Ojg6MTMgUE0maGFzaF92YWx1ZT1GRVdZYzJpOFJrWWlvK1FuK1dzL01BPT0mdmFsaWRtaW51dGVzPTE0NDAmaWQ9M2FiZDcxYWEtOTczMy00YmU1LTgxYTAtMmE0YzM2MGMwNjQy"
+    "backupStreamUrl2": "https://video-auth5.iol.pt/live_tvi/live_tvi/edge_servers/tvi-720p/chunks.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9MTEvMjUvMjAyNiAyOjk6NiBQTSZoYXNoX3ZhbHVlPVZRbmtWOGpQQTBINHZHR2l4dFBDS3c9PSZ2YWxpZG1pbnV0ZXM9MTQ0MCZpZD1jZGIzYmRkMy0wOWJlLTQxZGQtOTlhMi1hMGNiOGRlZTkzN2M="
   },
   {
     "id": "717",
@@ -224,6 +214,16 @@
     "isPt": true,
     "backupStreamUrl": "https://shoewiki.click/eymmdvm3-8294",
     "backupStreamUrl2": "https://epicsports-tv.com/eu.html?id=33092"
+  },
+  {
+    "id": "artv-pt",
+    "name": "ARTV",
+    "country": "PT",
+    "category": "Em Manutenção",
+    "isPt": true,
+    "backupStreamUrl": "https://playout175.livextend.cloud/livenlin4/_definst_/2liveartvpub2/playlist.m3u8",
+    "backupStreamUrl2": null,
+    "originalCategory": "Generalistas"
   },
   {
     "id": "abola-pt",
